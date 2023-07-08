@@ -74,6 +74,19 @@
                                                 </div>
 
                                                 <div class="col-md-3">
+                                                    <label class="col-form-label">Programa </label>
+                                                    <select class="form-control js-choice"
+                                                    th:field="${proyecto.programa}" 
+                                                    name="docente">
+                                                    <option value="">Seleccione un Programa</option>
+                                                    <option th:each="pro : ${programas}" th:value="${pro.id_programa}"
+                                                        th:if="${pro.estado != 'X'}" th:text="${pro.nombre_programa}">
+                                                    </option>
+                                                </select>
+            
+                                                </div>
+
+                                                <div class="col-md-3">
                                                     <label class="col-form-label">Docente </label>
                                                     <select class="form-control js-choice"
                                                     th:field="${proyecto.docente}" 
@@ -136,8 +149,9 @@
                                         <table id="datatable" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                             <thead>
                                             <tr>
+                                                <th>Programa</th>
                                                 <th>Proyecto</th>
-                                                <th>Estudiantes</th>
+                                               
                                                 <th>Acciones</th>
                                             </tr>
                                             </thead>
@@ -146,13 +160,9 @@
                                             <tbody>
                                            
                                                 <tr th:each="por : ${proyectos}" th:if="${por.estado != 'X'}">
-                                      
+                                                    <td th:text="${por.programa.nombre_programa}"></td>
                                                     <td th:text="${por.nombre_proyecto}"></td>
-                                                    <td>
-                                                        <ul>
-                                                          <li th:each="est : ${por.estudiante}" th:text="${est.persona.nombres}+' '+${est.persona.paterno}+' '+${est.persona.materno}"></li>
-                                                        </ul>
-                                                      </td>
+                                           
                                                     <td>
 
                                                         <div style="display: flex; justify-content: center;align-items: center;">

@@ -53,6 +53,7 @@
                         <!-- end row -->
 
                         <!-- INICIO FORMULARIO -->
+                        <!--
                         <div class="row">
                             <div class="col-lg-12">
                                 <div class="card m-b-30">
@@ -71,19 +72,6 @@
                                                     <label class="col-form-label">Titulo Proyecto</label>
                                                     <input class="form-control" type="text" th:field="${proyecto.nombre_proyecto}"
                                                         required>
-                                                </div>
-
-                                                <div class="col-md-3">
-                                                    <label class="col-form-label">Programa </label>
-                                                    <select class="form-control js-choice"
-                                                    th:field="${proyecto.programa}" 
-                                                    name="docente">
-                                                    <option value="">Seleccione un Programa</option>
-                                                    <option th:each="pro : ${programas}" th:value="${pro.id_programa}"
-                                                        th:if="${pro.estado != 'X'}" th:text="${pro.nombre_programa}">
-                                                    </option>
-                                                </select>
-            
                                                 </div>
 
                                                 <div class="col-md-3">
@@ -134,6 +122,7 @@
                                 </div>
                             </div>
                         </div>
+                        -->
                         <!-- FIN INICIO FORMULARIO -->
 
                         <!-- INICIO FORMULARIO -->
@@ -141,44 +130,37 @@
                         <div class="row">
                             <div class="col-12">
                                 <div class="card m-b-30">
-                                    <div class="card-body">
+                                    <div class="card-body" style="display: flex; justify-content: center;">
         
-                                        <h4 class="mt-0 header-title">Lista de Proyectos</h4>
+                                     
                                     
         
-                                        <table id="datatable" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                                            <thead>
+                                        <table style="border: 1px solid black; width: 80%;">
                                             <tr>
-                                                <th>Programa</th>
-                                                <th>Proyecto</th>
-                                               
-                                                <th>Acciones</th>
+                                              <td colspan="2" style="border-bottom: 1px solid black; text-align: center;">FORMULARIO  DE  EVALUACIÓN </td>
                                             </tr>
-                                            </thead>
-        
-        
-                                            <tbody>
-                                           
-                                                <tr th:each="por : ${proyectos}" th:if="${por.estado != 'X'}">
-                                                    <td th:text="${por.programa.nombre_programa}"></td>
-                                                    <td th:text="${por.nombre_proyecto}"></td>
-                                           
-                                                    <td>
-
-                                                        <div style="display: flex; justify-content: center;align-items: center;">
-                                                            <a th:href="${'../../../../editar-proyecto/' + por.id_proyecto}" style="font-size: 24px; margin-right: 10px;"><i class="mdi mdi-border-color"></i></a>
-                                                            
-                                                            <a   class="btn" th:attr="onclick=${'MandarURL('+por.id_proyecto+')'}" style="font-size: 28px;">
-                                                                <i class="mdi mdi-close" style="color: red; pointer-events: none;"></i>
-                                                              </a>
-                                                            
-
-                                                          </div>
-                                                    </td>
-                                                </tr>
+                                            <tr>
+                                                <td style="border: 1px solid black; border-right: none;">PROGRAMA:</td>
+                                                <td style="border: 1px solid black;" th:text="${proyecto.programa.nombre_programa}">Columna 2</td>
+                                              </tr>
+                                              <tr>
+                                                <td style="border: 1px solid black; border-right: none;">TÍTULO DE LA INVESTIGACIÓN:</td>
+                                                <td style="border: 1px solid black;" th:text="${proyecto.nombre_proyecto}"></td>
+                                              </tr>
+                                              <tr>
+                                                <td style="border: 1px solid black; border-right: none;">DOCENTE ASESOR:</td>
+                                                <td style="border: 1px solid black;" th:text="${proyecto.docente.persona.nombres}+' '+${proyecto.docente.persona.paterno}+' '+${proyecto.docente.persona.materno}"></td>
+                                              </tr>
+                                      
                                             
-                                            </tbody>
-                                        </table>
+                                            <tr>
+                                                <td colspan="2" style="border-top: 1px solid black; text-align: center;">CRITERIOS DE EVALUACIÓN</td>
+                                            </tr>
+                                            
+                                          </table>
+                                          
+                                          
+                                          
         
                                     </div>
                                 </div>

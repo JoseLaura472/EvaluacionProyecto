@@ -39,10 +39,22 @@ public class Proyecto implements Serializable{
     @JoinColumn(name = "id_docente")
     private Docente docente; 
 
-    @JsonManagedReference
+    //Tabla Persona
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_programa")
+    private Programa programa; 
+
+  @JsonManagedReference
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "estudiante_proyecto", joinColumns = @JoinColumn(name = "id_proyecto"), inverseJoinColumns = @JoinColumn(name = "id_estudiante"))
   private Set<Estudiante> estudiante;
+
+  @JsonManagedReference
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "evaluacion_proyecto", joinColumns = @JoinColumn(name = "id_proyecto"), inverseJoinColumns = @JoinColumn(name = "id_evaluacion"))
+  private Set<Evaluacion> evaluaciones;
+
 
  
 

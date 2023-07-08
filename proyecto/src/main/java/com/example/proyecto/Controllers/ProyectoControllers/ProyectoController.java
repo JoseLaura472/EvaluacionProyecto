@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Service.IDocenteService;
 import com.example.proyecto.Models.Service.IEstudianteService;
+import com.example.proyecto.Models.Service.IProgramaService;
 import com.example.proyecto.Models.Service.IProyectoService;
 
 @Controller
@@ -27,8 +28,11 @@ public class ProyectoController {
     @Autowired
 	private IDocenteService docenteService;
 
-     @Autowired
+    @Autowired
 	private IProyectoService proyectoService;
+
+    @Autowired
+	private IProgramaService programaService;
 
 
 
@@ -41,6 +45,7 @@ public class ProyectoController {
 			model.addAttribute("proyectos", proyectoService.findAll());
             model.addAttribute("docentes", docenteService.findAll());
             model.addAttribute("estudiantes", estudianteService.findAll());
+            model.addAttribute("programas", programaService.findAll());
 
 			return "proyecto/gestionar-proyecto";
 		} else {
@@ -74,6 +79,8 @@ public class ProyectoController {
         model.addAttribute("proyectos", proyectoService.findAll());
         model.addAttribute("estudiantes", estudianteService.findAll());
         model.addAttribute("docentes", docenteService.findAll());
+        model.addAttribute("programas", programaService.findAll());
+
         model.addAttribute("edit", "true");
         return "proyecto/gestionar-proyecto";
 
