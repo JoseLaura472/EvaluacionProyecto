@@ -126,47 +126,182 @@
                         <!-- FIN INICIO FORMULARIO -->
 
                         <!-- INICIO FORMULARIO -->
-                 
+
                         <div class="row">
                             <div class="col-12">
                                 <div class="card m-b-30">
                                     <div class="card-body" style="display: flex; justify-content: center;">
-        
-                                     
-                                    
-        
-                                        <table style="border: 1px solid black; width: 80%;">
+
+                                        <table style="border: 1px solid black; width: 95%;">
                                             <tr>
-                                              <td colspan="2" style="border-bottom: 1px solid black; text-align: center;">FORMULARIO  DE  EVALUACIÓN </td>
+                                                <td colspan="4"
+                                                    style="border-bottom: 1px solid black; text-align: center;">
+                                                    FORMULARIO DE EVALUACIÓN </td>
                                             </tr>
+
                                             <tr>
                                                 <td style="border: 1px solid black; border-right: none;">PROGRAMA:</td>
-                                                <td style="border: 1px solid black;" th:text="${proyecto.programa.nombre_programa}">Columna 2</td>
-                                              </tr>
-                                              <tr>
-                                                <td style="border: 1px solid black; border-right: none;">TÍTULO DE LA INVESTIGACIÓN:</td>
-                                                <td style="border: 1px solid black;" th:text="${proyecto.nombre_proyecto}"></td>
-                                              </tr>
-                                              <tr>
-                                                <td style="border: 1px solid black; border-right: none;">DOCENTE ASESOR:</td>
-                                                <td style="border: 1px solid black;" th:text="${proyecto.docente.persona.nombres}+' '+${proyecto.docente.persona.paterno}+' '+${proyecto.docente.persona.materno}"></td>
-                                              </tr>
-                                      
-                                            
+                                                <td colspan="3" style="border: 1px solid black;"
+                                                    th:text="${proyecto.programa.nombre_programa}">Columna 2</td>
+                                            </tr>
+
                                             <tr>
-                                                <td colspan="2" style="border-top: 1px solid black; text-align: center;">CRITERIOS DE EVALUACIÓN</td>
+                                                <td style="border: 1px solid black; border-right: none;">TÍTULO DE LA
+                                                    INVESTIGACIÓN:</td>
+                                                <td colspan="3" style="border: 1px solid black;"
+                                                    th:text="${proyecto.nombre_proyecto}"></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="border: 1px solid black; border-right: none;">DOCENTE ASESOR:
+                                                </td>
+                                                <td colspan="3" style="border: 1px solid black;"
+                                                    th:text="${proyecto.docente.persona.nombres}+' '+${proyecto.docente.persona.paterno}+' '+${proyecto.docente.persona.materno}">
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td colspan="4"
+                                                    style="border-top: 1px solid black; text-align: center;">CRITERIOS
+                                                    DE EVALUACIÓN</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="border: 1px solid black;">Nota: S = Satisfactorio; O = Óptimo; E = Excelente</td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="border: 1px solid black;">I. CONTENIDO Y PRESENTACIÓN (30 PUNTOS)</td>
+                                                <td style="border: 1px solid black; text-align: center;">S</td>
+                                                <td style="border: 1px solid black; text-align: center;">O</td>
+                                                <td style="border: 1px solid black; text-align: center;">E</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="border: 1px solid black; text-align: center;">S = 4    O = 6    E = 10</td>
+                                                <td style="border: 1px solid black; text-align: center;">4</td>
+                                                <td style="border: 1px solid black; text-align: center;">6</td>
+                                                <td style="border: 1px solid black; text-align: center;">10</td>
                                             </tr>
                                             
-                                          </table>
-                                          
-                                          
-                                          
-        
+                                            <tr>
+                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="border: 1px solid black;  text-align: right;" >Sub Total (I)</td>
+                                                <td colspan="3" style="border: 1px solid black;"></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="color: white;">d</td>
+                                                <td ></td>
+                                                <td ></td>
+                                                <td ></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="border: 1px solid black;">II. EXPOSICIÓN (36 PUNTOS)</td>
+                                                <td style="border: 1px solid black; text-align: center;">S</td>
+                                                <td style="border: 1px solid black; text-align: center;">O</td>
+                                                <td style="border: 1px solid black; text-align: center;">E</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="border: 1px solid black; text-align: center;">S = 4    O = 8    E = 12</td>
+                                                <td style="border: 1px solid black; text-align: center;">4</td>
+                                                <td style="border: 1px solid black; text-align: center;">8</td>
+                                                <td style="border: 1px solid black; text-align: center;">12</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="border: 1px solid black;  text-align: right;" >Sub Total (I)</td>
+                                                <td colspan="3" style="border: 1px solid black;"></td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="border: 1px solid black;">III. DEFENSA (34 PUNTOS)</td>
+                                                <td style="border: 1px solid black; text-align: center;">S</td>
+                                                <td style="border: 1px solid black; text-align: center;">O</td>
+                                                <td style="border: 1px solid black; text-align: center;">E</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="border: 1px solid black; text-align: center;">S = 8    O = 12    E = 17</td>
+                                                <td style="border: 1px solid black; text-align: center;">8</td>
+                                                <td style="border: 1px solid black; text-align: center;">12</td>
+                                                <td style="border: 1px solid black; text-align: center;">17</td>
+                                            </tr>
+
+                                            <tr>
+                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="border: 1px solid black;  text-align: right;" >Sub Total (I)</td>
+                                                <td colspan="3" style="border: 1px solid black;"></td>
+                                            </tr>
+
+                                        </table>
+                                        
+
+
+
+
                                     </div>
                                 </div>
-                            </div> 
+                            </div>
                         </div>
-                  
+
                         <!-- FIN INICIO FORMULARIO -->
 
                     </div><!-- container fluid -->
