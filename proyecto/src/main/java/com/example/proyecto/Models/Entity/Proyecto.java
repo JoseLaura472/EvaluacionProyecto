@@ -44,9 +44,6 @@ public class Proyecto implements Serializable{
   @JoinTable(name = "estudiante_proyecto", joinColumns = @JoinColumn(name = "id_proyecto"), inverseJoinColumns = @JoinColumn(name = "id_estudiante"))
   private Set<Estudiante> estudiante;
 
-     @JsonManagedReference
-  @ManyToMany(fetch = FetchType.LAZY)
-  @JoinTable(name = "jurado_proyecto", joinColumns = @JoinColumn(name = "id_proyecto"), inverseJoinColumns = @JoinColumn(name = "id_jurado"))
-  private Set<Jurado> jurado;
+ 
 
 }

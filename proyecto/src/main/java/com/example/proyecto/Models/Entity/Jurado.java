@@ -36,8 +36,6 @@ public class Jurado  implements Serializable{
     @JoinColumn(name = "id_persona")
     private Persona persona; 
 
-     @JsonIgnore
-    @ManyToMany(mappedBy = "jurado")
-    private Set<Proyecto> proyecto;
+
 
 }
