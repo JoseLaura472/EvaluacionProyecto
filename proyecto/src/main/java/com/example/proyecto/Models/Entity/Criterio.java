@@ -1,5 +1,7 @@
 package com.example.proyecto.Models.Entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -18,7 +20,7 @@ import lombok.Setter;
 @Table(name = "criterio")
 @Getter
 @Setter
-public class Criterio {
+public class Criterio implements Serializable{
     private static final long serialVersionUID = 2629195288020321924L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,5 +35,10 @@ public class Criterio {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ponderacion")
-    private Ponderacion ponderacion ; 
+    private Ponderacion ponderaciones; 
+
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_pregunta")
+    private Pregunta preguntas; 
 }

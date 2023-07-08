@@ -12,8 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.example.proyecto.Models.Entity.Docente;
-import com.example.proyecto.Models.Entity.Jurado;
+
 import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Service.IDocenteService;
 import com.example.proyecto.Models.Service.IEstudianteService;
@@ -74,6 +73,7 @@ public class ProyectoController {
         model.addAttribute("proyecto", proyecto);
         model.addAttribute("proyectos", proyectoService.findAll());
         model.addAttribute("estudiantes", estudianteService.findAll());
+        model.addAttribute("docentes", docenteService.findAll());
         model.addAttribute("edit", "true");
         return "proyecto/gestionar-proyecto";
 
@@ -82,7 +82,7 @@ public class ProyectoController {
     // Boton para Guardar Documento
     @RequestMapping(value = "/ProyectoModF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
     public String ProyectoModF(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
-             @RequestParam(value = "estudiantes") Long[] id_estudiantes) { // validar los datos capturados (1)
+             @RequestParam(value = "estudiante") Long[] id_estudiantes) { // validar los datos capturados (1)
       
         proyecto.setEstado("A");
         proyectoService.save(proyecto);

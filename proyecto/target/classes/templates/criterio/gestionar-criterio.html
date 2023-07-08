@@ -58,48 +58,57 @@
                                 <div class="card m-b-30">
                                     <div class="card-body">
 
-                                        <h1 class="mt-0 header-title" style="font-size: 30px;">Formulario de Registro Proyecto
+                                        <h1 class="mt-0 header-title" style="font-size: 30px;">Formulario de Registro Criterio
                                         </h1>
                                
 
-                                        <form th:action="${edit} ?@{/ProyectoModF} :@{/ProyectoF}" method="post">
-                                            <input type="hidden" th:field="${proyecto.id_proyecto}">
+                                        <form th:action="${edit} ?@{/CriterioModF} :@{/CriterioF}" method="post">
+                                            <input type="hidden" th:field="${criterio.id_criterio}">
                                             <div class="row">
 
 
-                                                <div class="col-md-4">
-                                                    <label class="col-form-label">Titulo Proyecto</label>
-                                                    <input class="form-control" type="text" th:field="${proyecto.nombre_proyecto}"
-                                                        required>
-                                                </div>
+                                             
 
-                                                <div class="col-md-3">
-                                                    <label class="col-form-label">Docente </label>
+                                                <div class="col-md-6">
+                                                    <label class="col-form-label">Categoria Criterio </label>
                                                     <select class="form-control js-choice"
-                                                    th:field="${proyecto.docente}" 
-                                                    name="docente">
-                                                    <option value="">Seleccione un Docente</option>
-                                                    <option th:each="doc : ${docentes}" th:value="${doc.id_docente}"
-                                                        th:if="${doc.estado != 'X'}" th:text="${doc.persona.nombres}+' '+${doc.persona.paterno}+' '+${doc.persona.materno}">
+                                                    th:field="${criterio.categoriaCriterio}" 
+                                                    name="categoriaCriterio">
+                                                    <option value="">Seleccione una Categoria Criterio</option>
+                                                    <option th:each="cat : ${categoriaC}" th:value="${cat.id_categoria_criterio}"
+                                                        th:if="${cat.estado != 'X'}" th:text="${cat.nombre_cat_criterio}">
                                                     </option>
                                                 </select>
             
                                                 </div>
 
-                                                <div class="col-md-5">
-                                                    <label class="col-form-label">Estudiantes </label>
+                                                <div class="col-md-6">
+                                                    <label class="col-form-label">Pregunta</label>
                                                     <select class="form-control js-choice"
-                                                    multiple="multiple" size="3"
-                                                data-options='{"removeItemButton":true,"placeholder":true}'
-                                                    th:field="${proyecto.estudiante}" 
-                                                    name="id_estudiante"  id="id_estudiante">
-                                                    <option th:each="est : ${estudiantes}"
-                                                    th:value="${est.id_estudiante}" th:if="${est.estado != 'X'}"
-                                                    th:text="${est.persona.nombres}+' '+${est.persona.paterno}+' '+${est.persona.materno}">
-                                                </option>
+                                                    th:field="${criterio.preguntas}" 
+                                                    name="preguntas">
+                                                    <option value="">Seleccione una Pregunta</option>
+                                                    <option th:each="pre : ${preguntaslist}" th:value="${pre.id_pregunta}"
+                                                        th:if="${pre.estado != 'X'}" th:text="${pre.pregunta}">
+                                                    </option>
                                                 </select>
             
                                                 </div>
+
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Ponderado</label>
+                                                    <select class="form-control js-choice"
+                                                    th:field="${criterio.ponderaciones}" 
+                                                    name="ponderacion">
+                                                    <option value="">Seleccione una Ponderacion</option>
+                                                    <option th:each="pon : ${ponderacioneslist}" th:value="${pon.id_ponderacion}"
+                                                        th:if="${pon.estado != 'X'}" th:text="${pon.ponderacion}">
+                                                    </option>
+                                                </select>
+                                                </div>
+
+
+                                          
                                           
                                           
 
@@ -130,41 +139,44 @@
                                 <div class="card m-b-30">
                                     <div class="card-body">
         
-                                        <h4 class="mt-0 header-title">Lista de Proyectos</h4>
+                                        <h4 class="mt-0 header-title">Lista de Criteerios</h4>
                                     
         
                                         <table id="datatable" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                             <thead>
                                             <tr>
-                                                <th>Proyecto</th>
-                                                <th>Estudiantes</th>
+                                                <th>Pregunta</th>
+                                                
+                                                
+                                                <th>Ponderación</th>
                                                 <th>Acciones</th>
+                                                <th>Categoria</th>
+                                                
                                             </tr>
                                             </thead>
         
         
                                             <tbody>
                                            
-                                                <tr th:each="por : ${proyectos}" th:if="${por.estado != 'X'}">
-                                      
-                                                    <td th:text="${por.nombre_proyecto}"></td>
-                                                    <td>
-                                                        <ul>
-                                                          <li th:each="est : ${por.estudiante}" th:text="${est.persona.nombres}+' '+${est.persona.paterno}+' '+${est.persona.materno}"></li>
-                                                        </ul>
-                                                      </td>
+                                                <tr th:each="cri : ${criterios}" th:if="${cri.estado != 'X'}">
+                                                    <td th:text="${cri.preguntas.pregunta}"></td>
+                                                   
+                                                    
+                                                    <td th:text="${cri.ponderaciones.ponderacion}"></td>
+                                                        
                                                     <td>
 
                                                         <div style="display: flex; justify-content: center;align-items: center;">
-                                                            <a th:href="${'../../../../editar-proyecto/' + por.id_proyecto}" style="font-size: 24px; margin-right: 10px;"><i class="mdi mdi-border-color"></i></a>
+                                                            <a th:href="${'../../../../editar-criterio/' + cri.id_criterio}" style="font-size: 24px; margin-right: 10px;"><i class="mdi mdi-border-color"></i></a>
                                                             
-                                                            <a   class="btn" th:attr="onclick=${'MandarURL('+por.id_proyecto+')'}" style="font-size: 28px;">
+                                                            <a   class="btn" th:attr="onclick=${'MandarURL('+cri.id_criterio+')'}" style="font-size: 28px;">
                                                                 <i class="mdi mdi-close" style="color: red; pointer-events: none;"></i>
                                                               </a>
                                                             
 
                                                           </div>
                                                     </td>
+                                                    <td th:text="${cri.categoriaCriterio.nombre_cat_criterio}"></td>
                                                 </tr>
                                             
                                             </tbody>
@@ -205,7 +217,7 @@
                 showConfirmButton: false,
                 cancelButtonText: "Cancelar",
                 html:
-                    "<a type='button' class='swal2-styled ' style='display: inline-block; background-color: rgb(48, 133, 214); border-left-color: rgb(48, 133, 214); border-right-color: rgb(48, 133, 214); padding: 13px 35px 13px 35px;' data-original-title='' title='' href='../../../../eliminar-proyecto/" + a + "'  >" +
+                    "<a type='button' class='swal2-styled ' style='display: inline-block; background-color: rgb(48, 133, 214); border-left-color: rgb(48, 133, 214); border-right-color: rgb(48, 133, 214); padding: 13px 35px 13px 35px;' data-original-title='' title='' href='../../../../eliminar-criterio/" + a + "'  >" +
                     "Eliminar" +
                     "</a>",
             }).then().done();
