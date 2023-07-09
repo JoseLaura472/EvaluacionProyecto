@@ -131,7 +131,9 @@
                             <div class="col-12">
                                 <div class="card m-b-30">
                                     <div class="card-body" style="display: flex; justify-content: center;">
-
+                                        <form th:action="@{/GuardarEvaluacionF}" method="post">
+                                        <input type="hidden" name="proyectos" th:value="${proyecto.id_proyecto}" th:field="${evaluacion.proyectos}">
+                                        <input type="hidden"  th:field="${evaluacion.id_evaluacion}">
                                         <table style="border: 1px solid black; width: 95%;">
                                             <tr>
                                                 <td colspan="4"
@@ -167,54 +169,101 @@
                                             </tr>
 
                                             <tr>
-                                                <td style="border: 1px solid black;">Nota: S = Satisfactorio; O = Óptimo; E = Excelente</td>
+                                                <td style="border: 1px solid black;">Nota: S = Satisfactorio; O =
+                                                    Óptimo; E = Excelente</td>
                                                 <td style="border: 1px solid black;"></td>
                                                 <td style="border: 1px solid black;"></td>
                                                 <td style="border: 1px solid black;"></td>
                                             </tr>
 
                                             <tr>
-                                                <td style="border: 1px solid black;">I. CONTENIDO Y PRESENTACIÓN (30 PUNTOS)</td>
+                                                <td style="border: 1px solid black;">I. CONTENIDO Y PRESENTACIÓN (30
+                                                    PUNTOS)</td>
                                                 <td style="border: 1px solid black; text-align: center;">S</td>
                                                 <td style="border: 1px solid black; text-align: center;">O</td>
                                                 <td style="border: 1px solid black; text-align: center;">E</td>
                                             </tr>
 
                                             <tr>
-                                                <td style="border: 1px solid black; text-align: center;">S = 4    O = 6    E = 10</td>
+                                                <td style="border: 1px solid black; text-align: center;">S = 4 O = 6 E =
+                                                    10</td>
                                                 <td style="border: 1px solid black; text-align: center;">4</td>
                                                 <td style="border: 1px solid black; text-align: center;">6</td>
                                                 <td style="border: 1px solid black; text-align: center;">10</td>
                                             </tr>
-                                            
+
                                             <tr>
-                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;">1. Innovación (El trabajo introduce
+                                                    novedades, o modificación de algo ya existente con el fin de
+                                                    mejorarlo).</td>
+                                                <td style="border: 1px solid black; text-align: center;">
+                                                    <input type="checkbox" id="checkbox1" name="criterios"
+                                                        th:value="${criterio1.id_criterio}"
+                                                        th:field="${evaluacion.criterios}">
+                                                </td>
+                                                <td style="border: 1px solid black; text-align: center;">
+                                                    <input type="checkbox" id="checkbox2" name="criterios"
+                                                        th:value="${criterio2.id_criterio}"
+                                                        th:field="${evaluacion.criterios}">
+                                                </td>
+                                                <td style="border: 1px solid black; text-align: center;">
+                                                    <input type="checkbox" id="checkbox3" name="criterios"
+                                                        th:value="${criterio3.id_criterio}"
+                                                        th:field="${evaluacion.criterios}">
+                                                </td>
+
                                             </tr>
                                             <tr>
-                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;">1. Innovación (El trabajo introduce
+                                                    novedades, o modificación de algo ya existente con el fin de
+                                                    mejorarlo).</td>
+                                                <td style="border: 1px solid black; text-align: center;">
+                                                    <input type="checkbox" id="checkbox4" name="criterios"
+                                                        th:value="${criterio4.id_criterio}"
+                                                        th:field="${evaluacion.criterios}">
+                                                </td>
+                                                <td style="border: 1px solid black; text-align: center;">
+                                                    <input type="checkbox" id="checkbox5" name="criterios"
+                                                        th:value="${criterio5.id_criterio}"
+                                                        th:field="${evaluacion.criterios}">
+                                                </td>
+                                                <td style="border: 1px solid black; text-align: center;">
+                                                    <input type="checkbox" id="checkbox6" name="criterios"
+                                                        th:value="${criterio6.id_criterio}"
+                                                        th:field="${evaluacion.criterios}">
+                                                </td>
                                             </tr>
                                             <tr>
-                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;">1. Innovación (El trabajo introduce
+                                                    novedades, o modificación de algo ya existente con el fin de
+                                                    mejorarlo).</td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox7" name="criterios"
+                                                            th:value="${criterio7.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox8" name="criterios"
+                                                            th:value="${criterio8.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox9" name="criterios"
+                                                            th:value="${criterio9.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
                                             </tr>
                                             <tr>
-                                                <td style="border: 1px solid black;  text-align: right;" >Sub Total (I)</td>
+                                                <td style="border: 1px solid black;  text-align: right;">Sub Total (I)
+                                                </td>
                                                 <td colspan="3" style="border: 1px solid black;"></td>
                                             </tr>
 
                                             <tr>
                                                 <td style="color: white;">d</td>
-                                                <td ></td>
-                                                <td ></td>
-                                                <td ></td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
                                             </tr>
 
                                             <tr>
@@ -225,32 +274,76 @@
                                             </tr>
 
                                             <tr>
-                                                <td style="border: 1px solid black; text-align: center;">S = 4    O = 8    E = 12</td>
+                                                <td style="border: 1px solid black; text-align: center;">S = 4 O = 8 E =
+                                                    12</td>
                                                 <td style="border: 1px solid black; text-align: center;">4</td>
                                                 <td style="border: 1px solid black; text-align: center;">8</td>
                                                 <td style="border: 1px solid black; text-align: center;">12</td>
                                             </tr>
 
                                             <tr>
-                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;">1. Innovación (El trabajo introduce
+                                                    novedades, o modificación de algo ya existente con el fin de
+                                                    mejorarlo).</td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox10" name="criterios"
+                                                            th:value="${criterio10.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox11" name="criterios"
+                                                            th:value="${criterio11.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox12" name="criterios"
+                                                            th:value="${criterio12.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
                                             </tr>
                                             <tr>
-                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;">1. Innovación (El trabajo introduce
+                                                    novedades, o modificación de algo ya existente con el fin de
+                                                    mejorarlo).</td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox13" name="criterios"
+                                                            th:value="${criterio13.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox14" name="criterios"
+                                                            th:value="${criterio14.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox15" name="criterios"
+                                                            th:value="${criterio15.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
                                             </tr>
                                             <tr>
-                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;">1. Innovación (El trabajo introduce
+                                                    novedades, o modificación de algo ya existente con el fin de
+                                                    mejorarlo).</td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox16" name="criterios"
+                                                            th:value="${criterio16.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox17" name="criterios"
+                                                            th:value="${criterio17.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox18" name="criterios"
+                                                            th:value="${criterio18.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
                                             </tr>
                                             <tr>
-                                                <td style="border: 1px solid black;  text-align: right;" >Sub Total (I)</td>
+                                                <td style="border: 1px solid black;  text-align: right;">Sub Total (I)
+                                                </td>
                                                 <td colspan="3" style="border: 1px solid black;"></td>
                                             </tr>
 
@@ -262,37 +355,70 @@
                                             </tr>
 
                                             <tr>
-                                                <td style="border: 1px solid black; text-align: center;">S = 8    O = 12    E = 17</td>
+                                                <td style="border: 1px solid black; text-align: center;">S = 8 O = 12 E
+                                                    = 17</td>
                                                 <td style="border: 1px solid black; text-align: center;">8</td>
                                                 <td style="border: 1px solid black; text-align: center;">12</td>
                                                 <td style="border: 1px solid black; text-align: center;">17</td>
                                             </tr>
 
                                             <tr>
-                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;">1. Innovación (El trabajo introduce
+                                                    novedades, o modificación de algo ya existente con el fin de
+                                                    mejorarlo).</td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox19" name="criterios"
+                                                            th:value="${criterio19.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox20" name="criterios"
+                                                            th:value="${criterio20.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox21" name="criterios"
+                                                            th:value="${criterio21.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
                                             </tr>
                                             <tr>
-                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
+                                                <td style="border: 1px solid black;">1. Innovación (El trabajo introduce
+                                                    novedades, o modificación de algo ya existente con el fin de
+                                                    mejorarlo).</td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox22" name="criterios"
+                                                            th:value="${criterio22.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox23" name="criterios"
+                                                            th:value="${criterio23.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
+                                                    <td style="border: 1px solid black; text-align: center;">
+                                                        <input type="checkbox" id="checkbox24" name="criterios"
+                                                            th:value="${criterio24.id_criterio}"
+                                                            th:field="${evaluacion.criterios}">
+                                                    </td>
                                             </tr>
+                                      
                                             <tr>
-                                                <td style="border: 1px solid black;">1. Innovación  (El trabajo introduce novedades, o modificación de algo ya  existente con el fin de mejorarlo).</td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
-                                                <td style="border: 1px solid black;"></td>
-                                            </tr>
-                                            <tr>
-                                                <td style="border: 1px solid black;  text-align: right;" >Sub Total (I)</td>
+                                                <td style="border: 1px solid black;  text-align: right;">Sub Total (I)
+                                                </td>
                                                 <td colspan="3" style="border: 1px solid black;"></td>
                                             </tr>
 
                                         </table>
-                                        
+                                        <br>
+                                        <div class="text-center">
+                                            <div>
+                                                <button class="btn btn-primary" type="submit"
+                                                th:text="${edit} ?'Actualizar' :'Enviar'"></button>
+                                             
+                                            </div>
+                                        </div>
+                                        </form>
 
 
 

@@ -14,6 +14,7 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -50,10 +51,9 @@ public class Proyecto implements Serializable{
   @JoinTable(name = "estudiante_proyecto", joinColumns = @JoinColumn(name = "id_proyecto"), inverseJoinColumns = @JoinColumn(name = "id_estudiante"))
   private Set<Estudiante> estudiante;
 
-  @JsonManagedReference
-  @ManyToMany(fetch = FetchType.LAZY)
-  @JoinTable(name = "evaluacion_proyecto", joinColumns = @JoinColumn(name = "id_proyecto"), inverseJoinColumns = @JoinColumn(name = "id_evaluacion"))
-  private Set<Evaluacion> evaluaciones;
+     @JsonIgnore
+    @ManyToMany(mappedBy = "proyectos")
+    private Set<Evaluacion> evaluacion;
 
 
  

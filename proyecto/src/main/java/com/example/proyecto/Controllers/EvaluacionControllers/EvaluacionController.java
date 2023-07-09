@@ -65,12 +65,52 @@ public class EvaluacionController {
         Long id_criterio2 = (long) 2;
         Long id_criterio3 = (long) 3;
         Long id_criterio4 = (long) 4;
+        Long id_criterio5 = (long) 5;
+        Long id_criterio6 = (long) 6;
+        Long id_criterio7 = (long) 7;
+        Long id_criterio8 = (long) 8;
+        Long id_criterio9 = (long) 9;
+        Long id_criterio10 = (long) 10;
+        Long id_criterio11 = (long) 11;
+        Long id_criterio12 = (long) 12;
+        Long id_criterio13 = (long) 13;
+        Long id_criterio14 = (long) 14;
+        Long id_criterio15 = (long) 15;
+        Long id_criterio16 = (long) 16;
+        Long id_criterio17 = (long) 17;
+        Long id_criterio18 = (long) 18;
+        Long id_criterio19 = (long) 19;
+        Long id_criterio20 = (long) 20;
+        Long id_criterio21 = (long) 21;
+        Long id_criterio22 = (long) 22;
+        Long id_criterio23 = (long) 23;
+        Long id_criterio24 = (long) 24;
         model.addAttribute("proyecto", proyecto);
         model.addAttribute("evaluacion", evaluacion);
         model.addAttribute("criterio1", criterioService.findOne(id_criterio1));
         model.addAttribute("criterio2", criterioService.findOne(id_criterio2));
         model.addAttribute("criterio3", criterioService.findOne(id_criterio3));
         model.addAttribute("criterio4", criterioService.findOne(id_criterio4));
+        model.addAttribute("criterio5", criterioService.findOne(id_criterio5));
+        model.addAttribute("criterio6", criterioService.findOne(id_criterio6));
+        model.addAttribute("criterio7", criterioService.findOne(id_criterio7));
+        model.addAttribute("criterio8", criterioService.findOne(id_criterio8));
+        model.addAttribute("criterio9", criterioService.findOne(id_criterio9));
+        model.addAttribute("criterio10", criterioService.findOne(id_criterio10));
+        model.addAttribute("criterio11", criterioService.findOne(id_criterio11));
+        model.addAttribute("criterio12", criterioService.findOne(id_criterio12));
+        model.addAttribute("criterio13", criterioService.findOne(id_criterio13));
+        model.addAttribute("criterio14", criterioService.findOne(id_criterio14));
+        model.addAttribute("criterio15", criterioService.findOne(id_criterio15));
+        model.addAttribute("criterio16", criterioService.findOne(id_criterio16));
+        model.addAttribute("criterio17", criterioService.findOne(id_criterio17));
+        model.addAttribute("criterio18", criterioService.findOne(id_criterio18));
+        model.addAttribute("criterio19", criterioService.findOne(id_criterio19));
+        model.addAttribute("criterio20", criterioService.findOne(id_criterio20));
+        model.addAttribute("criterio21", criterioService.findOne(id_criterio21));
+        model.addAttribute("criterio22", criterioService.findOne(id_criterio22));
+        model.addAttribute("criterio23", criterioService.findOne(id_criterio23));
+        model.addAttribute("criterio24", criterioService.findOne(id_criterio24));
 
         return "evaluacion/form-evaluacion";
 
@@ -78,7 +118,7 @@ public class EvaluacionController {
 
     // Boton para Guardar Documento
     @RequestMapping(value = "/GuardarEvaluacionF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
-    public String GuardarEvaluacionF(@Validated Proyecto proyecto,@Validated Evaluacion evaluacion, RedirectAttributes redirectAttrs,
+    public String GuardarEvaluacionF(@Validated Evaluacion evaluacion, RedirectAttributes redirectAttrs,
              @RequestParam(value = "criterios") Long[] id_criterio, HttpServletRequest request,
              @RequestParam(value = "proyectos") Long[] id_proyecto)
               { // validar los datos capturados (1)
