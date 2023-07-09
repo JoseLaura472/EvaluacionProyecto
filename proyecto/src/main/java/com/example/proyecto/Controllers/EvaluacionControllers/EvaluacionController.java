@@ -18,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Entity.Usuario;
+import com.example.proyecto.Models.Entity.Criterio;
 import com.example.proyecto.Models.Entity.Evaluacion;
 import com.example.proyecto.Models.Entity.Jurado;
 import com.example.proyecto.Models.Service.ICriterioService;
@@ -27,36 +28,33 @@ import com.example.proyecto.Models.Service.IProyectoService;
 
 @Controller
 public class EvaluacionController {
-    
-    @Autowired
-	private IEvaluacionService evaluacionService;
 
     @Autowired
-	private ICriterioService criterioService;
+    private IEvaluacionService evaluacionService;
 
     @Autowired
-	private IProyectoService proyectoService;
+    private ICriterioService criterioService;
 
     @Autowired
-	private IJuradoService juradoService;
+    private IProyectoService proyectoService;
 
+    @Autowired
+    private IJuradoService juradoService;
 
-        // FUNCION PARA LA VISUALIZACION DE REGISTRO DE MNACIONALIDAD
-	@RequestMapping(value = "/ProyectosEvaluacionR", method = RequestMethod.GET) // Pagina principal
-	public String EvaluacionR(HttpServletRequest request, Model model) {
-		if (request.getSession().getAttribute("usuario") != null) {
+    // FUNCION PARA LA VISUALIZACION DE REGISTRO DE MNACIONALIDAD
+    @RequestMapping(value = "/ProyectosEvaluacionR", method = RequestMethod.GET) // Pagina principal
+    public String EvaluacionR(HttpServletRequest request, Model model) {
+        if (request.getSession().getAttribute("usuario") != null) {
 
-			
-			model.addAttribute("proyectos", proyectoService.findAll());
-    
+            model.addAttribute("proyectos", proyectoService.findAll());
 
-			return "evaluacion/gestionar-proyectoEvaluacion";
-		} else {
-			return "redirect:LoginR";
-		}
-	}
+            return "evaluacion/gestionar-proyectoEvaluacion";
+        } else {
+            return "redirect:LoginR";
+        }
+    }
 
-      // Boton para Editar Documentos
+    // Boton para Editar Documentos
     @RequestMapping(value = "/form-evaluacion/{id_proyecto}")
     public String editar_proyecto(@PathVariable("id_proyecto") Long id_proyecto, Model model) {
         Evaluacion evaluacion = new Evaluacion();
@@ -119,26 +117,32 @@ public class EvaluacionController {
     // Boton para Guardar Documento
     @RequestMapping(value = "/GuardarEvaluacionF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
     public String GuardarEvaluacionF(@Validated Evaluacion evaluacion, RedirectAttributes redirectAttrs,
-             @RequestParam(value = "criterios") Long[] id_criterio, HttpServletRequest request,
-             @RequestParam(value = "proyectos") Long[] id_proyecto)
-              { // validar los datos capturados (1)
-                HttpSession session = request.getSession();
-                Usuario usuario = (Usuario) session.getAttribute("usuario");
-                Jurado jurado = juradoService.juradoPorIdPersona(usuario.getPersona().getId_persona());
-              
-            evaluacion.setEstado("A");
-            evaluacion.setJurado(jurado);
-            evaluacionService.save(evaluacion);
-      
+            @RequestParam(value = "criterios") Long[] id_criterio, HttpServletRequest request,
+            @RequestParam("proyectos") Long idProyecto) { // validar los datos capturados (1)
+        Proyecto proyecto = proyectoService.findOne(idProyecto);
+        HttpSession session = request.getSession();
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        Jurado jurado = juradoService.juradoPorIdPersona(usuario.getPersona().getId_persona());
 
-      
+        int puntajeTotal = 0;
+
+        for (Long id : id_criterio) {
+            Criterio criterio = criterioService.findOne(id);
+            int ponderacion = criterio.getPonderaciones().getPonderacion();
+            puntajeTotal += ponderacion;
+        }
+
+        evaluacion.setEstado("A");
+        evaluacion.setJurado(jurado);
+        evaluacion.getProyectos().add(proyecto);
+        evaluacion.setPuntaje_total(puntajeTotal);
+        evaluacionService.save(evaluacion);
+
         redirectAttrs
                 .addFlashAttribute("mensaje2", "Datos del Documento Actualizados Correctamente")
                 .addFlashAttribute("clase2", "success alert-dismissible fade show");
 
         return "redirect:/ProyectosEvaluacionR";
     }
-
-
 
 }

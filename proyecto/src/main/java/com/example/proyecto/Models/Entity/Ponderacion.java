@@ -25,7 +25,7 @@ public class Ponderacion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_ponderacion;
-    private String ponderacion;
+    private int ponderacion;
     private String estado;
 
     @JsonIgnore

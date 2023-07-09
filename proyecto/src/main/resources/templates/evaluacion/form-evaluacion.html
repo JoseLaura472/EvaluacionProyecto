@@ -132,7 +132,8 @@
                                 <div class="card m-b-30">
                                     <div class="card-body" style="display: flex; justify-content: center;">
                                         <form th:action="@{/GuardarEvaluacionF}" method="post">
-                                        <input type="hidden" name="proyectos" th:value="${proyecto.id_proyecto}" th:field="${evaluacion.proyectos}">
+                                       
+                                        <input type="hidden" name="proyectos" th:value="${proyecto.id_proyecto}">
                                         <input type="hidden"  th:field="${evaluacion.id_evaluacion}">
                                         <table style="border: 1px solid black; width: 95%;">
                                             <tr>
@@ -167,7 +168,7 @@
                                                     style="border-top: 1px solid black; text-align: center;">CRITERIOS
                                                     DE EVALUACIÓN</td>
                                             </tr>
-
+                                            <table>
                                             <tr>
                                                 <td style="border: 1px solid black;">Nota: S = Satisfactorio; O =
                                                     Óptimo; E = Excelente</td>
@@ -191,13 +192,13 @@
                                                 <td style="border: 1px solid black; text-align: center;">6</td>
                                                 <td style="border: 1px solid black; text-align: center;">10</td>
                                             </tr>
-
+                                          
                                             <tr>
                                                 <td style="border: 1px solid black;">1. Innovación (El trabajo introduce
                                                     novedades, o modificación de algo ya existente con el fin de
                                                     mejorarlo).</td>
                                                 <td style="border: 1px solid black; text-align: center;">
-                                                    <input type="checkbox" id="checkbox1" name="criterios"
+                                                    <input type="checkbox"  name="criterios" id="checkbox1"
                                                         th:value="${criterio1.id_criterio}"
                                                         th:field="${evaluacion.criterios}">
                                                 </td>
@@ -253,10 +254,11 @@
                                                             th:field="${evaluacion.criterios}">
                                                     </td>
                                             </tr>
+                                            
                                             <tr>
-                                                <td style="border: 1px solid black;  text-align: right;">Sub Total (I)
+                                                <td style="border: 1px solid black;  text-align: right;" >Sub Total (I)
                                                 </td>
-                                                <td colspan="3" style="border: 1px solid black;"></td>
+                                                <td colspan="3" style="border: 1px solid black; text-align: center;" id="resultado"></td>
                                             </tr>
 
                                             <tr>
@@ -280,7 +282,7 @@
                                                 <td style="border: 1px solid black; text-align: center;">8</td>
                                                 <td style="border: 1px solid black; text-align: center;">12</td>
                                             </tr>
-
+                                          
                                             <tr>
                                                 <td style="border: 1px solid black;">1. Innovación (El trabajo introduce
                                                     novedades, o modificación de algo ya existente con el fin de
@@ -344,9 +346,9 @@
                                             <tr>
                                                 <td style="border: 1px solid black;  text-align: right;">Sub Total (I)
                                                 </td>
-                                                <td colspan="3" style="border: 1px solid black;"></td>
+                                                <td colspan="3" style="border: 1px solid black; text-align: center;" id="resultado"></td>
                                             </tr>
-
+                                      
                                             <tr>
                                                 <td style="border: 1px solid black;">III. DEFENSA (34 PUNTOS)</td>
                                                 <td style="border: 1px solid black; text-align: center;">S</td>
@@ -406,10 +408,17 @@
                                             <tr>
                                                 <td style="border: 1px solid black;  text-align: right;">Sub Total (I)
                                                 </td>
-                                                <td colspan="3" style="border: 1px solid black;"></td>
+                                                <td colspan="3" style="border: 1px solid black; text-align: center;" id="resultado"></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="border: 1px solid black;  text-align: right;">Puntaje Total 
+                                                </td>
+                                                <td colspan="3" style="border: 1px solid black; text-align: center;" id="resultado"></td>
                                             </tr>
 
+
                                         </table>
+                                     
                                         <br>
                                         <div class="text-center">
                                             <div>
@@ -450,20 +459,69 @@
     <div th:replace="layout/script :: script">
     </div>
     <script>
-        function MandarURL(a) {
-            swal({
-                title: 'Eliminar Registro?',
-                type: 'error',
-                showCancelButton: true,
-                showConfirmButton: false,
-                cancelButtonText: "Cancelar",
-                html:
-                    "<a type='button' class='swal2-styled ' style='display: inline-block; background-color: rgb(48, 133, 214); border-left-color: rgb(48, 133, 214); border-right-color: rgb(48, 133, 214); padding: 13px 35px 13px 35px;' data-original-title='' title='' href='../../../../eliminar-proyecto/" + a + "'  >" +
-                    "Eliminar" +
-                    "</a>",
-            }).then().done();
-        }
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const checkboxValues = {
+                seccion1: {
+                    checkbox1: 4,
+                    checkbox2: 6,
+                    checkbox3: 10,
+                    checkbox4: 4,
+                    checkbox5: 6,
+                    checkbox6: 10,
+                    checkbox7: 4,
+                    checkbox8: 6,
+                    checkbox9: 10
+                 
+                },
+                seccion2: {
+                    checkbox10: 4,
+                    checkbox11: 6,
+                    checkbox12: 10
+                },
+                seccion3: {
+                    checkbox13: 4,
+                    checkbox14: 6,
+                    checkbox15: 10
+                }
+            }; // Definir los valores de los checkboxes por sección aquí
+
+            const secciones = document.querySelectorAll('.seccion');
+            const resultadoDivs = document.querySelectorAll('.resultado');
+
+            secciones.forEach((seccion, index) => {
+                const checkboxes = seccion.querySelectorAll('input[type="checkbox"]');
+                const resultadoDiv = resultadoDivs[index];
+
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.id in checkboxValues[seccion.id]) {
+                        checkbox.value = checkboxValues[seccion.id][checkbox.id]; // Asignar valor al checkbox específico
+
+                        checkbox.addEventListener('change', () => {
+                            calcularSubtotal(seccion, resultadoDiv);
+                        });
+                    }
+                });
+
+                calcularSubtotal(seccion, resultadoDiv);
+            });
+
+            function calcularSubtotal(seccion, resultadoDiv) {
+                const checkboxes = seccion.querySelectorAll('input[type="checkbox"]');
+                let subtotal = 0;
+
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        subtotal += parseInt(checkbox.value);
+                    }
+                });
+
+                resultadoDiv.textContent = 'Subtotal: ' + subtotal;
+            }
+        });
     </script>
+
+
+
 </body>
 
 </html>
