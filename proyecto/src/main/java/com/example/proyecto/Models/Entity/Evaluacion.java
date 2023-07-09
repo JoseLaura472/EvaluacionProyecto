@@ -49,5 +49,9 @@ public class Evaluacion implements Serializable{
     @JoinTable(name = "evaluacion_criterio", joinColumns = @JoinColumn(name = "id_evaluacion"), inverseJoinColumns = @JoinColumn(name = "id_criterio"))
     private Set<Criterio> criterios;
 
+    @JsonIgnore
+    @ManyToMany(mappedBy = "evaluaciones")
+    private Set<Proyecto> proyectos;
+
 
 }

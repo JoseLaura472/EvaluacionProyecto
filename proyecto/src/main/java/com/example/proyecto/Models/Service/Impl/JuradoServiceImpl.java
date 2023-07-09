@@ -35,4 +35,9 @@ public class JuradoServiceImpl implements IJuradoService {
     public void delete(Long id) {
         juradoDao.deleteById(id);
     }
+
+    @Override
+    public Jurado juradoPorIdPersona(Long id_persona) {
+        return juradoDao.juradoPorIdPersona(id_persona);
+    }
 }

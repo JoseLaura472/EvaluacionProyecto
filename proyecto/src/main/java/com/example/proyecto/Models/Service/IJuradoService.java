@@ -14,4 +14,6 @@ public interface IJuradoService {
 	public Jurado findOne(Long id);
 
 	public void delete(Long id);
+
+    public Jurado juradoPorIdPersona(Long id_persona);
 }
