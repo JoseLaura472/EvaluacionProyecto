@@ -255,11 +255,7 @@
                                                     </td>
                                             </tr>
                                             
-                                            <tr>
-                                                <td style="border: 1px solid black;  text-align: right;" >Sub Total (I)
-                                                </td>
-                                                <td colspan="3" style="border: 1px solid black; text-align: center;" id="resultado"></td>
-                                            </tr>
+                                          
 
                                             <tr>
                                                 <td style="color: white;">d</td>
@@ -344,9 +340,10 @@
                                                     </td>
                                             </tr>
                                             <tr>
-                                                <td style="border: 1px solid black;  text-align: right;">Sub Total (I)
-                                                </td>
-                                                <td colspan="3" style="border: 1px solid black; text-align: center;" id="resultado"></td>
+                                                <td style="color: white;">d</td>
+                                                <td></td>
+                                                <td></td>
+                                                <td></td>
                                             </tr>
                                       
                                             <tr>
@@ -405,11 +402,7 @@
                                                     </td>
                                             </tr>
                                       
-                                            <tr>
-                                                <td style="border: 1px solid black;  text-align: right;">Sub Total (I)
-                                                </td>
-                                                <td colspan="3" style="border: 1px solid black; text-align: center;" id="resultado"></td>
-                                            </tr>
+                                           
                                             <tr>
                                                 <td style="border: 1px solid black;  text-align: right;">Puntaje Total 
                                                 </td>
@@ -460,7 +453,61 @@
     </div>
 
 
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            const checkboxValues = {
+                checkbox1: 4,
+                checkbox2: 6,
+                checkbox3: 10,
+                checkbox4: 4,
+                checkbox5: 6,
+                checkbox6: 10,
+                checkbox7: 4,
+                checkbox8: 6,
+                checkbox9: 10,
+                checkbox10: 4,
+                checkbox11: 8,
+                checkbox12: 12,
+                checkbox13: 4,
+                checkbox14: 8,
+                checkbox15: 12,
+                checkbox16: 4,
+                checkbox17: 8,
+                checkbox18: 12,
+                checkbox19: 8,
+                checkbox20: 12,
+                checkbox21: 17,
+                checkbox22: 8,
+                checkbox23: 12,
+                checkbox24: 17
+            }; // Definir los valores de los checkboxes específicos aquí
 
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            const resultadoDiv = document.getElementById('resultado');
+
+            checkboxes.forEach(checkbox => {
+                if (checkbox.id in checkboxValues) {
+                    checkbox.value = checkboxValues[checkbox.id]; // Asignar valor al checkbox específico
+
+                    checkbox.addEventListener('change', () => {
+                        calcularSuma();
+                    });
+                }
+            });
+
+            function calcularSuma() {
+                let suma = 0;
+
+                checkboxes.forEach(checkbox => {
+                    if (checkbox.checked) {
+                        suma += parseInt(checkbox.value);
+                    }
+                });
+
+                resultadoDiv.textContent =  suma;
+            }
+        });
+    </script>
 
 </body>
 
