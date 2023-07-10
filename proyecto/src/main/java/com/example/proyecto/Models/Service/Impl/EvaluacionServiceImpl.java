@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.proyecto.Models.Dao.IEvaluacionDao;
 import com.example.proyecto.Models.Entity.Evaluacion;
-
+import com.example.proyecto.Models.Entity.Jurado;
 import com.example.proyecto.Models.Service.IEvaluacionService;
 
 @Service
@@ -37,6 +37,11 @@ public class EvaluacionServiceImpl implements IEvaluacionService {
     @Override
     public void delete(Long id) {
         evaluacionDao.deleteById(id);
+    }
+
+    @Override
+    public  Evaluacion  juradoEvaluacion(Long id_jurado) {
+        return evaluacionDao.juradoEvaluacion(id_jurado);
     }
     
 }

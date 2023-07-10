@@ -1,6 +1,8 @@
 package com.example.proyecto.Controllers.EvaluacionControllers;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,9 +47,38 @@ public class EvaluacionController {
     @RequestMapping(value = "/ProyectosEvaluacionR", method = RequestMethod.GET) // Pagina principal
     public String EvaluacionR(HttpServletRequest request, Model model) {
         if (request.getSession().getAttribute("usuario") != null) {
+        HttpSession session = request.getSession();
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        Jurado jurado = juradoService.juradoPorIdPersona(usuario.getPersona().getId_persona());
+        List<Proyecto> listaProyecto = new ArrayList();
+        Evaluacion ev = evaluacionService.juradoEvaluacion(jurado.getId_jurado());
+        //System.out.println(ev.getJurado().getPersona().getNombres());
+        if (ev != null) {
+         for (Proyecto proyecto : proyectoService.findAll()) {
+            if (ev.getJurado().getId_jurado()==jurado.getId_jurado()) {
+                for (Proyecto p : ev.getProyectos()) {
+                    if (proyecto.getId_proyecto() != p.getId_proyecto()) {
+                        listaProyecto.add(proyecto);
+                    }
+                }
+            }
+        }
+        for (Proyecto p : listaProyecto) {
+            System.out.println(p.getNombre_proyecto());
+        }
+        }
+       
+        
+        if (ev == null) {
+        model.addAttribute("proyectos", proyectoService.findAll());
+        }else{
+         model.addAttribute("proyectos", listaProyecto);
 
-            model.addAttribute("proyectos", proyectoService.findAll());
-
+        }
+            
+            
+     
+            model.addAttribute("edit", "true");
             return "evaluacion/gestionar-proyectoEvaluacion";
         } else {
             return "redirect:LoginR";
