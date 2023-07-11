@@ -113,6 +113,7 @@ model.addAttribute("proyectos", listaProyecto);
         Long id_criterio24 = (long) 24;
         model.addAttribute("proyecto", proyecto);
         model.addAttribute("evaluacion", evaluacion);
+
         model.addAttribute("criterio1", criterioService.findOne(id_criterio1));
         model.addAttribute("criterio2", criterioService.findOne(id_criterio2));
         model.addAttribute("criterio3", criterioService.findOne(id_criterio3));
@@ -154,10 +155,12 @@ model.addAttribute("proyectos", listaProyecto);
         List<Jurado> listjurado = juradoService.findByProyectoId(idProyecto);
         int puntajeTotal = 0;
         int cantidadJurados = listjurado.size();
+
         for (Long id : id_criterio) {
             Criterio criterio = criterioService.findOne(id);
             int ponderacion = criterio.getPonderaciones().getPonderacion();
             puntajeTotal += ponderacion;
+            System.out.println(criterio.getId_criterio()+"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
         }
 
         evaluacion.setEstado("A");
