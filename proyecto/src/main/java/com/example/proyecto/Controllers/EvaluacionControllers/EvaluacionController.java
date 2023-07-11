@@ -51,31 +51,28 @@ public class EvaluacionController {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         Jurado jurado = juradoService.juradoPorIdPersona(usuario.getPersona().getId_persona());
         List<Proyecto> listaProyecto = new ArrayList();
-        Evaluacion ev = evaluacionService.juradoEvaluacion(jurado.getId_jurado());
-        //System.out.println(ev.getJurado().getPersona().getNombres());
-        if (ev != null) {
-         for (Proyecto proyecto : proyectoService.findAll()) {
-            if (ev.getJurado().getId_jurado()==jurado.getId_jurado()) {
-                for (Proyecto p : ev.getProyectos()) {
-                    if (proyecto.getId_proyecto() != p.getId_proyecto()) {
-                        listaProyecto.add(proyecto);
-                    }
-                }
-            }
-        }
-        for (Proyecto p : listaProyecto) {
-            System.out.println(p.getNombre_proyecto());
-        }
-        }
        
         
-        if (ev == null) {
-        model.addAttribute("proyectos", proyectoService.findAll());
-        }else{
-         model.addAttribute("proyectos", listaProyecto);
+        List<Evaluacion> listaEvaluacion = evaluacionService.juradoEvaluacion(jurado.getId_jurado());
 
+if (!listaEvaluacion.isEmpty()) {
+    List<Long> proyectosEvaluados = new ArrayList<>();
+    for (Evaluacion ev : listaEvaluacion) {
+        for (Proyecto p : ev.getProyectos()) {
+            proyectosEvaluados.add(p.getId_proyecto());
         }
-            
+    }
+
+    for (Proyecto proyecto : proyectoService.findByJuradoId(jurado.getId_jurado())) {
+        if (!proyectosEvaluados.contains(proyecto.getId_proyecto())) {
+            listaProyecto.add(proyecto);
+        }
+    }
+} else {
+    listaProyecto = proyectoService.findByJuradoId(jurado.getId_jurado());
+}
+
+model.addAttribute("proyectos", listaProyecto);
             
      
             model.addAttribute("edit", "true");
@@ -154,9 +151,9 @@ public class EvaluacionController {
         HttpSession session = request.getSession();
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         Jurado jurado = juradoService.juradoPorIdPersona(usuario.getPersona().getId_persona());
-
+        List<Jurado> listjurado = juradoService.findByProyectoId(idProyecto);
         int puntajeTotal = 0;
-
+        int cantidadJurados = listjurado.size();
         for (Long id : id_criterio) {
             Criterio criterio = criterioService.findOne(id);
             int ponderacion = criterio.getPonderaciones().getPonderacion();
@@ -168,6 +165,18 @@ public class EvaluacionController {
         evaluacion.getProyectos().add(proyecto);
         evaluacion.setPuntaje_total(puntajeTotal);
         evaluacionService.save(evaluacion);
+        
+        int promedioActual = (proyecto.getPromedio_final() + (evaluacion.getPuntaje_total() / cantidadJurados));
+        proyecto.setPromedio_final(promedioActual);
+        proyecto.setEstado("A");
+        proyecto.setDocente(proyecto.getDocente());
+        proyecto.setEstudiante(proyecto.getEstudiante());
+        proyecto.setEvaluacion(proyecto.getEvaluacion());
+        proyecto.setJurado(proyecto.getJurado());
+        proyecto.setPrograma(proyecto.getPrograma());
+        proyecto.setNombre_proyecto(proyecto.getNombre_proyecto());
+        proyectoService.save(proyecto);
+
 
         redirectAttrs
                 .addFlashAttribute("mensaje2", "Datos del Documento Actualizados Correctamente")

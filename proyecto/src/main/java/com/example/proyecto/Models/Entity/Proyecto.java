@@ -32,6 +32,8 @@ public class Proyecto implements Serializable{
     private Long id_proyecto;
     private String estado;
     private String nombre_proyecto;
+    private int promedio_final;
+    private int cantidad_evaluacion;
 
 
      //Tabla Persona
@@ -51,9 +53,14 @@ public class Proyecto implements Serializable{
   @JoinTable(name = "estudiante_proyecto", joinColumns = @JoinColumn(name = "id_proyecto"), inverseJoinColumns = @JoinColumn(name = "id_estudiante"))
   private Set<Estudiante> estudiante;
 
-     @JsonIgnore
-    @ManyToMany(mappedBy = "proyectos")
-    private Set<Evaluacion> evaluacion;
+   @JsonManagedReference
+  @ManyToMany(fetch = FetchType.LAZY)
+  @JoinTable(name = "jurado_proyecto", joinColumns = @JoinColumn(name = "id_proyecto"), inverseJoinColumns = @JoinColumn(name = "id_jurado"))
+  private Set<Jurado> jurado;
+
+  @JsonIgnore
+  @ManyToMany(mappedBy = "proyectos")
+  private Set<Evaluacion> evaluacion;
 
 
  

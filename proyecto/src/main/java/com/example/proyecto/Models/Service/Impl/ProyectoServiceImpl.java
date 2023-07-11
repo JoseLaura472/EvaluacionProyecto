@@ -34,5 +34,10 @@ public class ProyectoServiceImpl implements IProyectoService {
     public void delete(Long id) {
         proyectoDao.deleteById(id);
     }
+
+    @Override
+    public List<Proyecto> findByJuradoId(Long juradoId) {
+       return (List<Proyecto>) proyectoDao.findByJuradoId(juradoId);
+    }
     
 }

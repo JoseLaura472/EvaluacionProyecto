@@ -2,6 +2,7 @@ package com.example.proyecto.Models.Service;
 
 import java.util.List;
 
+import org.springframework.data.repository.query.Param;
 
 import com.example.proyecto.Models.Entity.Proyecto;
 
@@ -14,4 +15,6 @@ public interface IProyectoService {
 	public Proyecto findOne(Long id);
 
 	public void delete(Long id);
+
+    List<Proyecto> findByJuradoId(@Param("juradoId") Long juradoId);
 }

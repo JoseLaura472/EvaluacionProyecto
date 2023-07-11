@@ -43,6 +43,10 @@ public class Jurado  implements Serializable{
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "jurado", fetch = FetchType.LAZY)
     private List<Evaluacion> evaluacion;
 
+    @JsonIgnore
+    @ManyToMany(mappedBy = "jurado")
+    private Set<Proyecto> proyecto;
+
 
 
 }

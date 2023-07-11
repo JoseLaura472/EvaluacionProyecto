@@ -86,6 +86,22 @@
             
                                                 </div>
 
+                                                <div class="col-md-5">
+                                                    <label class="col-form-label">Jurados </label>
+                                                    <select class="form-control js-choice"
+                                                    multiple="multiple" size="3"
+                                                data-options='{"removeItemButton":true,"placeholder":true}'
+                                                    th:field="${proyecto.jurado}" 
+                                                    name="id_jurado"  id="id_jurado">
+                                                    <option th:each="jur : ${jurados}"
+                                                    th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                                                    th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
+                                                </option>
+                                                </select>
+            
+                                                </div>
+                                          
+
                                                 <div class="col-md-3">
                                                     <label class="col-form-label">Docente </label>
                                                     <select class="form-control js-choice"

@@ -35,6 +35,7 @@ public class Evaluacion implements Serializable{
     private Long id_evaluacion;
     private String estado;
     private int puntaje_total;
+    
 
     //Tabla Jurado
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

@@ -40,4 +40,9 @@ public class JuradoServiceImpl implements IJuradoService {
     public Jurado juradoPorIdPersona(Long id_persona) {
         return juradoDao.juradoPorIdPersona(id_persona);
     }
+
+    @Override
+    public List<Jurado> findByProyectoId(Long proyectoId) {
+      return (List<Jurado>) juradoDao.findByProyectoId(proyectoId);
+    }
 }

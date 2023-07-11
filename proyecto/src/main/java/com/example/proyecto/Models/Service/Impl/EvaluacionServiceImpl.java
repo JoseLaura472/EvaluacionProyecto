@@ -40,8 +40,13 @@ public class EvaluacionServiceImpl implements IEvaluacionService {
     }
 
     @Override
-    public  Evaluacion  juradoEvaluacion(Long id_jurado) {
-        return evaluacionDao.juradoEvaluacion(id_jurado);
+    public  List<Evaluacion>  juradoEvaluacion(Long id_jurado) {
+        return (List<Evaluacion>) evaluacionDao.juradoEvaluacion(id_jurado);
+    }
+
+    @Override
+    public List<Evaluacion> findByProyectoId(Long proyectoId) {
+           return (List<Evaluacion>) evaluacionDao.findByProyectoId(proyectoId);
     }
     
 }

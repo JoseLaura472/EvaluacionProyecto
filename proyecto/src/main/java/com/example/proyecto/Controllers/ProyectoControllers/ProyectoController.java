@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Service.IDocenteService;
 import com.example.proyecto.Models.Service.IEstudianteService;
+import com.example.proyecto.Models.Service.IJuradoService;
 import com.example.proyecto.Models.Service.IProgramaService;
 import com.example.proyecto.Models.Service.IProyectoService;
 
@@ -34,6 +35,9 @@ public class ProyectoController {
     @Autowired
 	private IProgramaService programaService;
 
+    @Autowired
+	private IJuradoService juradoService;
+
 
 
        // FUNCION PARA LA VISUALIZACION DE REGISTRO DE MNACIONALIDAD
@@ -46,6 +50,7 @@ public class ProyectoController {
             model.addAttribute("docentes", docenteService.findAll());
             model.addAttribute("estudiantes", estudianteService.findAll());
             model.addAttribute("programas", programaService.findAll());
+             model.addAttribute("jurados", juradoService.findAll());
 
 			return "proyecto/gestionar-proyecto";
 		} else {
@@ -57,7 +62,8 @@ public class ProyectoController {
      // Boton para Guardar Documento
     @RequestMapping(value = "/ProyectoF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
     public String ProyectoF(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
-            @RequestParam(value = "estudiante") Long[] id_estudiantes) { // validar los datos capturados (1)
+            @RequestParam(value = "estudiante") Long[] id_estudiantes,
+            @RequestParam(value = "jurado") Long[] id_jurados) { // validar los datos capturados (1)
        
         proyecto.setEstado("A");
         proyectoService.save(proyecto);
@@ -80,6 +86,7 @@ public class ProyectoController {
         model.addAttribute("estudiantes", estudianteService.findAll());
         model.addAttribute("docentes", docenteService.findAll());
         model.addAttribute("programas", programaService.findAll());
+        model.addAttribute("jurados", juradoService.findAll());
 
         model.addAttribute("edit", "true");
         return "proyecto/gestionar-proyecto";
@@ -89,7 +96,8 @@ public class ProyectoController {
     // Boton para Guardar Documento
     @RequestMapping(value = "/ProyectoModF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
     public String ProyectoModF(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
-             @RequestParam(value = "estudiante") Long[] id_estudiantes) { // validar los datos capturados (1)
+             @RequestParam(value = "estudiante") Long[] id_estudiantes,
+            @RequestParam(value = "jurado") Long[] id_jurados) { // validar los datos capturados (1)
       
         proyecto.setEstado("A");
         proyectoService.save(proyecto);
