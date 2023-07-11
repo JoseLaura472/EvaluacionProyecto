@@ -439,7 +439,7 @@ code {
 }
 
 .bg-primary {
-  background-color: #54cc96 !important;
+  background-color: #508aeb !important;
 }
 
 .bg-success {
@@ -843,7 +843,7 @@ File: Menu
   position: relative;
   width: 240px;
   z-index: 1;
-  background-color: #60d09d;
+  background-color: #508aeb;
 }
 
 .topbar .topbar-left .logo {
@@ -855,7 +855,7 @@ File: Menu
 }
 
 .navbar-custom {
-  background-color: #54cc96;
+  background-color: #508aeb;
   border: none;
   -webkit-box-shadow: 1px 0px 20px rgba(0, 0, 0, 0.05);
           box-shadow: 1px 0px 20px rgba(0, 0, 0, 0.05);
@@ -1082,7 +1082,7 @@ body.fixed-left .side-menu.left {
 }
 
 .button-menu-mobile {
-  background-color: #54cc96;
+  background-color: #508aeb;
   font-size: 28px;
   color: #ffffff;
   width: 60px;
