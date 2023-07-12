@@ -50,83 +50,100 @@
                         </div>
                         <!-- end row -->
 
-                        
 
-                        <div class="row" th:if="${session.usuario.estado == 'A'}">
-
-                            <div class="col-xl-4 col-md-6" th:each ="pr : ${PrimerL}">
+                        <div class="row">
+                            <div class="col-xl-3 col-md-6">
                                 <div class="card mini-stat m-b-30">
-                                    <div class="p-3 text-white" style="background-color: #000000 !important">
+                                    <div class="p-3 bg-primary text-white">
                                         <div class="mini-stat-icon">
-                                            <i class="float-right mb-0"><img src="../../../../assets/images/1mejor.png" height="100" alt="logo"></i>
+                                            <i class="mdi mdi-cube-outline float-right mb-0"></i>
                                         </div>
-                                        <h6 class="text-uppercase mb-0">PRIMER LUGAR</h6>
+                                        <h6 class="text-uppercase mb-0">New Orders</h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="border-bottom pb-4">
-                                            <p class="m-0">PROYECTO :</p>
-                                            <h5 class="m-0" th:text="${pr.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
+                                            <span class="badge badge-success"> +11% </span> <span
+                                                class="ml-2 text-muted">From previous period</span>
                                         </div>
                                         <div class="mt-4 text-muted">
                                             <div class="float-right">
-                                                <h5 class="m-0" th:text="${pr.promedio_final}">3567<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                                <p class="m-0">Last : 1325</p>
                                             </div>
-                                            <h5 class="m-0" th:text="${pr.programa.nombre_programa}">1456<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-    
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-xl-4 col-md-6" th:each ="sg : ${SegundoL}">
-                                <div class="card mini-stat m-b-30">
-                                    <div class="p-3 text-white" style="background-color: #000000 !important">
-                                        <div class="mini-stat-icon">
-                                            <i class="float-right mb-0"><img src="../../../../assets/images/2mejor.png" height="100" alt="logo"></i>
-                                        </div>
-                                        <h6 class="text-uppercase mb-0">SEGUNDO LUGAR</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="border-bottom pb-4">
-                                            <p class="m-0">PROYECTO :</p>
-                                            <h5 class="m-0" th:text="${sg.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
-                                        </div>
-                                        <div class="mt-4 text-muted">
-                                            <div class="float-right">
-                                                <h5 class="m-0" th:text="${sg.promedio_final}">3567<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-                                            </div>
-                                            <h5 class="m-0" th:text="${sg.programa.nombre_programa}">1456<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                            <h5 class="m-0">1456<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
 
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
-                            
-                            <div class="col-xl-4 col-md-6" th:each ="ter : ${TercerL}">
+                            <div class="col-xl-3 col-md-6">
                                 <div class="card mini-stat m-b-30">
-                                    <div class="p-3 text-white" style="background-color: #000000 !important">
+                                    <div class="p-3 bg-primary text-white">
                                         <div class="mini-stat-icon">
-                                            <i class="float-right mb-0"><img src="../../../../assets/images/3mejor.png" height="100" alt="logo"></i>
+                                            <i class="mdi mdi-account-network float-right mb-0"></i>
                                         </div>
-                                        <h6 class="text-uppercase mb-0">TERCER LUGAR</h6>
+                                        <h6 class="text-uppercase mb-0">New Users</h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="border-bottom pb-4">
-                                            <p class="m-0">PROYECTO :</p>
-                                            <h5 class="m-0" th:text="${ter.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
+                                            <span class="badge badge-success"> +22% </span> <span
+                                                class="ml-2 text-muted">From previous period</span>
                                         </div>
                                         <div class="mt-4 text-muted">
                                             <div class="float-right">
-                                                <h5 class="m-0" th:text="${ter.promedio_final}">3567<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                                <p class="m-0">Last : 3426</p>
                                             </div>
-                                            <h5 class="m-0" th:text="${ter.programa.nombre_programa}">1456<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                            <h5 class="m-0">3567<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
 
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card mini-stat m-b-30">
+                                    <div class="p-3 bg-primary text-white">
+                                        <div class="mini-stat-icon">
+                                            <i class="mdi mdi-tag-text-outline float-right mb-0"></i>
+                                        </div>
+                                        <h6 class="text-uppercase mb-0">Average Price</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="border-bottom pb-4">
+                                            <span class="badge badge-danger"> -02% </span> <span
+                                                class="ml-2 text-muted">From previous period</span>
+                                        </div>
+                                        <div class="mt-4 text-muted">
+                                            <div class="float-right">
+                                                <p class="m-0">Last : 15.8</p>
+                                            </div>
+                                            <h5 class="m-0">14.5<i class="mdi mdi-arrow-down text-danger ml-2"></i></h5>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-xl-3 col-md-6">
+                                <div class="card mini-stat m-b-30">
+                                    <div class="p-3 bg-primary text-white">
+                                        <div class="mini-stat-icon">
+                                            <i class="mdi mdi-cart-outline float-right mb-0"></i>
+                                        </div>
+                                        <h6 class="text-uppercase mb-0">Total Sales</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="border-bottom pb-4">
+                                            <span class="badge badge-success"> +10% </span> <span
+                                                class="ml-2 text-muted">From previous period</span>
+                                        </div>
+                                        <div class="mt-4 text-muted">
+                                            <div class="float-right">
+                                                <p class="m-0">Last : 14256</p>
+                                            </div>
+                                            <h5 class="m-0">15234<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <!-- end row -->
 
@@ -216,10 +233,10 @@
 
                     </div><!-- container fluid -->
 
-                </div> 
+                </div>
                 <!-- FIN INICIO CONTENIDO -->
 
-            </div> 
+            </div>
             <!-- content -->
 
             <footer th:replace="layout/footer :: footer">

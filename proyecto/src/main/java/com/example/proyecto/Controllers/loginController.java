@@ -1,5 +1,7 @@
 package com.example.proyecto.Controllers;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -11,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Entity.Usuario;
+import com.example.proyecto.Models.Service.IProyectoService;
 import com.example.proyecto.Models.Service.IUsuarioService;
 
 @Controller
@@ -20,7 +24,9 @@ public class loginController {
     @Autowired
     private IUsuarioService usuarioService;
 
-    
+    @Autowired
+    private IProyectoService proyectoService;
+
     // Funcion de visualizacion de iniciar sesiòn administrador
     @RequestMapping(value = "/LoginR", method = RequestMethod.GET)
     public String LoginR(Model model) {
@@ -56,12 +62,19 @@ public class loginController {
     }
 
     // Funcion de visualizaciòn de la pagina principal
-	@RequestMapping(value = "/AdmPG", method = RequestMethod.GET) // Pagina principal
+    @RequestMapping(value = "/AdmPG", method = RequestMethod.GET) // Pagina principal
 	public String Inicio(HttpServletRequest request, Model model) {
 		if (request.getSession().getAttribute("usuario") != null) {
-		
-		
-			
+
+            //Proyecto proyecto = proyectoService.findOne(id_proyecto)
+            
+            List<Proyecto> PrimerL = proyectoService.Primerlugar();
+            List<Proyecto> SegundoL = proyectoService.Segundolugar();
+            List<Proyecto> TercerL = proyectoService.Tercerlugar();
+
+            model.addAttribute("PrimerL", PrimerL);
+			model.addAttribute("SegundoL", SegundoL);
+            model.addAttribute("TercerL", TercerL);
 			return "Inicio";
 		} else {
 			return "redirect:LoginR";
@@ -69,14 +82,14 @@ public class loginController {
 	}
 
     // Funcion de cerrar sesion de administrador
-	@RequestMapping("/cerrar_sesionAdm")
-	public String cerrarSesion2(HttpServletRequest request, RedirectAttributes flash) {
-		HttpSession sessionAdministrador = request.getSession();
-		if (sessionAdministrador != null) {
-			sessionAdministrador.invalidate();
-			flash.addAttribute("validado", "Se cerro sesion con exito!");
-		}
-		return "redirect:/LoginR";
-	}
+    @RequestMapping("/cerrar_sesionAdm")
+    public String cerrarSesion2(HttpServletRequest request, RedirectAttributes flash) {
+        HttpSession sessionAdministrador = request.getSession();
+        if (sessionAdministrador != null) {
+            sessionAdministrador.invalidate();
+            flash.addAttribute("validado", "Se cerro sesion con exito!");
+        }
+        return "redirect:/LoginR";
+    }
 
 }
