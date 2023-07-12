@@ -123,4 +123,23 @@ public class ProyectoController {
 	}
 
 
+      // FUNCION PARA LA VISUALIZACION DE REGISTRO DE MNACIONALIDAD
+	@RequestMapping(value = "/ProyectoE", method = RequestMethod.GET) // Pagina principal
+	public String ProyectoE(HttpServletRequest request, Model model) {
+		if (request.getSession().getAttribute("usuario") != null) {
+
+			
+			model.addAttribute("proyectos", proyectoService.proyectosEvaluados());
+            model.addAttribute("docentes", docenteService.findAll());
+            model.addAttribute("estudiantes", estudianteService.findAll());
+            model.addAttribute("programas", programaService.findAll());
+             model.addAttribute("jurados", juradoService.findAll());
+
+			return "proyecto/proyectos-evaluados";
+		} else {
+			return "redirect:LoginR";
+		}
+	}
+
+
 }

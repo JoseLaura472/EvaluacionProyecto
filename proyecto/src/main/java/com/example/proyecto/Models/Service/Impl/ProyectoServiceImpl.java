@@ -39,5 +39,10 @@ public class ProyectoServiceImpl implements IProyectoService {
     public List<Proyecto> findByJuradoId(Long juradoId) {
        return (List<Proyecto>) proyectoDao.findByJuradoId(juradoId);
     }
+
+    @Override
+    public List<Proyecto> proyectosEvaluados() {
+       return (List<Proyecto>) proyectoDao.proyectosEvaluados();
+    }
     
 }
