@@ -134,6 +134,31 @@
             }).then().done();
         }
     </script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        var alertParam = new URLSearchParams(window.location.search).get('alert');
+
+        if (alertParam === 'true') {
+            
+
+            // Mostrar el alert de SweetAlert2 solo si se envió el formulario de registro
+            swal({
+                icon: 'success',
+                title: 'Proyecto Evaluado Correctamente',
+                type: 'success',
+                
+            });
+        }
+    });
+</script>
+
+
+
+
+
+
+
 </body>
 
 </html>

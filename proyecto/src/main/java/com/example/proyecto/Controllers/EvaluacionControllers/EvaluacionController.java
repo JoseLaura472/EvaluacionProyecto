@@ -197,11 +197,10 @@ public class EvaluacionController {
         proyecto.setNombre_proyecto(proyecto.getNombre_proyecto());
         proyectoService.save(proyecto);
 
-        redirectAttrs
-                .addFlashAttribute("mensaje2", "Datos del Documento Actualizados Correctamente")
-                .addFlashAttribute("clase2", "success alert-dismissible fade show");
+        redirectAttrs.addFlashAttribute("mensaje", "Proyecto Evaluado Correctamente");
+                
 
-        return "redirect:/ProyectosEvaluacionR";
+        return "redirect:/ProyectosEvaluacionR?alert=true";
     }
 
 }
