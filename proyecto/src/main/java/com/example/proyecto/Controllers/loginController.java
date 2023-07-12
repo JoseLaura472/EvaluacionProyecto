@@ -53,7 +53,7 @@ public class loginController {
 
             flash.addAttribute("success", usuario.getPersona().getNombres());
 
-            return "redirect:/AdmPG/";
+            return "redirect:/AdmPG";
 
         } else {
             return "redirect:/LoginR";
@@ -66,8 +66,8 @@ public class loginController {
 	public String Inicio(HttpServletRequest request, Model model) {
 		if (request.getSession().getAttribute("usuario") != null) {
 
-            HttpSession session = request.getSession();
-            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            HttpSession sessionAdministrador = request.getSession();
+            Usuario usuario = (Usuario) sessionAdministrador.getAttribute("usuario");
             
             List<Proyecto> PrimerL = proyectoService.Primerlugar();
             List<Proyecto> SegundoL = proyectoService.Segundolugar();
