@@ -62,5 +62,11 @@ public class ProyectoServiceImpl implements IProyectoService {
     public List<Proyecto> proyectosEvaluados() {
        return (List<Proyecto>) proyectoDao.proyectosEvaluados();
     }
+
+    @Override
+    public List<Proyecto> proyectosRanking() {
+        // TODO Auto-generated method stub
+        return (List<Proyecto>) proyectoDao.proyectosRanking();
+    }
     
 }

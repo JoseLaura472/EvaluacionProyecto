@@ -26,4 +26,6 @@ public interface IProyectoService {
     
     List<Proyecto> proyectosEvaluados();
 
+    List<Proyecto> proyectosRanking();
+
 }

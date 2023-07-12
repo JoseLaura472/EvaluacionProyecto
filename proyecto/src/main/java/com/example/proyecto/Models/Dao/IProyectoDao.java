@@ -27,4 +27,7 @@ public interface IProyectoDao extends CrudRepository<Proyecto, Long>{
 
     @Query(value = "Select * from proyecto Where estado = 'E'", nativeQuery = true)
     List<Proyecto> proyectosEvaluados();
+
+    @Query(value = "SELECT * FROM proyecto as p ORDER BY p.promedio_final DESC", nativeQuery = true)
+    List<Proyecto> proyectosRanking();
 }

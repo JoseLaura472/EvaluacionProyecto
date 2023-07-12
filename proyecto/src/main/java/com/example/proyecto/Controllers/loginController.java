@@ -66,15 +66,20 @@ public class loginController {
 	public String Inicio(HttpServletRequest request, Model model) {
 		if (request.getSession().getAttribute("usuario") != null) {
 
-            //Proyecto proyecto = proyectoService.findOne(id_proyecto)
+            HttpSession session = request.getSession();
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
             
             List<Proyecto> PrimerL = proyectoService.Primerlugar();
             List<Proyecto> SegundoL = proyectoService.Segundolugar();
             List<Proyecto> TercerL = proyectoService.Tercerlugar();
+            List<Proyecto> Ranking = proyectoService.proyectosRanking();
 
             model.addAttribute("PrimerL", PrimerL);
 			model.addAttribute("SegundoL", SegundoL);
             model.addAttribute("TercerL", TercerL);
+            model.addAttribute("Ranking", Ranking);
+
+            model.addAttribute("usuario", usuario);
 			return "Inicio";
 		} else {
 			return "redirect:LoginR";
