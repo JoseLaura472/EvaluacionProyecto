@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head th:replace="layout/head :: head">
+    </head>
+
+
+    <body class="fixed-left">
+
+        <!-- Loader -->
+        <div id="preloader"><div id="status"><div class="spinner"></div></div></div>
+
+        <!-- Begin page -->
+        <div id="wrapper">
+
+            <!-- ========== Left Sidebar Start ========== -->
+            <div th:replace="layout/sidebar :: sidebar">
+            </div>
+            <!-- Left Sidebar End -->
+
+            <!-- Start right Content here -->
+
+            <div class="content-page">
+                <!-- Start content -->
+                <div class="content">
+
+                    <!-- Top Bar Start -->
+                    <div th:replace="layout/topbar :: topbar">
+                    </div>
+                    <!-- Top Bar End -->
+
+                    <div class="page-content-wrapper ">
+
+                        <div class="container-fluid">
+
+          
+
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card m-b-30">
+                                        <div class="card-body">
+            
+                                            <h2 class="mt-0 header-title" style="font-size: 30px;">Formulario de Registro de Personas</h2>
+                                            <form th:action="${edit} ?@{/PersonaModF} :@{/PersonaF}" method="post"
+                                            enctype="multipart/form-data">
+                                            <input type="hidden" th:field="${persona.id_persona}">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Nombres</label>
+                                                    <input class="form-control" type="text" th:field="${persona.nombres}"
+                                                        onkeyup="javascript:this.value=this.value.toUpperCase();"
+                                                        style="text-transform:uppercase;" required>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Apellido Paterno</label>
+                                                    <input class="form-control" type="text" th:field="${persona.paterno}"
+                                                        onkeyup="javascript:this.value=this.value.toUpperCase();"
+                                                        style="text-transform:uppercase;" required>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Apellido Materno</label>
+                                                    <input class="form-control" type="text" th:field="${persona.materno}"
+                                                        onkeyup="javascript:this.value=this.value.toUpperCase();"
+                                                        style="text-transform:uppercase;" required>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Cedula de Identidad </label>
+                                                    <input class="form-control" type="text" th:field="${persona.ci}"
+                                                        onkeyup="javascript:this.value=this.value.toUpperCase();"
+                                                        style="text-transform:uppercase;" required>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Sexo </label>
+                                                    <select class="form-control js-choice" th:field="${persona.tipoSexo}">
+                                                        <option value="">Seleccione un tipo de sexo</option>
+                                                        <option value="Masculino">Masculino</option>
+                                                        <option value="Femenino">Femenino</option>
+                                                    </select>
+            
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Fecha de Nacimiento</label>
+                                                    <input class="form-control" type="date" th:field="${persona.fecNacimiento}"
+                                                        onkeyup="javascript:this.value=this.value.toUpperCase();"
+                                                        style="text-transform:uppercase;" required>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Correo</label>
+                                                    <input class="form-control" type="email" th:field="${persona.email}" required>
+                                                </div>
+                                     
+
+                                            </div>
+
+                                              
+            
+                                          <br>
+                                                <div class="text-center">
+                                                    <button class="btn btn-primary" type="submit"
+                                                    th:text="${edit} ?'Actualizar' :'Registrar'"></button>
+                                       
+
+                                                </div>
+                                            
+                                               
+                                     
+                                        </form>
+                              
+                                        </div>
+                                    </div>
+                                </div> <!-- end col -->
+                            </div> <!-- end row -->
+            
+               
+            
+                        </div><!-- container fluid -->
+
+                    </div> <!-- Page content Wrapper -->
+
+                </div> <!-- content -->
+
+                <footer class="footer">
+                    © 2018 <b>Drixo</b> <span class="d-none d-sm-inline-block"> - Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesdesign.</span>
+                </footer>
+
+            </div>
+            <!-- End Right content here -->
+
+        </div>
+        <!-- END wrapper -->
+
+        <div th:replace="layout/script :: script">
+        </div>
+
+    </body>
+</html>

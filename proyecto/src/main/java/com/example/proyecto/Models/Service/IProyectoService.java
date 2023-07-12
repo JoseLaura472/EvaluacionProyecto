@@ -17,14 +17,13 @@ public interface IProyectoService {
 	public void delete(Long id);
 
     List<Proyecto> findByJuradoId(@Param("juradoId") Long juradoId);
-<<<<<<< HEAD
 
     public List<Proyecto> Primerlugar();
 
     public List<Proyecto> Segundolugar();
 
     public List<Proyecto> Tercerlugar();
-=======
+    
     List<Proyecto> proyectosEvaluados();
->>>>>>> d3cdc190cb5b014449a22dabcf77a122e5d5880f
+
 }

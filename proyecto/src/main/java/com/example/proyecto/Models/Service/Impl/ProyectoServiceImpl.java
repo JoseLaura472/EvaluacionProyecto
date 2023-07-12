@@ -41,7 +41,6 @@ public class ProyectoServiceImpl implements IProyectoService {
     }
 
     @Override
-<<<<<<< HEAD
     public List<Proyecto> Primerlugar() {
         // TODO Auto-generated method stub
         return (List<Proyecto>) proyectoDao.Primerlugar();
@@ -57,10 +56,11 @@ public class ProyectoServiceImpl implements IProyectoService {
     public List<Proyecto> Tercerlugar() {
         // TODO Auto-generated method stub
         return (List<Proyecto>) proyectoDao.Tercerlugar();
-=======
+    }
+
+    @Override
     public List<Proyecto> proyectosEvaluados() {
        return (List<Proyecto>) proyectoDao.proyectosEvaluados();
->>>>>>> d3cdc190cb5b014449a22dabcf77a122e5d5880f
     }
     
 }

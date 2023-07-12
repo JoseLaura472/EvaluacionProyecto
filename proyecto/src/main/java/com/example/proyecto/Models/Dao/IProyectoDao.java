@@ -16,7 +16,6 @@ public interface IProyectoDao extends CrudRepository<Proyecto, Long>{
     @Query("SELECT p FROM Proyecto p JOIN p.jurado j WHERE j.id = :juradoId")
     List<Proyecto> findByJuradoId(@Param("juradoId") Long juradoId);
 
-<<<<<<< HEAD
     @Query(value = "SELECT * FROM proyecto as p ORDER BY p.promedio_final DESC LIMIT 1", nativeQuery = true)
     public List<Proyecto> Primerlugar();
 
@@ -25,9 +24,7 @@ public interface IProyectoDao extends CrudRepository<Proyecto, Long>{
 
     @Query(value = "SELECT * FROM ( SELECT *, ROW_NUMBER() OVER (ORDER BY promedio_final DESC) AS row_num FROM proyecto ) AS subquery WHERE row_num = 3", nativeQuery = true)
     public List<Proyecto> Tercerlugar();
-=======
 
     @Query(value = "Select * from proyecto Where estado = 'E'", nativeQuery = true)
     List<Proyecto> proyectosEvaluados();
->>>>>>> d3cdc190cb5b014449a22dabcf77a122e5d5880f
 }
