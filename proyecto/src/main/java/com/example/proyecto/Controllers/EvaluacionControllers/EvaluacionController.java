@@ -154,6 +154,7 @@ public class EvaluacionController {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         Jurado jurado = juradoService.juradoPorIdPersona(usuario.getPersona().getId_persona());
         List<Jurado> listjurado = juradoService.findByProyectoId(idProyecto);
+        List<Evaluacion> listEvaluacion = evaluacionService.findByProyectoId(idProyecto);
         int puntajeTotal = 0;
         int cantidadJurados = listjurado.size();
 
@@ -195,13 +196,17 @@ public class EvaluacionController {
         proyecto.setJurado(proyecto.getJurado());
         proyecto.setPrograma(proyecto.getPrograma());
         proyecto.setNombre_proyecto(proyecto.getNombre_proyecto());
+      
         proyectoService.save(proyecto);
+        
+        if (listjurado.size() == listEvaluacion.size()+1) {
+        proyecto.setEstado("E"); 
+        proyectoService.save(proyecto);
+        }
+        redirectAttrs.addFlashAttribute("mensaje", "Proyecto Evaluado Correctamente");
+                
 
-        redirectAttrs
-                .addFlashAttribute("mensaje2", "Datos del Documento Actualizados Correctamente")
-                .addFlashAttribute("clase2", "success alert-dismissible fade show");
-
-        return "redirect:/ProyectosEvaluacionR";
+        return "redirect:/ProyectosEvaluacionR?alert=true";
     }
 
 }

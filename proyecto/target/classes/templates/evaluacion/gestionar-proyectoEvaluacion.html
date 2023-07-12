@@ -59,7 +59,7 @@
                                 <div class="card m-b-30">
                                     <div class="card-body">
         
-                                        <h4 class="mt-0 header-title">Lista de Proyectos a Evaluar</h4>
+                                        <h2  style="text-align: center; color: rgb(171, 10, 10);">Lista de Proyectos a Evaluar</h2>
                                     
         
                                         <table id="datatable" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
@@ -134,6 +134,31 @@
             }).then().done();
         }
     </script>
+
+<script>
+    window.addEventListener('DOMContentLoaded', function() {
+        var alertParam = new URLSearchParams(window.location.search).get('alert');
+
+        if (alertParam === 'true') {
+            
+
+            // Mostrar el alert de SweetAlert2 solo si se envió el formulario de registro
+            swal({
+                icon: 'success',
+                title: 'Proyecto Evaluado Correctamente',
+                type: 'success',
+                
+            });
+        }
+    });
+</script>
+
+
+
+
+
+
+
 </body>
 
 </html>
