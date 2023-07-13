@@ -40,16 +40,15 @@
 
                         <div class="row">
                             <div class="col-sm-12">
-                                <div class="float-right page-breadcrumb">
-                                    <ol class="breadcrumb">
-                                        <li class="breadcrumb-item"><a href="#">Drixo</a></li>
-                                        <li class="breadcrumb-item"><a href="#">Forms</a></li>
-                                        <li class="breadcrumb-item active">Form Validation</li>
-                                    </ol>
-                                </div>
-                                <br>
-                                <a class="btn btn-primary" type="submit" href="/ProyectosEvaluacionR">Volver</a>
+                                <div style="display: flex; justify-content: space-between; background-color: #f2f2f2; padding: 10px;">
+                                    <a class="btn btn-primary"  type="submit" href="/ProyectosEvaluacionR">Volver</a>
+                                    <a class="btn btn-warning" type="button" target="_blank" th:href="${'../../../../openFileProyectoN/' + proyecto.id_proyecto}" >Ver Documento</a>
+                                  </div>
+                     
+                               
+                               
                             </div>
+                            
                         </div>
                         <!-- end row -->
 
@@ -176,7 +175,7 @@
                                             <p></p>
 
                                             <table
-                                                style="border: 1px solid black; width: 80%; margin-left: auto; margin-right: auto;">
+                                                style="border: 1px solid black; width: 100%; margin-left: auto; margin-right: auto;">
 
                                                 <tr>
                                                     <td colspan="4"
@@ -512,7 +511,21 @@
                                         </form>
 
 
-
+                                        <div class="modal fade" tabindex="-1" id="ModalEvaluacion" role="dialog"
+                                        aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog modal-lg">
+                                            <div class="modal-content">
+        
+                                                <div>
+        
+        
+                                                    <iframe width="800" height="800" id="iframe-pdf" frameborder="0"
+                                                        allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                                </div>
+        
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     </div>
                                 </div>
@@ -541,7 +554,22 @@
     <div th:replace="layout/script :: script">
     </div>
 
-    
+    <script type="text/javascript">
+        function renombrar(id_archivo_adjunto) {
+            var id_a = id_archivo_adjunto;
+
+            //alert(id_archivo_adjunto);
+
+            $("#ModalEvaluacion").modal("show");
+
+            $("#id_a").val(id_a);
+
+            $("#iframe-pdf").attr("src", `/openFileProyecto/${id_a}`)
+
+
+        }
+
+    </script>
     <script>
         window.addEventListener('DOMContentLoaded', function() {
           var checkboxes = document.querySelectorAll('input[type="checkbox"]');

@@ -13,6 +13,9 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
+
+import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -63,6 +66,16 @@ public class Proyecto implements Serializable{
   private Set<Evaluacion> evaluacion;
 
 
+   @Transient
+    private MultipartFile file; 
+    
+    @Transient
+    private String nombreArchivo; 
+
+       //Tabla Archivo Adjunto
+       @ManyToOne(fetch = FetchType.EAGER)
+       @JoinColumn(name = "id_archivo_adjunto")
+       private ArchivoAdjunto archivoAdjunto;
  
 
 }

@@ -4,12 +4,14 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.proyecto.Models.Dao.IProyectoDao;
 import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Service.IProyectoService;
 
 @Service
+@Transactional
 public class ProyectoServiceImpl implements IProyectoService {
 
     @Autowired
