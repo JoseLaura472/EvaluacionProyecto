@@ -39,5 +39,34 @@ public class ProyectoServiceImpl implements IProyectoService {
     public List<Proyecto> findByJuradoId(Long juradoId) {
        return (List<Proyecto>) proyectoDao.findByJuradoId(juradoId);
     }
+
+    @Override
+    public List<Proyecto> Primerlugar() {
+        // TODO Auto-generated method stub
+        return (List<Proyecto>) proyectoDao.Primerlugar();
+    }
+
+    @Override
+    public List<Proyecto> Segundolugar() {
+        // TODO Auto-generated method stub
+        return (List<Proyecto>) proyectoDao.Segundolugar();
+    }
+
+    @Override
+    public List<Proyecto> Tercerlugar() {
+        // TODO Auto-generated method stub
+        return (List<Proyecto>) proyectoDao.Tercerlugar();
+    }
+
+    @Override
+    public List<Proyecto> proyectosEvaluados() {
+       return (List<Proyecto>) proyectoDao.proyectosEvaluados();
+    }
+
+    @Override
+    public List<Proyecto> proyectosRanking() {
+        // TODO Auto-generated method stub
+        return (List<Proyecto>) proyectoDao.proyectosRanking();
+    }
     
 }

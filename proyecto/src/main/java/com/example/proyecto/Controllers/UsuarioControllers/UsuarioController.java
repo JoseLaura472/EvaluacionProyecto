@@ -45,7 +45,6 @@ public class UsuarioController {
      @RequestMapping(value = "/UsuarioF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
 	public String UsuarioF(@Validated Usuario usuario, RedirectAttributes redirectAttrs) { // validar los datos capturados (1)
 
-		usuario.setEstado("A");
 		usuarioService.save(usuario);
 		redirectAttrs
 				.addFlashAttribute("mensaje", "Registro Exitoso del País")

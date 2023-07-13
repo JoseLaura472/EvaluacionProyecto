@@ -15,7 +15,7 @@ public class indexController {
 		if (request.getSession().getAttribute("usuario") != null) {
 				return "index";
 		} else {
-			return "redirect:LoginR";
+			return "redirect:loginR";
 		}
 
 	}

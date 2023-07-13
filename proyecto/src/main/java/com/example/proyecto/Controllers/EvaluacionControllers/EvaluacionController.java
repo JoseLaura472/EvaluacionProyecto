@@ -1,8 +1,11 @@
 package com.example.proyecto.Controllers.EvaluacionControllers;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,34 +50,32 @@ public class EvaluacionController {
     @RequestMapping(value = "/ProyectosEvaluacionR", method = RequestMethod.GET) // Pagina principal
     public String EvaluacionR(HttpServletRequest request, Model model) {
         if (request.getSession().getAttribute("usuario") != null) {
-        HttpSession session = request.getSession();
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
-        Jurado jurado = juradoService.juradoPorIdPersona(usuario.getPersona().getId_persona());
-        List<Proyecto> listaProyecto = new ArrayList();
-       
-        
-        List<Evaluacion> listaEvaluacion = evaluacionService.juradoEvaluacion(jurado.getId_jurado());
+            HttpSession session = request.getSession();
+            Usuario usuario = (Usuario) session.getAttribute("usuario");
+            Jurado jurado = juradoService.juradoPorIdPersona(usuario.getPersona().getId_persona());
+            List<Proyecto> listaProyecto = new ArrayList();
 
-if (!listaEvaluacion.isEmpty()) {
-    List<Long> proyectosEvaluados = new ArrayList<>();
-    for (Evaluacion ev : listaEvaluacion) {
-        for (Proyecto p : ev.getProyectos()) {
-            proyectosEvaluados.add(p.getId_proyecto());
-        }
-    }
+            List<Evaluacion> listaEvaluacion = evaluacionService.juradoEvaluacion(jurado.getId_jurado());
 
-    for (Proyecto proyecto : proyectoService.findByJuradoId(jurado.getId_jurado())) {
-        if (!proyectosEvaluados.contains(proyecto.getId_proyecto())) {
-            listaProyecto.add(proyecto);
-        }
-    }
-} else {
-    listaProyecto = proyectoService.findByJuradoId(jurado.getId_jurado());
-}
+            if (!listaEvaluacion.isEmpty()) {
+                List<Long> proyectosEvaluados = new ArrayList<>();
+                for (Evaluacion ev : listaEvaluacion) {
+                    for (Proyecto p : ev.getProyectos()) {
+                        proyectosEvaluados.add(p.getId_proyecto());
+                    }
+                }
 
-model.addAttribute("proyectos", listaProyecto);
-            
-     
+                for (Proyecto proyecto : proyectoService.findByJuradoId(jurado.getId_jurado())) {
+                    if (!proyectosEvaluados.contains(proyecto.getId_proyecto())) {
+                        listaProyecto.add(proyecto);
+                    }
+                }
+            } else {
+                listaProyecto = proyectoService.findByJuradoId(jurado.getId_jurado());
+            }
+
+            model.addAttribute("proyectos", listaProyecto);
+
             model.addAttribute("edit", "true");
             return "evaluacion/gestionar-proyectoEvaluacion";
         } else {
@@ -153,6 +154,7 @@ model.addAttribute("proyectos", listaProyecto);
         Usuario usuario = (Usuario) session.getAttribute("usuario");
         Jurado jurado = juradoService.juradoPorIdPersona(usuario.getPersona().getId_persona());
         List<Jurado> listjurado = juradoService.findByProyectoId(idProyecto);
+        List<Evaluacion> listEvaluacion = evaluacionService.findByProyectoId(idProyecto);
         int puntajeTotal = 0;
         int cantidadJurados = listjurado.size();
 
@@ -160,7 +162,7 @@ model.addAttribute("proyectos", listaProyecto);
             Criterio criterio = criterioService.findOne(id);
             int ponderacion = criterio.getPonderaciones().getPonderacion();
             puntajeTotal += ponderacion;
-            System.out.println(criterio.getId_criterio()+"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
         }
 
         evaluacion.setEstado("A");
@@ -168,8 +170,24 @@ model.addAttribute("proyectos", listaProyecto);
         evaluacion.getProyectos().add(proyecto);
         evaluacion.setPuntaje_total(puntajeTotal);
         evaluacionService.save(evaluacion);
-        
-        int promedioActual = (proyecto.getPromedio_final() + (evaluacion.getPuntaje_total() / cantidadJurados));
+
+        double promedioActual = proyecto.getPromedio_final()
+                + (evaluacion.getPuntaje_total() / (double) cantidadJurados);
+        double parteDecimal = (promedioActual - Math.floor(promedioActual)) * 100; // Multiplicamos por 100 para
+                                                                                   // trabajar con los dos decimales
+
+        if (parteDecimal >= 50.0) {
+            promedioActual = Math.ceil(promedioActual);
+        }
+
+        if (promedioActual > 100.0) {
+            promedioActual = 100.0;
+        }
+
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+        symbols.setDecimalSeparator('.');
+        DecimalFormat decimalFormat = new DecimalFormat("#0.000", symbols);
+        promedioActual = Double.parseDouble(decimalFormat.format(promedioActual));
         proyecto.setPromedio_final(promedioActual);
         proyecto.setEstado("A");
         proyecto.setDocente(proyecto.getDocente());
@@ -178,14 +196,17 @@ model.addAttribute("proyectos", listaProyecto);
         proyecto.setJurado(proyecto.getJurado());
         proyecto.setPrograma(proyecto.getPrograma());
         proyecto.setNombre_proyecto(proyecto.getNombre_proyecto());
+      
         proyectoService.save(proyecto);
+        
+        if (listjurado.size() == listEvaluacion.size()+1) {
+        proyecto.setEstado("E"); 
+        proyectoService.save(proyecto);
+        }
+        redirectAttrs.addFlashAttribute("mensaje", "Proyecto Evaluado Correctamente");
+                
 
-
-        redirectAttrs
-                .addFlashAttribute("mensaje2", "Datos del Documento Actualizados Correctamente")
-                .addFlashAttribute("clase2", "success alert-dismissible fade show");
-
-        return "redirect:/ProyectosEvaluacionR";
+        return "redirect:/ProyectosEvaluacionR?alert=true";
     }
 
 }
