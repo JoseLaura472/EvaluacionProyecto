@@ -4,7 +4,6 @@
 <head th:replace="layout/head :: head">
 </head>
 
-
 <body class="fixed-left">
 
     <!-- Loader -->
@@ -58,74 +57,61 @@
                                 <div class="card m-b-30">
                                     <div class="card-body">
 
-                                        <h1 class="mt-0 header-title" style="font-size: 30px;">Formulario de Registro Criterio
+                                        <h1 class="mt-0 header-title" style="font-size: 30px;">Formulario de Registro
+                                            Criterio
                                         </h1>
-                               
 
                                         <form th:action="${edit} ?@{/CriterioModF} :@{/CriterioF}" method="post">
                                             <input type="hidden" th:field="${criterio.id_criterio}">
                                             <div class="row">
-
-
-                                             
-
                                                 <div class="col-md-6">
                                                     <label class="col-form-label">Categoria Criterio </label>
                                                     <select class="form-control js-choice"
-                                                    th:field="${criterio.categoriaCriterio}" 
-                                                    name="categoriaCriterio">
-                                                    <option value="">Seleccione una Categoria Criterio</option>
-                                                    <option th:each="cat : ${categoriaC}" th:value="${cat.id_categoria_criterio}"
-                                                        th:if="${cat.estado != 'X'}" th:text="${cat.nombre_cat_criterio}">
-                                                    </option>
-                                                </select>
-            
+                                                        th:field="${criterio.categoriaCriterio}"
+                                                        name="categoriaCriterio">
+                                                        <option value="">Seleccione una Categoria Criterio</option>
+                                                        <option th:each="cat : ${categoriaC}"
+                                                            th:value="${cat.id_categoria_criterio}"
+                                                            th:if="${cat.estado != 'X'}"
+                                                            th:text="${cat.nombre_cat_criterio}">
+                                                        </option>
+                                                    </select>
+
                                                 </div>
 
                                                 <div class="col-md-6">
                                                     <label class="col-form-label">Pregunta</label>
                                                     <select class="form-control js-choice"
-                                                    th:field="${criterio.preguntas}" 
-                                                    name="preguntas">
-                                                    <option value="">Seleccione una Pregunta</option>
-                                                    <option th:each="pre : ${preguntaslist}" th:value="${pre.id_pregunta}"
-                                                        th:if="${pre.estado != 'X'}" th:text="${pre.pregunta}">
-                                                    </option>
-                                                </select>
-            
+                                                        th:field="${criterio.preguntas}" name="preguntas">
+                                                        <option value="">Seleccione una Pregunta</option>
+                                                        <option th:each="pre : ${preguntaslist}"
+                                                            th:value="${pre.id_pregunta}" th:if="${pre.estado != 'X'}"
+                                                            th:text="${pre.pregunta}">
+                                                        </option>
+                                                    </select>
                                                 </div>
 
                                                 <div class="col-md-3">
                                                     <label class="col-form-label">Ponderado</label>
                                                     <select class="form-control js-choice"
-                                                    th:field="${criterio.ponderaciones}" 
-                                                    name="ponderacion">
-                                                    <option value="">Seleccione una Ponderacion</option>
-                                                    <option th:each="pon : ${ponderacioneslist}" th:value="${pon.id_ponderacion}"
-                                                        th:if="${pon.estado != 'X'}" th:text="${pon.ponderacion}">
-                                                    </option>
-                                                </select>
+                                                        th:field="${criterio.ponderaciones}" name="ponderacion">
+                                                        <option value="">Seleccione una Ponderacion</option>
+                                                        <option th:each="pon : ${ponderacioneslist}"
+                                                            th:value="${pon.id_ponderacion}"
+                                                            th:if="${pon.estado != 'X'}" th:text="${pon.ponderacion}">
+                                                        </option>
+                                                    </select>
                                                 </div>
-
-
-                                          
-                                          
-                                          
-
-                                         
                                             </div>
                                             <br>
                                             <div class="text-center">
                                                 <div>
                                                     <button class="btn btn-primary" type="submit"
-                                                    th:text="${edit} ?'Actualizar' :'Registrar'"></button>
-                                                    <button type="reset" class="btn btn-secondary waves-effect m-l-5">
-                                                        Cancelar
+                                                        th:text="${edit} ?'Actualizar' :'Registrar'">
                                                     </button>
                                                 </div>
                                             </div>
                                         </form>
-
                                     </div>
                                 </div>
                             </div>
@@ -133,67 +119,64 @@
                         <!-- FIN INICIO FORMULARIO -->
 
                         <!-- INICIO FORMULARIO -->
-                 
+
                         <div class="row">
                             <div class="col-12">
                                 <div class="card m-b-30">
                                     <div class="card-body">
-        
+
                                         <h4 class="mt-0 header-title">Lista de Criteerios</h4>
-                                    
-        
-                                        <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive "  style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+
+
+                                        <table id="datatable-buttons"
+                                            class="table table-striped table-bordered dt-responsive "
+                                            style="border-collapse: collapse; border-spacing: 0; width: 100%; text-align: center;">
                                             <thead>
-                                            <tr>
-                                                <th>Pregunta</th>
-                                                
-                                                
-                                                <th>Ponderación</th>
-                                                <th>Acciones</th>
-                                                <th>Categoria</th>
-                                                
-                                            </tr>
-                                            </thead>
-        
-        
-                                            <tbody>
-                                           
-                                                <tr th:each="cri : ${criterios}" th:if="${cri.estado != 'X'}">
-                                                    <td th:text="${cri.preguntas.pregunta}"></td>
-                                                   
-                                                    
-                                                    <td th:text="${cri.ponderaciones.ponderacion}"></td>
-                                                        
-                                                    <td>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Categoria</th>
+                                                    <th>Pregunta</th>
+                                                    <th>Ponderación</th>
+                                                    <th>Acciones</th>
 
-                                                        <div style="display: flex; justify-content: center;align-items: center;">
-                                                            <a th:href="${'../../../../editar-criterio/' + cri.id_criterio}" style="font-size: 24px; margin-right: 10px;"><i class="mdi mdi-border-color"></i></a>
-                                                            
-                                                            <a   class="btn" th:attr="onclick=${'MandarURL('+cri.id_criterio+')'}" style="font-size: 28px;">
-                                                                <i class="mdi mdi-close" style="color: red; pointer-events: none;"></i>
-                                                              </a>
-                                                            
 
-                                                          </div>
-                                                    </td>
-                                                    <td th:text="${cri.categoriaCriterio.nombre_cat_criterio}"></td>
                                                 </tr>
-                                            
+                                            </thead>
+
+
+                                            <tbody>
+
+                                                <tr th:each="cri,index : ${criterios}" th:if="${cri.estado != 'X'}">
+                                                    <td th:text="${index.index + 1}"></td>
+                                                    <td th:text="${cri.categoriaCriterio.nombre_cat_criterio}"></td>
+                                                    <td th:text="${cri.preguntas.pregunta}"></td>
+                                                    <td th:text="${cri.ponderaciones.ponderacion}"></td>
+                                                    <td>
+                                                        <div
+                                                            style="display: flex; justify-content: center;align-items: center;">
+                                                            <a th:href="${'../../../../editar-criterio/' + cri.id_criterio}"
+                                                                style="font-size: 24px; margin-right: 10px;"><i
+                                                                    class="mdi mdi-border-color"></i></a>
+
+                                                            <a class="btn"
+                                                                th:attr="onclick=${'MandarURL('+cri.id_criterio+')'}"
+                                                                style="font-size: 28px;">
+                                                                <i class="mdi mdi-close"
+                                                                    style="color: red; pointer-events: none;"></i>
+                                                            </a>
+                                                        </div>
+                                                    </td>
+                                                </tr>
                                             </tbody>
                                         </table>
-        
                                     </div>
                                 </div>
-                            </div> 
+                            </div>
                         </div>
-                  
                         <!-- FIN INICIO FORMULARIO -->
-
                     </div><!-- container fluid -->
-
                 </div>
                 <!-- FIN INICIO CONTENIDO -->
-
             </div>
             <!-- content -->
 

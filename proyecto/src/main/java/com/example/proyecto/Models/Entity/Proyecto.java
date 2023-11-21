@@ -37,6 +37,7 @@ public class Proyecto implements Serializable{
     private String nombre_proyecto;
     private double promedio_final;
     private String nro_stand;
+    private String categoria_proyecto;
 
 
      //Tabla Persona
