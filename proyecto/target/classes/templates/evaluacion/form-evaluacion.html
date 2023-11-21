@@ -2,6 +2,43 @@
 <html lang="en">
 
 <head th:replace="layout/head :: head">
+    <style>
+        .button-container {
+      display: flex;
+      align-items: center;
+    }
+    
+    button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: #0056b3;
+    }
+    
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid #007bff;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 2s linear infinite;
+      margin-left: 10px;
+      display: none; /* Por defecto, ocultar el spinner */
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    </style>
 </head>
 
 
@@ -577,8 +614,10 @@
                                             </table>
 
                                             <br>
-                                            <div class="text-center">
-                                                <div>
+                                            <div class="button-container text-center">
+                                                
+                                                  
+                                                <div id="Dsubmit">
                                                     <button class="btn btn-primary" type="submit"
                                                         th:text="${edit} ?'Actualizar' :'Enviar'"></button>
                                                 </div>
@@ -645,61 +684,63 @@
         }
 
     </script>
-    <script>
-        window.addEventListener('DOMContentLoaded', function() {
-          var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-          var groups = {};
-      
-          checkboxes.forEach(function(checkbox) {
+  <script>
+    $(document).ready(function () {
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        var groups = {};
+
+        checkboxes.forEach(function(checkbox) {
             var group = checkbox.getAttribute('data-group');
-      
+
             if (group) {
-              if (!groups[group]) {
-                groups[group] = [];
-              }
-              groups[group].push(checkbox);
+                if (!groups[group]) {
+                    groups[group] = [];
+                }
+                groups[group].push(checkbox);
             }
-      
+
             checkbox.addEventListener('change', function() {
-              var groupCheckboxes = groups[group];
-              var checkedGroupCheckboxes = groupCheckboxes.filter(function(groupCheckbox) {
-                return groupCheckbox.checked;
-              });
-      
-              if (checkedGroupCheckboxes.length === 1) {
+                var groupCheckboxes = groups[group];
+
                 groupCheckboxes.forEach(function(groupCheckbox) {
-                  if (!groupCheckbox.checked) {
-                    groupCheckbox.disabled = true;
-                  }
+                    if (groupCheckbox !== checkbox) {
+                        groupCheckbox.disabled = checkbox.checked;
+                    }
                 });
-              } else {
-                groupCheckboxes.forEach(function(groupCheckbox) {
-                  groupCheckbox.disabled = false;
-                });
-              }
             });
-          });
-      
-          document.getElementById('myForm').addEventListener('submit', function(event) {
+        });
+
+        $('#myForm').submit(function (event) {
+            var allCheckboxesSelected = true;
+
             for (var group in groups) {
-              var checkedGroupCheckboxes = groups[group].filter(function(groupCheckbox) {
-                return groupCheckbox.checked;
-              });
-      
-              if (checkedGroupCheckboxes.length !== 1) {
+                var checkedGroupCheckboxes = groups[group].filter(function(groupCheckbox) {
+                    return groupCheckbox.checked;
+                });
+
+                if (checkedGroupCheckboxes.length !== 1) {
+                    allCheckboxesSelected = false;
+                    break;
+                }
+            }
+
+            if (!allCheckboxesSelected) {
                 event.preventDefault();
                 swal({
-                title: 'Debe seleccionar una Casilla en cada criterio',
-                type: 'warning',
-                showCancelButton: true,
-                showConfirmButton: false,
-                cancelButtonText: "aceptar",
-            }).then().done();
-              }
+                    title: 'Debe seleccionar una Casilla en cada criterio',
+                    type: 'warning',
+                    showCancelButton: true,
+                    showConfirmButton: false,
+                    cancelButtonText: "aceptar",
+                }).then().done();
+            } else {
+                $('#Dsubmit').html('<br><div class="spinner"></div>');
             }
-          });
         });
-      </script>
+    });
+</script>
+
+    
 
 
 
@@ -781,7 +822,7 @@
             }
         });
     </script>
-
+     
 
 <!--
     <script>
