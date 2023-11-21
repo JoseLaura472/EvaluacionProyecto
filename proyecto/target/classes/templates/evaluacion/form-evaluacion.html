@@ -50,80 +50,7 @@
                             </div>
                             
                         </div>
-                        <!-- end row -->
-
-                        <!-- INICIO FORMULARIO -->
-                        <!--
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="card m-b-30">
-                                    <div class="card-body">
-
-                                        <h1 class="mt-0 header-title" style="font-size: 30px;">Formulario de Registro Proyecto
-                                        </h1>
-                               
-
-                                        <form th:action="${edit} ?@{/ProyectoModF} :@{/ProyectoF}" method="post">
-                                            <input type="hidden" th:field="${proyecto.id_proyecto}">
-                                            <div class="row">
-
-
-                                                <div class="col-md-4">
-                                                    <label class="col-form-label">Titulo Proyecto</label>
-                                                    <input class="form-control" type="text" th:field="${proyecto.nombre_proyecto}"
-                                                        required>
-                                                </div>
-
-                                                <div class="col-md-3">
-                                                    <label class="col-form-label">Docente </label>
-                                                    <select class="form-control js-choice"
-                                                    th:field="${proyecto.docente}" 
-                                                    name="docente">
-                                                    <option value="">Seleccione un Docente</option>
-                                                    <option th:each="doc : ${docentes}" th:value="${doc.id_docente}"
-                                                        th:if="${doc.estado != 'X'}" th:text="${doc.persona.nombres}+' '+${doc.persona.paterno}+' '+${doc.persona.materno}">
-                                                    </option>
-                                                </select>
-            
-                                                </div>
-
-                                                <div class="col-md-5">
-                                                    <label class="col-form-label">Estudiantes </label>
-                                                    <select class="form-control js-choice"
-                                                    multiple="multiple" size="3"
-                                                data-options='{"removeItemButton":true,"placeholder":true}'
-                                                    th:field="${proyecto.estudiante}" 
-                                                    name="id_estudiante"  id="id_estudiante">
-                                                    <option th:each="est : ${estudiantes}"
-                                                    th:value="${est.id_estudiante}" th:if="${est.estado != 'X'}"
-                                                    th:text="${est.persona.nombres}+' '+${est.persona.paterno}+' '+${est.persona.materno}">
-                                                </option>
-                                                </select>
-            
-                                                </div>
-                                          
-                                          
-
-                                         
-                                            </div>
-                                            <br>
-                                            <div class="text-center">
-                                                <div>
-                                                    <button class="btn btn-primary" type="submit"
-                                                    th:text="${edit} ?'Actualizar' :'Registrar'"></button>
-                                                    <button type="reset" class="btn btn-secondary waves-effect m-l-5">
-                                                        Cancelar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </form>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        -->
-                        <!-- FIN INICIO FORMULARIO -->
+                       
 
                         <!-- INICIO FORMULARIO -->
 
@@ -185,25 +112,21 @@
                                                 </tr>
 
                                                 <tr>
-                                                    <td style="border: 1px solid black; padding: 5px;">Nota: S =
-                                                        Satisfactorio; O =
-                                                        Óptimo; E = Excelente</td>
-                                                    <td style="border: 1px solid black;"></td>
-                                                    <td style="border: 1px solid black;"></td>
-                                                    <td style="border: 1px solid black;"></td>
+                                                    <td style="border-top: 1px; font-weight: bold; font-size: larger; padding-left: 380px;"> R=Regular; B=Bien; E=Excelente </td>
+                                                 
                                                 </tr>
 
                                                 <tr>
                                                     <td
                                                         style="border: 1px solid black; background-color: #D3D8E5; padding: 5px;">
-                                                        I. CONTENIDO Y PRESENTACIÓN (30
-                                                        PUNTOS)</td>
+                                                        I. Originalidad y Creatividad (30 PUNTOS)
+                                                    </td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
-                                                        S</td>
+                                                        R</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
-                                                        O</td>
+                                                        B</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
                                                         E</td>
@@ -212,24 +135,21 @@
                                                 <tr>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
-                                                        S = 4 O = 6 E =
-                                                        10</td>
+                                                        R=5; B=8; E=10
+                                                    </td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
-                                                        4</td>
+                                                        5</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
-                                                        6</td>
+                                                        8</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
                                                         10</td>
                                                 </tr>
 
                                                 <tr>
-                                                    <td style="border: 1px solid black; padding: 5px;">1. Innovación (El
-                                                        trabajo introduce
-                                                        novedades, o modificación de algo ya existente con el fin de
-                                                        mejorarlo).</td>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿El proyecto es de impacto y contribuye a la sociedad en general?</td>
                                                     <td width="5%"
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
                                                         <input type="checkbox" name="criterios" id="checkbox1"
@@ -251,10 +171,7 @@
 
                                                 </tr>
                                                 <tr>
-                                                    <td style="border: 1px solid black; padding: 5px;">2. Calidad de
-                                                        presentación (La presentación del trabajo es formal, contiene
-                                                        una adecuada estructuración y formato, respeta fuentes autores y
-                                                        citas bibliográficas).</td>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿La planificación es adecuada para llevar a cabo el proyecto?</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
                                                         <input type="checkbox" id="checkbox4" name="criterios"
@@ -275,8 +192,7 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td style="border: 1px solid black; padding: 5px;">3. Creatividad y
-                                                        organización del Stand.</td>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿EL proyecto contribuye con aporte a la comunidad en beneficio social?</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
                                                         <input type="checkbox" id="checkbox7" name="criterios"
@@ -309,13 +225,13 @@
                                                 <tr>
                                                     <td
                                                         style="border: 1px solid black; background-color: #D3D8E5; padding: 5px;">
-                                                        II. EXPOSICIÓN (36 PUNTOS)</td>
+                                                        II. Impacto y Beneficio social (30 PUNTOS)</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
-                                                        S</td>
+                                                        R</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
-                                                        O</td>
+                                                        B</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
                                                         E</td>
@@ -324,22 +240,20 @@
                                                 <tr>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
-                                                        S = 4 O = 8 E =
-                                                        12</td>
+                                                        R=5; B=8; E=10</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
-                                                        4</td>
+                                                        5</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
                                                         8</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
-                                                        12</td>
+                                                        10</td>
                                                 </tr>
 
                                                 <tr>
-                                                    <td style="border: 1px solid black; padding: 5px;">1. Exponen con
-                                                        seguridad y enmarcados en el tema.</td>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿El proyecto es de impacto y contribuye a la sociedad en general?</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
                                                         <input type="checkbox" id="checkbox10" name="criterios"
@@ -360,8 +274,7 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td style="border: 1px solid black; padding: 5px;">2. Hacen uso de
-                                                        medios de exposición.</td>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿La planificación es adecuada para llevar a cabo el proyecto?</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
                                                         <input type="checkbox" id="checkbox13" name="criterios"
@@ -382,8 +295,7 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td style="border: 1px solid black; padding: 5px;">3. Cumplen con el
-                                                        tiempo establecido de exposición.</td>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿EL proyecto contribuye con aporte a la comunidad en beneficio social?</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
                                                         <input type="checkbox" id="checkbox16" name="criterios"
@@ -413,13 +325,13 @@
                                                 <tr>
                                                     <td
                                                         style="border: 1px solid black; background-color: #D3D8E5; padding: 5px;">
-                                                        III. DEFENSA (34 PUNTOS)</td>
+                                                        III. Metodología (20 PUNTOS)</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
-                                                        S</td>
+                                                        R</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
-                                                        O</td>
+                                                        B</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
                                                         E</td>
@@ -428,23 +340,20 @@
                                                 <tr>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
-                                                        S = 8 O = 12 E
-                                                        = 17</td>
+                                                        R=2; B=3; E=5</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
-                                                        8</td>
+                                                        2</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
-                                                        12</td>
+                                                        3</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
-                                                        17</td>
+                                                        5</td>
                                                 </tr>
 
                                                 <tr>
-                                                    <td style="border: 1px solid black; padding: 5px;">1. Responden a
-                                                        todas las preguntas con precisión y de forma clara,demostrando
-                                                        interés cuando explican.</td>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿Se describe adecuadamente la metodología utilizada en la investigación?</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
                                                         <input type="checkbox" id="checkbox19" name="criterios"
@@ -465,8 +374,7 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td style="border: 1px solid black; padding: 5px;">2. Demuestran que
-                                                        estan preparados y organizados</td>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿hay concordancia entre los objetivos, metas y metodología con el título planteado en el proyecto?</td>
                                                     <td
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
                                                         <input type="checkbox" id="checkbox22" name="criterios"
@@ -486,6 +394,173 @@
                                                             th:field="${evaluacion.criterios}" data-group="grupo8">
                                                     </td>
                                                 </tr>
+                                                <tr>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿el objetivo general responde a la pregunta planteada en el problema?</td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox25" name="criterios"
+                                                            th:value="${criterio25.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo9">
+                                                    </td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox26" name="criterios"
+                                                            th:value="${criterio26.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo9">
+                                                    </td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox27" name="criterios"
+                                                            th:value="${criterio27.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo9">
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿La metodología utilizada es adecuada para su trabajo de investigación?</td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox28" name="criterios"
+                                                            th:value="${criterio28.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo10">
+                                                    </td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox29" name="criterios"
+                                                            th:value="${criterio29.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo10">
+                                                    </td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox30" name="criterios"
+                                                            th:value="${criterio30.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo10">
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td style="color: white;">d</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td></td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td
+                                                        style="border: 1px solid black; background-color: #D3D8E5; padding: 5px;">
+                                                        IV. Exposición y Presentación (20 PUNTOS)</td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
+                                                        R</td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
+                                                        B</td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
+                                                        E</td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        R=2; B=3; E=5</td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        2</td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        3</td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        5</td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿El proyecto se presenta de manera clara y comprensible para un público no especializado?</td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox31" name="criterios"
+                                                            th:value="${criterio31.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo11">
+                                                    </td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox32" name="criterios"
+                                                            th:value="${criterio32.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo11">
+                                                    </td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox33" name="criterios"
+                                                            th:value="${criterio33.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo11">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿El stand se ve reflejado de acuerdo al tema investigación?</td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox34" name="criterios"
+                                                            th:value="${criterio34.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo12">
+                                                    </td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox35" name="criterios"
+                                                            th:value="${criterio35.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo12">
+                                                    </td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox36" name="criterios"
+                                                            th:value="${criterio36.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo12">
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿La Exposición cumple con el tiempo establecido en la convocatoria?</td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox37" name="criterios"
+                                                            th:value="${criterio37.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo13">
+                                                    </td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox38" name="criterios"
+                                                            th:value="${criterio38.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo13">
+                                                    </td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox39" name="criterios"
+                                                            th:value="${criterio39.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo13">
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td style="border: 1px solid black; padding: 5px;">¿El stand cumple con una creatividad innovadora?</td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox40" name="criterios"
+                                                            th:value="${criterio40.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo14">
+                                                    </td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox41" name="criterios"
+                                                            th:value="${criterio41.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo14">
+                                                    </td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <input type="checkbox" id="checkbox42" name="criterios"
+                                                            th:value="${criterio42.id_criterio}"
+                                                            th:field="${evaluacion.criterios}" data-group="grupo14">
+                                                    </td>
+                                                </tr>
+                                                
 
 
                                                 <tr>
@@ -632,30 +707,52 @@
     <script>
         window.addEventListener('DOMContentLoaded', (event) => {
             const checkboxValues = {
-                checkbox1: 4,
-                checkbox2: 6,
+                checkbox1: 5,
+                checkbox2: 8,
                 checkbox3: 10,
-                checkbox4: 4,
-                checkbox5: 6,
+                checkbox4: 5,
+                checkbox5: 8,
                 checkbox6: 10,
-                checkbox7: 4,
-                checkbox8: 6,
+                checkbox7: 5,
+                checkbox8: 8,
                 checkbox9: 10,
-                checkbox10: 4,
+                
+                checkbox10: 5,
                 checkbox11: 8,
-                checkbox12: 12,
-                checkbox13: 4,
+                checkbox12: 10,
+                checkbox13: 5,
                 checkbox14: 8,
-                checkbox15: 12,
-                checkbox16: 4,
+                checkbox15: 10,
+                checkbox16: 5,
                 checkbox17: 8,
-                checkbox18: 12,
-                checkbox19: 8,
-                checkbox20: 12,
-                checkbox21: 17,
-                checkbox22: 8,
-                checkbox23: 12,
-                checkbox24: 17
+                checkbox18: 10,
+
+                checkbox19: 2,
+                checkbox20: 3,
+                checkbox21: 5,
+                checkbox22: 2,
+                checkbox23: 3,
+                checkbox24: 5,
+                checkbox25: 2,
+                checkbox26: 3,
+                checkbox27: 5,
+                checkbox28: 2,
+                checkbox29: 3,
+                checkbox30: 5,
+
+                checkbox31: 2,
+                checkbox32: 3,
+                checkbox33: 5,
+                checkbox34: 2,
+                checkbox35: 3,
+                checkbox36: 5,
+                checkbox37: 2,
+                checkbox38: 3,
+                checkbox39: 5,
+                checkbox40: 2,
+                checkbox41: 3,
+                checkbox42: 5,
+                
             }; // Definir los valores de los checkboxes específicos aquí
 
             const checkboxes = document.querySelectorAll('input[type="checkbox"]');

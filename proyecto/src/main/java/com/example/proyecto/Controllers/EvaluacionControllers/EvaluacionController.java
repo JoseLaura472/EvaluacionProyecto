@@ -112,6 +112,26 @@ public class EvaluacionController {
         Long id_criterio22 = (long) 22;
         Long id_criterio23 = (long) 23;
         Long id_criterio24 = (long) 24;
+        Long id_criterio25 = (long) 25;
+        Long id_criterio26 = (long) 26;
+        Long id_criterio27 = (long) 27;
+        Long id_criterio28 = (long) 28;
+        Long id_criterio29 = (long) 29;
+        Long id_criterio30 = (long) 30;
+        Long id_criterio31 = (long) 31;
+        Long id_criterio32 = (long) 32;
+        Long id_criterio33 = (long) 33;
+        Long id_criterio34 = (long) 34;
+        Long id_criterio35 = (long) 35;
+        Long id_criterio36 = (long) 36;
+        Long id_criterio37 = (long) 37;
+        Long id_criterio38 = (long) 38;
+        Long id_criterio39 = (long) 39;
+        Long id_criterio40 = (long) 40;
+        Long id_criterio41 = (long) 41;
+        Long id_criterio42 = (long) 42;
+        
+        
         model.addAttribute("proyecto", proyecto);
         model.addAttribute("evaluacion", evaluacion);
 
@@ -139,6 +159,24 @@ public class EvaluacionController {
         model.addAttribute("criterio22", criterioService.findOne(id_criterio22));
         model.addAttribute("criterio23", criterioService.findOne(id_criterio23));
         model.addAttribute("criterio24", criterioService.findOne(id_criterio24));
+        model.addAttribute("criterio25", criterioService.findOne(id_criterio25));
+        model.addAttribute("criterio26", criterioService.findOne(id_criterio26));
+        model.addAttribute("criterio27", criterioService.findOne(id_criterio27));
+        model.addAttribute("criterio28", criterioService.findOne(id_criterio28));
+        model.addAttribute("criterio29", criterioService.findOne(id_criterio29));
+        model.addAttribute("criterio30", criterioService.findOne(id_criterio30));
+        model.addAttribute("criterio31", criterioService.findOne(id_criterio31));
+        model.addAttribute("criterio32", criterioService.findOne(id_criterio32));
+        model.addAttribute("criterio33", criterioService.findOne(id_criterio33));
+        model.addAttribute("criterio34", criterioService.findOne(id_criterio34));
+        model.addAttribute("criterio35", criterioService.findOne(id_criterio35));
+        model.addAttribute("criterio36", criterioService.findOne(id_criterio36));
+        model.addAttribute("criterio37", criterioService.findOne(id_criterio37));
+        model.addAttribute("criterio38", criterioService.findOne(id_criterio38));
+        model.addAttribute("criterio39", criterioService.findOne(id_criterio39));
+        model.addAttribute("criterio40", criterioService.findOne(id_criterio40));
+        model.addAttribute("criterio41", criterioService.findOne(id_criterio41));
+        model.addAttribute("criterio42", criterioService.findOne(id_criterio42));
 
         return "evaluacion/form-evaluacion";
 
@@ -176,9 +214,7 @@ public class EvaluacionController {
         double parteDecimal = (promedioActual - Math.floor(promedioActual)) * 100; // Multiplicamos por 100 para
                                                                                    // trabajar con los dos decimales
 
-        if (parteDecimal >= 50.0) {
-            promedioActual = Math.ceil(promedioActual);
-        }
+       
 
         if (promedioActual > 100.0) {
             promedioActual = 100.0;
