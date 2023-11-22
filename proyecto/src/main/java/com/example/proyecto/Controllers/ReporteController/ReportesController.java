@@ -77,15 +77,7 @@ public class ReportesController {
         c2.sort(Comparator.comparing(criterio -> criterio.getPreguntas().getId_pregunta()));
         c3.sort(Comparator.comparing(criterio -> criterio.getPreguntas().getId_pregunta()));
 
-        for (Criterio cr1 : c1) {
-            System.out.println("jurado jose "+cr1.getPreguntas().getPregunta()+" "+cr1.getPonderaciones().getPonderacion());    
-        }
-        for (Criterio cr1 : c2) {
-            System.out.println("jurado jurado "+cr1.getPreguntas().getPregunta()+" "+cr1.getPonderaciones().getPonderacion());
-        }
-        for (Criterio cr1 : c3) {
-            System.out.println("jurado jurado 2 "+cr1.getPreguntas().getPregunta()+" "+cr1.getPonderaciones().getPonderacion());
-        }
+        
 
         model.addAttribute("criterio1", c1);
         model.addAttribute("criterio2", c2);
