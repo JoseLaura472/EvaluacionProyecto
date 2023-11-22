@@ -30,4 +30,13 @@ public interface IProyectoDao extends CrudRepository<Proyecto, Long>{
 
     @Query(value = "SELECT * FROM proyecto as p ORDER BY p.promedio_final DESC", nativeQuery = true)
     List<Proyecto> proyectosRanking();
+
+    @Query(value = "SELECT * FROM proyecto as p WHERE p.categoria_proyecto='INNOVACIÓN TECNOLÓGICA EN LA AMAZONIA' AND p.estado != 'X' ORDER BY p.promedio_final DESC", nativeQuery = true)
+    List<Proyecto> proyectosRankingTecnologia();
+
+    @Query(value = "SELECT * FROM proyecto as p WHERE p.categoria_proyecto='INNOVACIÓN Y EMPRENDIMIENTO' AND p.estado != 'X' ORDER BY p.promedio_final DESC", nativeQuery = true)
+    List<Proyecto> proyectosRankingEmprendimiento();
+
+    @Query(value = "SELECT * FROM proyecto as p WHERE p.categoria_proyecto='SALUD PUBLICA, DERECHOS HUMANOS Y JUSTICIA SOCIAL' AND p.estado != 'X' ORDER BY p.promedio_final DESC", nativeQuery = true)
+    List<Proyecto> proyectosRankingSalud();
 }

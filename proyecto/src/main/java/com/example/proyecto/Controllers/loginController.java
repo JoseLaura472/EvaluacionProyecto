@@ -86,6 +86,60 @@ public class loginController {
 		}
 	}
 
+    @RequestMapping(value = "/Tecnologia", method = RequestMethod.GET) // Pagina principal
+	public String InicioA(HttpServletRequest request, Model model) {
+		if (request.getSession().getAttribute("usuario") != null) {
+
+            HttpSession sessionAdministrador = request.getSession();
+            Usuario usuario = (Usuario) sessionAdministrador.getAttribute("usuario");
+            
+            List<Proyecto> Ranking = proyectoService.proyectosRankingTecnologia();
+
+            model.addAttribute("RankingT", Ranking);
+            model.addAttribute("usuario", usuario);
+
+			return "ranking/ranking-tecnologia";
+		} else {
+			return "redirect:LoginR";
+		}
+	}
+
+    @RequestMapping(value = "/Empredimiento", method = RequestMethod.GET) // Pagina principal
+	public String InicioB(HttpServletRequest request, Model model) {
+		if (request.getSession().getAttribute("usuario") != null) {
+
+            HttpSession sessionAdministrador = request.getSession();
+            Usuario usuario = (Usuario) sessionAdministrador.getAttribute("usuario");
+            
+            List<Proyecto> Ranking = proyectoService.proyectosRankingEmprendimiento();
+
+            model.addAttribute("RankingE", Ranking);
+            model.addAttribute("usuario", usuario);
+
+			return "ranking/ranking-emprendimiento";
+		} else {
+			return "redirect:LoginR";
+		}
+	}
+
+    @RequestMapping(value = "/Salud", method = RequestMethod.GET) // Pagina principal
+	public String InicioC(HttpServletRequest request, Model model) {
+		if (request.getSession().getAttribute("usuario") != null) {
+
+            HttpSession sessionAdministrador = request.getSession();
+            Usuario usuario = (Usuario) sessionAdministrador.getAttribute("usuario");
+            
+            List<Proyecto> Ranking = proyectoService.proyectosRankingSalud();
+
+            model.addAttribute("RankingS", Ranking);
+            model.addAttribute("usuario", usuario);
+
+			return "ranking/ranking-salud";
+		} else {
+			return "redirect:LoginR";
+		}
+	}
+
     // Funcion de cerrar sesion de administrador
     @RequestMapping("/cerrar_sesionAdm")
     public String cerrarSesion2(HttpServletRequest request, RedirectAttributes flash) {

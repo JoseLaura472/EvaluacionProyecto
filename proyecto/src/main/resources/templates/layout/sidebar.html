@@ -7,7 +7,8 @@
     <div class="left-side-logo d-block d-lg-none">
         <div class="text-center">
 
-            <a href="index.html" class="logo"><img src="../../../../assets/images/logo-dark.png" height="20" alt="logo"></a>
+            <a href="index.html" class="logo"><img src="../../../../assets/images/logo-dark.png" height="20"
+                    alt="logo"></a>
         </div>
     </div>
 
@@ -15,7 +16,7 @@
 
         <div id="sidebar-menu">
             <ul>
-          
+
                 <!--
                 <li class="has_sub">
                     <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-briefcase"></i>
@@ -64,9 +65,9 @@
                         <li><a href="/DocenteR">Docentes</a></li>
                         <li><a href="/JuradoR">Jurados</a></li>
                         <li><a href="/EstudianteR">Estudiantes</a></li>
-          
-          
-                     
+
+
+
                     </ul>
                 </li>
                 <!--
@@ -86,53 +87,63 @@
                     </ul>
                 </li>
                 -->
-              
-                <li >
-                    <a href="/UsuarioR" class="waves-effect"  th:if="${session.usuario.estado == 'A'}">
+
+                <li>
+                    <a href="/UsuarioR" class="waves-effect" th:if="${session.usuario.estado == 'A'}">
                         <i class="dripicons-user"></i>
                         <span>Usuarios</span>
                     </a>
                 </li>
-         
 
-                <li  th:if="${session.usuario.estado == 'A'}">
+
+                <li th:if="${session.usuario.estado == 'A'}">
                     <a href="/CriterioR" class="waves-effect">
                         <i class="dripicons-user"></i>
                         <span>Criterios</span>
                     </a>
                 </li>
-                <li class="has_sub"  th:if="${session.usuario.estado == 'A'}">
+                <li class="has_sub" th:if="${session.usuario.estado == 'A'}">
                     <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-user"></i>
                         <span> Proyectos </span> <span class="menu-arrow float-right"><i
                                 class="mdi mdi-chevron-right"></i></span></a>
                     <ul class="list-unstyled">
                         <li><a href="/ProyectoR">Proyectos</a></li>
                         <li><a href="/ProyectoE">Proyectos Evaluados</a></li>
-              
-          
-          
-                     
+
+
+
+
                     </ul>
                 </li>
-                <li >
+                <li>
                     <a href="/ProyectosEvaluacionR" class="waves-effect">
                         <i class="dripicons-user"></i>
                         <span>Evaluación</span>
                     </a>
                 </li>
-                <li >
+                <li class="has_sub" th:if="${session.usuario.estado == 'A'}">
+                    <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-user"></i>
+                        <span> Ranking </span> <span class="menu-arrow float-right"><i
+                                class="mdi mdi-chevron-right"></i></span></a>
+                    <ul class="list-unstyled">
+                        <li><a href="/Tecnologia">INNOVACIÓN TECNOLÓGICA EN LA AMAZONIA</a></li>
+                        <li><a href="/Empredimiento">INNOVACIÓN Y EMPRENDIMIENTO</a></li>
+                        <li><a href="/Salud">SALUD PUBLICA, DERECHOS HUMANOS Y JUSTICIA SOCIAL</a></li>
+                    </ul>
+                </li>
+                <li>
                     <a href="/FormReportes" class="waves-effect" th:if="${session.usuario.estado == 'A'}">
                         <i class="dripicons-briefcase"></i>
                         <span>Reportes</span>
                     </a>
                 </li>
-           
-
-         
 
 
 
-                
+
+
+
+
 
             </ul>
         </div>

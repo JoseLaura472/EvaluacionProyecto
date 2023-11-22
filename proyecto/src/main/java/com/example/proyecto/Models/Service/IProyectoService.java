@@ -28,4 +28,10 @@ public interface IProyectoService {
 
     List<Proyecto> proyectosRanking();
 
+    List<Proyecto> proyectosRankingTecnologia();
+
+    List<Proyecto> proyectosRankingEmprendimiento();
+
+    List<Proyecto> proyectosRankingSalud();
+
 }
