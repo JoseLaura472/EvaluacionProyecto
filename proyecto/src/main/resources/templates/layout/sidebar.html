@@ -121,7 +121,7 @@
                     </a>
                 </li>
                 <li >
-                    <a href="/FormReportes" class="waves-effect">
+                    <a href="/FormReportes" class="waves-effect" th:if="${session.usuario.estado == 'A'}">
                         <i class="dripicons-briefcase"></i>
                         <span>Reportes</span>
                     </a>

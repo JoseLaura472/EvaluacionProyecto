@@ -222,7 +222,7 @@ public class EvaluacionController {
 
         DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
         symbols.setDecimalSeparator('.');
-        DecimalFormat decimalFormat = new DecimalFormat("#0.000", symbols);
+        DecimalFormat decimalFormat = new DecimalFormat("#0.00", symbols);
         promedioActual = Double.parseDouble(decimalFormat.format(promedioActual));
         proyecto.setPromedio_final(promedioActual);
         proyecto.setEstado("A");
