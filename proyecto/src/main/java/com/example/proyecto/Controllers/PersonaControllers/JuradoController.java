@@ -9,9 +9,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.proyecto.Models.Entity.Jurado;
+import com.example.proyecto.Models.Entity.Persona;
 import com.example.proyecto.Models.Service.IJuradoService;
 import com.example.proyecto.Models.Service.IPersonaService;
 
@@ -41,10 +43,15 @@ public class JuradoController {
 	}
 
      @RequestMapping(value = "/JuradoF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
-	public String JuradoF(@Validated Jurado jurado, RedirectAttributes redirectAttrs) { // validar los datos capturados (1)
+	public String JuradoF(@Validated Jurado jurado,@RequestParam(value = "persona")Long id_persona, RedirectAttributes redirectAttrs) { // validar los datos capturados (1)
+		Persona persona = personaService.findOne(id_persona);
 
+		jurado.setPersona(persona);
 		jurado.setEstado("A");
 		juradoService.save(jurado);
+
+		persona.setEstado("E");
+		personaService.save(persona);
 		redirectAttrs
 				.addFlashAttribute("mensaje", "Registro Exitoso del País")
 				.addFlashAttribute("clase", "success alert-dismissible fade show");

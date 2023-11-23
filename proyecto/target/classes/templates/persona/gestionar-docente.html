@@ -68,11 +68,11 @@
                                                 <div class="col-md-5">
                                                     <label class="col-form-label">Persona </label>
                                                     <select class="form-control js-choice"
-                                                    th:field="${docente.persona}" 
+                                                    
                                                     name="persona">
                                                     <option value="">Seleccione una persona</option>
                                                     <option th:each="per : ${personas}" th:value="${per.id_persona}"
-                                                        th:if="${per.estado != 'X'}" th:text="${per.nombres}+' '+${per.paterno}+' '+${per.materno}">
+                                                        th:if="${per.estado != 'E'}" th:text="${per.nombres}+' '+${per.paterno}+' '+${per.materno}">
                                                     </option>
                                                 </select>
             
