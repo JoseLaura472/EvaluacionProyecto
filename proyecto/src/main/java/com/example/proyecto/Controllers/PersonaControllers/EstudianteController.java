@@ -9,10 +9,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.proyecto.Models.Entity.Docente;
 import com.example.proyecto.Models.Entity.Estudiante;
+import com.example.proyecto.Models.Entity.Persona;
 import com.example.proyecto.Models.Service.IEstudianteService;
 import com.example.proyecto.Models.Service.IPersonaService;
 
@@ -44,10 +46,14 @@ public class EstudianteController {
 	}
 
      @RequestMapping(value = "/EstudianteF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
-	public String EstudianteF(@Validated Estudiante estudiante, RedirectAttributes redirectAttrs) { // validar los datos capturados (1)
-
+	public String EstudianteF(@Validated Estudiante estudiante,@RequestParam(value = "persona")Long id_persona, RedirectAttributes redirectAttrs) { // validar los datos capturados (1)
+		Persona persona = personaService.findOne(id_persona);
+		estudiante.setPersona(persona);
 		estudiante.setEstado("A");
 		estudianteService.save(estudiante);
+
+		persona.setEstado("E");
+		personaService.save(persona);
 		redirectAttrs
 				.addFlashAttribute("mensaje", "Registro Exitoso del País")
 				.addFlashAttribute("clase", "success alert-dismissible fade show");
