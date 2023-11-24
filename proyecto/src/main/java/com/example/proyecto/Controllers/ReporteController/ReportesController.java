@@ -86,7 +86,9 @@ public class ReportesController {
         model.addAttribute("ev", evaluacionesList);
         model.addAttribute("proyecto", proyecto);
         model.addAttribute("cat", categoriaCriterioService.findAll());
-
+        if (evaluacionesList.size() == 2) {
+        return "reportes/print2";   
+        }
         return "reportes/print";
     }
 }
