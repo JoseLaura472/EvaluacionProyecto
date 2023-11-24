@@ -183,7 +183,7 @@
                                             style="border-collapse: collapse; border-spacing: 0; width: 100%; text-align: center;">
                                             <thead>
                                                 <tr>
-                                                    <th>#</th>
+                                                    <th>Número de Stan</th>
                                                     <th>Programa</th>
                                                     <th>Categoria</th>
                                                     <th>Proyecto</th>
@@ -195,7 +195,7 @@
                                             <tbody>
 
                                                 <tr th:each="por,index : ${proyectos}" th:if="${por.estado != 'X'}">
-                                                    <td th:text="${index.index + 1}"></td>
+                                                    <td th:text="${por.nro_stand}"></td>
                                                     <td th:text="${por.programa.nombre_programa}"></td>
                                                     <td th:text="${por.categoria_proyecto}"></td>
                                                     <td th:text="${por.nombre_proyecto}"></td>
