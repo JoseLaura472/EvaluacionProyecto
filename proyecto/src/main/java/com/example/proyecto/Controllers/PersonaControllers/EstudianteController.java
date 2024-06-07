@@ -39,7 +39,7 @@ public class EstudianteController {
 			model.addAttribute("estudiantes", estudianteService.findAll());
             model.addAttribute("personas", personaService.findAll());
 
-			return "persona/gestionar-estudiante";
+			return "persona/gestionar-Estudiante";
 		} else {
 			return "redirect:LoginR";
 		}
