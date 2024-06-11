@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.proyecto.Models.Entity.Usuario;
@@ -61,11 +62,10 @@ public class DocenteController {
 			docenteService.save(docente);
 			return ResponseEntity.ok("1");
 		}else{
-			
-			personaService.save(persona);
-			docente.setPersona(persona);
-			docente.setEstado("A");
-			docenteService.save(docente);
+			Persona p = personaService.getPersonaCI(persona.getCi());
+			if (p != null) {
+				System.out.println("ya Existe un Registro Igual");
+			}
 			return ResponseEntity.ok("3");
 		}
 		
@@ -102,19 +102,17 @@ public class DocenteController {
     @RequestMapping(value = "/DocenteModF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
 	public ResponseEntity<String> DocenteModF(@Validated Docente docente, @Validated Persona persona,
 			RedirectAttributes redirectAttrs) { // validar los datos capturados (1)
-
+		
+		persona.setEstado("A");
 		personaService.save(persona);
 		docente.setPersona(persona);
 		docente.setEstado("A");
 		docenteService.save(docente);
-		// redirectAttrs
-		// .addFlashAttribute("mensaje", "Datos del País Actualizados Correctamente")
-		// .addFlashAttribute("clase", "success alert-dismissible fade show");
-
 		return ResponseEntity.ok("2");
 	}
 
     @RequestMapping(value = "/eliminar-docente/{id_docente}")
+	@ResponseBody
 	public void eliminar_usuario(@PathVariable("id_docente") Long id_docente) {
 
 		Docente docente = docenteService.findOne(id_docente);
