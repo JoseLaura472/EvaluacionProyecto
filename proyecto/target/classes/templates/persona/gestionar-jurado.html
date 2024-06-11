@@ -15,149 +15,96 @@
     </div>
 
     <div id="wrapper">
+        <div id="vista">
 
-        <div th:replace="layout/sidebar :: sidebar">
         </div>
-
-        <div class="content-page">
-            <div class="content">
-
-                <div th:replace="layout/topbar :: topbar">
+    </div>
+    <!-- END wrapper -->
+    <div class="modal fade bs-example-modal-lg" id="formJurado" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title mt-0" id="myLargeModalLabel">Formulario de Registro de Personas</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <div class="page-content-wrapper ">
+                <div class="modal-body">
+                    <div id="VentanaForm">
 
-                    <div class="container-fluid">
-
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <div class="float-right page-breadcrumb">
-                                    <ol class="breadcrumb">
-                                        <li class="breadcrumb-item"><a href="#">Drixo</a></li>
-                                        <li class="breadcrumb-item"><a href="#">Forms</a></li>
-                                        <li class="breadcrumb-item active">Form Validation</li>
-                                    </ol>
-                                </div>
-                                <h5 class="page-title">Form Validation</h5>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="card m-b-30">
-                                    <div class="card-body">
-
-                                        <h1 class="mt-0 header-title" style="font-size: 30px;">Formulario Registro Jurado
-                                        </h1>
-                               
-
-                                        <form th:action="${edit} ?@{/JuradoModF} :@{/JuradoF}" method="post">
-                                            <input type="hidden" th:field="${jurado.id_jurado}">
-                                            <div class="row">
-                                                <div class="col-md-5">
-                                                    <label class="col-form-label">Persona </label>
-                                                    <select class="form-control js-choice"
-                                                    th:field="${jurado.persona}" 
-                                                    name="persona">
-                                                    <option value="">Seleccione una persona</option>
-                                                    <option th:each="per : ${personas}" th:value="${per.id_persona}"
-                                                        th:if="${per.estado != 'E'}" th:text="${per.nombres}+' '+${per.paterno}+' '+${per.materno}">
-                                                    </option>
-                                                </select>
-            
-                                                </div>
-                                          
-
-                                         
-                                            </div>
-                                            <br>
-                                            <div class="text-center">
-                                                <div>
-                                                    <button class="btn btn-primary" type="submit"
-                                                    th:text="${edit} ?'Actualizar' :'Registrar'"></button>
-                                                    <button type="reset" class="btn btn-secondary waves-effect m-l-5">
-                                                        Cancelar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </form>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card m-b-30">
-                                    <div class="card-body">
-        
-                                        <h4 class="mt-0 header-title">Lista de Jurados</h4>
-                                    
-        
-                                        <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive "  style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                                            <thead>
-                                            <tr>
-                                                <th>Jurado</th>
-                                      
-                                                <th>Acciones</th>
-                                            </tr>
-                                            </thead>
-        
-        
-                                            <tbody>
-                                           
-                                                <tr th:each="jur : ${jurados}" th:if="${jur.estado != 'X'}">
-                                      
-                                                    <td th:text="${jur.persona.nombres}+' '+ ${jur.persona.paterno} +' '+${jur.persona.materno}"></td>
-                                          
-                                                    <td>
-
-                                                        <div style="display: flex; justify-content: center;align-items: center;">
-                                                            <a th:href="${'../../../../editar-jurado/' + jur.id_jurado}" style="font-size: 24px; margin-right: 10px;"><i class="mdi mdi-border-color"></i></a>
-                                                            
-                                                            <a   class="btn" th:attr="onclick=${'MandarURL('+jur.id_jurado+')'}" style="font-size: 28px;">
-                                                                <i class="mdi mdi-close" style="color: red; pointer-events: none;"></i>
-                                                              </a>
-                                                            
-
-                                                          </div>
-                                                    </td>
-                                                </tr>
-                                            
-                                            </tbody>
-                                        </table>
-        
-                                    </div>
-                                </div>
-                            </div> 
-                        </div>
                     </div>
                 </div>
             </div>
-
-            <footer th:replace="layout/footer :: footer">
-            </footer>
         </div>
-
     </div>
-    <!-- END wrapper -->
-
-    <div th:replace="layout/script :: script">
-    </div>
+   
     <script>
-        function MandarURL(a) {
-            swal({
-                title: 'Eliminar Registro?',
-                type: 'error',
-                showCancelButton: true,
-                showConfirmButton: false,
-                cancelButtonText: "Cancelar",
-                html:
-                    "<a type='button' class='swal2-styled ' style='display: inline-block; background-color: rgb(48, 133, 214); border-left-color: rgb(48, 133, 214); border-right-color: rgb(48, 133, 214); padding: 13px 35px 13px 35px;' data-original-title='' title='' href='../../../../eliminar-jurado/" + a + "'  >" +
-                    "Eliminar" +
-                    "</a>",
-            }).then().done();
+        
+        CargarTabla();
+
+        function NuevoRegistro(){
+            $.ajax({
+                type: 'GET',
+                url: "/nuevo_registroJ",
+                success: function (response) {
+                    $("#formJurado").modal('show');
+                    $("#VentanaForm").html(response);
+                }
+            });
         }
+
+        function CargarTabla(){
+            $.ajax({
+                type: 'GET',
+                url: "/tabla_jurados",
+                success: function (response) {
+                    $("#vista").html(response);
+                }
+            });
+        }
+
+        function EditarRegistro(id){
+            $.ajax({
+                type: 'GET',
+                url: "/editar-jurado/"+id,
+                success: function (response) {
+                    $("#formJurado").modal('show');
+                    $("#VentanaForm").html(response);
+                }
+            });
+        }
+
+        function EliminarRegistro(id, nombre) {
+                Swal.fire({
+                    title: "Atencion!",
+                    text: "¿Estas seguro que desea eliminar el registro: " + nombre + "?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "SI, Eliminar",
+                    cancelButtonText: "Cancelar"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: 'GET',
+                            url: "/eliminar-jurado/" + id,
+                            success: function (response) {
+                                CargarTabla();
+                                Swal.fire({
+                                    title: "Eliminado!!",
+                                    text: "El registro se ha eliminado con éxito.",
+                                    icon: "success"
+                                });
+                            },
+                            error: function (xhr, status, error) {
+                                console.log(error);
+                            }
+                        });
+
+                    }
+                });
+            }
     </script>
 </body>
 

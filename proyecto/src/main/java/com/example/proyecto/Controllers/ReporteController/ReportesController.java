@@ -77,8 +77,6 @@ public class ReportesController {
         c2.sort(Comparator.comparing(criterio -> criterio.getPreguntas().getId_pregunta()));
         c3.sort(Comparator.comparing(criterio -> criterio.getPreguntas().getId_pregunta()));
 
-        
-
         model.addAttribute("criterio1", c1);
         model.addAttribute("criterio2", c2);
         model.addAttribute("criterio3", c3);
