@@ -118,7 +118,11 @@ public class DocenteController {
 		Docente docente = docenteService.findOne(id_docente);
 
 		docente.setEstado("X");
+		Persona persona = docente.getPersona();
 
+		persona.setEstado("X");
+
+		personaService.save(persona);
 		docenteService.save(docente);
 
 	}

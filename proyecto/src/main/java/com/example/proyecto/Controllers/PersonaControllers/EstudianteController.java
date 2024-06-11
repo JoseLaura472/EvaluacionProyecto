@@ -111,6 +111,11 @@ public class EstudianteController {
 		Estudiante estudiante = estudianteService.findOne(id_estudiante);
 
 		estudiante.setEstado("X");
+		Persona persona = estudiante.getPersona();
+
+		persona.setEstado("X");
+
+		personaService.save(persona);
 
 		estudianteService.save(estudiante);
 

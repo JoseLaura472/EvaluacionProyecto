@@ -108,6 +108,11 @@ public class JuradoController {
 		Jurado jurado = juradoService.findOne(id_jurado);
 
 		jurado.setEstado("X");
+		Persona persona = jurado.getPersona();
+
+		persona.setEstado("X");
+
+		personaService.save(persona);
 
 		juradoService.save(jurado);
 
