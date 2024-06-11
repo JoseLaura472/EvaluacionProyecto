@@ -108,36 +108,6 @@
                     }
                 });
             }
-          
-        function MandarURL(a) {
-            swal({
-                title: 'Eliminar Registro?',
-                type: 'warning',
-                showCancelButton: true,
-                confirmButtonText: "SI, Eliminar",
-                cancelButtonText: "Cancelar",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        type: 'GET',
-                        url: "/eliminar-docente/" + id,
-                        success: function (response) {
-                            CargarTabla();
-                            Swal.fire({
-                                title: "Eliminado!!",
-                                text: "El registro se ha eliminado con éxito.",
-                                icon: "success"
-                            });
-                        },
-                        error: function (xhr, status, error) {
-                            console.log(error);
-                        }
-                    });
-
-                }
-            });
-        }
-        
     </script>
 </body>
 

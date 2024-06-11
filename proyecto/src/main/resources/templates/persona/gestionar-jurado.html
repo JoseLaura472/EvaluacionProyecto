@@ -14,26 +14,16 @@
         </div>
     </div>
 
-    <!-- Begin page -->
     <div id="wrapper">
 
-        <!-- ========== Left Sidebar Start ========== -->
         <div th:replace="layout/sidebar :: sidebar">
         </div>
-        <!-- Left Sidebar End -->
-
-        <!-- Start right Content here -->
 
         <div class="content-page">
-            <!-- Start content -->
             <div class="content">
 
-                <!-- Top Bar Start -->
                 <div th:replace="layout/topbar :: topbar">
                 </div>
-                <!-- Top Bar End -->
-
-                <!-- INICIO CONTENIDO -->
                 <div class="page-content-wrapper ">
 
                     <div class="container-fluid">
@@ -50,9 +40,7 @@
                                 <h5 class="page-title">Form Validation</h5>
                             </div>
                         </div>
-                        <!-- end row -->
 
-                        <!-- INICIO FORMULARIO -->
                         <div class="row">
                             <div class="col-lg-12">
                                 <div class="card m-b-30">
@@ -97,9 +85,7 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- FIN INICIO FORMULARIO -->
 
-                        <!-- INICIO FORMULARIO -->
                         <div class="row">
                             <div class="col-12">
                                 <div class="card m-b-30">
@@ -143,23 +129,15 @@
         
                                     </div>
                                 </div>
-                            </div> <!-- end col -->
+                            </div> 
                         </div>
-                        <!-- FIN INICIO FORMULARIO -->
-
-                    </div><!-- container fluid -->
-
+                    </div>
                 </div>
-                <!-- FIN INICIO CONTENIDO -->
-
             </div>
-            <!-- content -->
 
             <footer th:replace="layout/footer :: footer">
             </footer>
-
         </div>
-        <!-- End Right content here -->
 
     </div>
     <!-- END wrapper -->
