@@ -28,8 +28,6 @@ public class EstudianteController {
     private IPersonaService personaService;
 
 
-
-    
       // FUNCION PARA LA VISUALIZACION DE REGISTRO DE MNACIONALIDAD
 	@RequestMapping(value = "/EstudianteR", method = RequestMethod.GET) // Pagina principal
 	public String EstudianteR(HttpServletRequest request, Model model) {

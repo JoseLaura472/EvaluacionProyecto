@@ -1,4 +1,8 @@
-<footer th:fragment="footer" class="footer">
-    © 2018 <b>Drixo</b> <span class="d-none d-sm-inline-block"> - Crafted with <i
-            class="mdi mdi-heart text-danger"></i> by Themesdesign.</span>
+<footer th:fragment="footer" class="footer">© <span id="year"></span>
+    <b>Unidad de Sistemas de Información y Comunicación</b><br><span class="d-none d-sm-inline-block"><b>#UAP
+            Digital</b></span>
+
+    <script>
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
 </footer>
