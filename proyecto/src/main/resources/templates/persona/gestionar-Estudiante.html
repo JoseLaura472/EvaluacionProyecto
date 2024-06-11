@@ -7,179 +7,99 @@
 
 <body class="fixed-left">
 
-    <!-- Loader -->
     <div id="preloader">
         <div id="status">
             <div class="spinner"></div>
         </div>
     </div>
 
-    <!-- Begin page -->
     <div id="wrapper">
-
-        <!-- ========== Left Sidebar Start ========== -->
-        <div th:replace="layout/sidebar :: sidebar">
-        </div>
-        <!-- Left Sidebar End -->
-
-        <!-- Start right Content here -->
-
-        <div class="content-page">
-            <!-- Start content -->
-            <div class="content">
-
-                <!-- Top Bar Start -->
-                <div th:replace="layout/topbar :: topbar">
-                </div>
-                <!-- Top Bar End -->
-
-                <!-- INICIO CONTENIDO -->
-                <div class="page-content-wrapper ">
-
-                    <div class="container-fluid">
-
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <div class="float-right page-breadcrumb">
-                                    <ol class="breadcrumb">
-                                        <li class="breadcrumb-item"><a href="#">Drixo</a></li>
-                                        <li class="breadcrumb-item"><a href="#">Forms</a></li>
-                                        <li class="breadcrumb-item active">Form Validation</li>
-                                    </ol>
-                                </div>
-                                <h5 class="page-title">Form Validation</h5>
-                            </div>
-                        </div>
-                        <!-- end row -->
-
-                        <!-- INICIO FORMULARIO -->
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="card m-b-30">
-                                    <div class="card-body">
-
-                                        <h1 class="mt-0 header-title" style="font-size: 30px;">Formulario Registro Estudiante
-                                        </h1>
-                               
-
-                                        <form th:action="${edit} ?@{/EstudianteModF} :@{/EstudianteF}" method="post">
-                                            <input type="hidden" th:field="${estudiante.id_estudiante}">
-                                            <div class="row">
-                                                <div class="col-md-5">
-                                                    <label class="col-form-label">Persona </label>
-                                                    <select class="form-control js-choice"
-                                                    
-                                                    name="persona">
-                                                    <option value="">Seleccione una persona</option>
-                                                    <option th:each="per : ${personas}" th:value="${per.id_persona}"
-                                                        th:if="${per.estado != 'E'}" th:text="${per.nombres}+' '+${per.paterno}+' '+${per.materno}">
-                                                    </option>
-                                                </select>
-            
-                                                </div>
-                                          
-
-                                         
-                                            </div>
-                                            <br>
-                                            <div class="text-center">
-                                                <div>
-                                                    <button class="btn btn-primary" type="submit"
-                                                    th:text="${edit} ?'Actualizar' :'Registrar'"></button>
-                                                    <button type="reset" class="btn btn-secondary waves-effect m-l-5">
-                                                        Cancelar
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </form>
-
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- FIN INICIO FORMULARIO -->
-
-                        <!-- INICIO FORMULARIO -->
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card m-b-30">
-                                    <div class="card-body">
-        
-                                        <h4 class="mt-0 header-title">Lista de Estudiantes</h4>
-                                    
-        
-                                        <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive "  style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                                            <thead>
-                                            <tr>
-                                                <th>Estudiante</th>
-                                      
-                                                <th>Acciones</th>
-                                            </tr>
-                                            </thead>
-        
-        
-                                            <tbody>
-                                           
-                                                <tr th:each="est : ${estudiantes}" th:if="${est.estado != 'X'}">
-                                      
-                                                    <td th:text="${est.persona.nombres}+' '+ ${est.persona.paterno} +' '+${est.persona.materno}"></td>
-                                          
-                                                    <td>
-
-                                                        <div style="display: flex; justify-content: center;align-items: center;">
-                                                            <a th:href="${'../../../../editar-estudiante/' + est.id_estudiante}" style="font-size: 24px; margin-right: 10px;"><i class="mdi mdi-border-color"></i></a>
-                                                            
-                                                            <a   class="btn" th:attr="onclick=${'MandarURL('+est.id_estudiante+')'}" style="font-size: 28px;">
-                                                                <i class="mdi mdi-close" style="color: red; pointer-events: none;"></i>
-                                                              </a>
-                                                            
-
-                                                          </div>
-                                                    </td>
-                                                </tr>
-                                            
-                                            </tbody>
-                                        </table>
-        
-                                    </div>
-                                </div>
-                            </div> <!-- end col -->
-                        </div>
-                        <!-- FIN INICIO FORMULARIO -->
-
-                    </div><!-- container fluid -->
-
-                </div>
-                <!-- FIN INICIO CONTENIDO -->
-
-            </div>
-            <!-- content -->
-
-            <footer th:replace="layout/footer :: footer">
-            </footer>
+        <div id="vista">
 
         </div>
-        <!-- End Right content here -->
-
     </div>
-    <!-- END wrapper -->
+    <div class="modal fade bs-example-modal-lg" id="formEstudiantes" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title mt-0" id="myLargeModalLabel">Formulario de Registro de Personas</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="VentanaForm">
 
-    <div th:replace="layout/script :: script">
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
     <script>
-        function MandarURL(a) {
-            swal({
-                title: 'Eliminar Registro?',
-                type: 'error',
-                showCancelButton: true,
-                showConfirmButton: false,
-                cancelButtonText: "Cancelar",
-                html:
-                    "<a type='button' class='swal2-styled ' style='display: inline-block; background-color: rgb(48, 133, 214); border-left-color: rgb(48, 133, 214); border-right-color: rgb(48, 133, 214); padding: 13px 35px 13px 35px;' data-original-title='' title='' href='../../../../eliminar-estudiante/" + a + "'  >" +
-                    "Eliminar" +
-                    "</a>",
-            }).then().done();
+        CargarTabla();
+        function NuevoRegistro(){
+            $.ajax({
+                type: 'GET',
+                url: "/nuevo_registroE",
+                success: function (response) {
+                    $("#formEstudiantes").modal('show');
+                    $("#VentanaForm").html(response);
+                }
+            });
         }
+
+        function CargarTabla(){
+            $.ajax({
+                type: 'GET',
+                url: "/tabla_estudiantes",
+                success: function (response) {
+                    $("#vista").html(response);
+                }
+            });
+        }
+
+        function EditarRegistro(id){
+            $.ajax({
+                type: 'GET',
+                url: "/editar-estudiante/"+id,
+                success: function (response) {
+                    $("#formEstudiantes").modal('show');
+                    $("#VentanaForm").html(response);
+                }
+            });
+        }
+
+        function EliminarRegistro(id, nombre) {
+                Swal.fire({
+                    title: "Atencion!",
+                    text: "¿Estas seguro que desea eliminar el registro: " + nombre + "?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "SI, Eliminar",
+                    cancelButtonText: "Cancelar"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            type: 'GET',
+                            url: "/eliminar-estudiante/" + id,
+                            success: function (response) {
+                                CargarTabla();
+                                Swal.fire({
+                                    title: "Eliminado!!",
+                                    text: "El registro se ha eliminado con éxito.",
+                                    icon: "success"
+                                });
+                            },
+                            error: function (xhr, status, error) {
+                                console.log(error);
+                            }
+                        });
+
+                    }
+                });
+            }
     </script>
 </body>
 
