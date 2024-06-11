@@ -69,6 +69,16 @@
                                                         style="text-transform:uppercase;" >
                                                 </div>
                                                 <div class="col-md-3">
+                                                    <label class="col-form-label">Fecha de Nacimiento</label>
+                                                    <input class="form-control" type="date" th:field="${persona.fecNacimiento}"
+                                                        onkeyup="javascript:this.value=this.value.toUpperCase();"
+                                                        style="text-transform:uppercase;" >
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Correo</label>
+                                                    <input class="form-control" type="email" th:field="${persona.email}" >
+                                                </div>
+                                                <div class="col-md-3">
                                                     <label class="col-form-label">Sexo </label>
                                                     <select class="form-control js-choice" th:field="${persona.tipoSexo}">
                                                         <option value="">Seleccione un tipo de sexo</option>
@@ -77,36 +87,16 @@
                                                     </select>
             
                                                 </div>
-
-                                                <div class="col-md-3">
-                                                    <label class="col-form-label">Fecha de Nacimiento</label>
-                                                    <input class="form-control" type="date" th:field="${persona.fecNacimiento}"
-                                                        onkeyup="javascript:this.value=this.value.toUpperCase();"
-                                                        style="text-transform:uppercase;" >
-                                                </div>
-
-                                                <div class="col-md-3">
-                                                    <label class="col-form-label">Correo</label>
-                                                    <input class="form-control" type="email" th:field="${persona.email}" >
-                                                </div>
-                                     
-
+                                                
                                             </div>
-
-                                              
-            
-                                          <br>
-                                                <div class="text-center">
-                                                    <button class="btn btn-primary" type="submit"
-                                                    th:text="${edit} ?'Actualizar' :'Registrar'"></button>
-                                       
-
-                                                </div>
                                             
-                                               
-                                     
+                                            <br>
+                                            <div class="text-center">
+                                                <button class="btn btn-primary" type="submit" th:text="${edit} ?'Actualizar' :'Registrar'"></button>
+                                            
+                                            
+                                            </div>
                                         </form>
-                              
                                         </div>
                                     </div>
                                 </div> <!-- end col -->
