@@ -2,6 +2,8 @@
 <html lang="en">
 
 <head th:replace="layout/head :: head">
+
+    
 </head>
 
 
@@ -131,11 +133,17 @@
 
             if (alertParam === 'true') {
 
-
                 // Mostrar el alert de SweetAlert2 solo si se envió el formulario de registro
-                swal({
+                Swal.fire({
                     icon: 'success',
                     title: 'Proyecto Evaluado Correctamente',
+                    type: 'success',
+
+                });
+            }else{
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'El Proyecto ya ha sido Evaluado',
                     type: 'success',
 
                 });

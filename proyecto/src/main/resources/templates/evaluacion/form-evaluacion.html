@@ -726,9 +726,9 @@
 
             if (!allCheckboxesSelected) {
                 event.preventDefault();
-                swal({
+                Swal.fire({
                     title: 'Debe seleccionar una Casilla en cada criterio',
-                    type: 'warning',
+                    icon: 'warning',
                     showCancelButton: true,
                     showConfirmButton: false,
                     cancelButtonText: "aceptar",
