@@ -12,4 +12,6 @@ public interface ICategoriaCriterioService {
 	public CategoriaCriterio findOne(Long id);
 
 	public void delete(Long id);
+
+    public List<CategoriaCriterio> obtenerPonderacionesPorProyecto(Long id_proyecto);
 }

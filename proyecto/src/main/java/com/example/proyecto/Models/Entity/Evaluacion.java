@@ -36,19 +36,21 @@ public class Evaluacion implements Serializable{
     private String estado;
     private int puntaje_total;
     
-
     //Tabla Jurado
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_jurado")
     private Jurado jurado; 
 
-  
-
     @JsonManagedReference
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "evaluacion_criterio", joinColumns = @JoinColumn(name = "id_evaluacion"), inverseJoinColumns = @JoinColumn(name = "id_criterio"))
     private Set<Criterio> criterios;
+
+    @JsonManagedReference
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "evaluacion_ponderacion", joinColumns = @JoinColumn(name = "id_evaluacion"), inverseJoinColumns = @JoinColumn(name = "id_ponderacion"))
+    private Set<Ponderacion> ponderaciones;
 
     @JsonManagedReference
     @ManyToMany(fetch = FetchType.LAZY)

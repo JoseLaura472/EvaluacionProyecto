@@ -38,5 +38,11 @@ public class PonderacionServiceImpl implements IPonderacionService{
         // TODO Auto-generated method stub
         ponderacionDao.deleteById(id);
     }
+
+    @Override
+    public List<Ponderacion> obtenerPonderacionesPorProyecto(Long id_proyecto) {
+        // TODO Auto-generated method stub
+        return ponderacionDao.obtenerPonderacionesPorProyecto(id_proyecto);
+    }
     
 }

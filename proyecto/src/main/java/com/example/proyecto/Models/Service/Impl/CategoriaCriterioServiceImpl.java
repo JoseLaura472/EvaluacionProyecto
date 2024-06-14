@@ -38,4 +38,10 @@ public class CategoriaCriterioServiceImpl implements ICategoriaCriterioService {
         categoriaCriterioDao.deleteById(id);
     }
 
+    @Override
+    public List<CategoriaCriterio> obtenerPonderacionesPorProyecto(Long id_proyecto) {
+        
+        return categoriaCriterioDao.obtenerPonderacionesPorProyecto(id_proyecto);
+    }
+
 }

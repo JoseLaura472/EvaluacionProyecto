@@ -12,4 +12,6 @@ public interface IPonderacionService {
 	public Ponderacion findOne(Long id);
 
 	public void delete(Long id);
+    
+    public List<Ponderacion> obtenerPonderacionesPorProyecto(Long id_proyecto);
 }

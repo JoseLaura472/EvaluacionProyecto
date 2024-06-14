@@ -21,4 +21,6 @@ public interface IEvaluacionService {
     public  List<Evaluacion>  juradoEvaluacion(Long id_jurado);
 
     List<Evaluacion> findByProyectoId(@Param("proyectoId") Long proyectoId);
+
+    public List<Evaluacion> obtenerNotasFinales(Long id_proyecto);
 }

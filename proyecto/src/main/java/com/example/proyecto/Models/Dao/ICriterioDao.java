@@ -6,4 +6,5 @@ import com.example.proyecto.Models.Entity.Criterio;
 
 public interface ICriterioDao extends CrudRepository<Criterio, Long>{
     
+    
 }

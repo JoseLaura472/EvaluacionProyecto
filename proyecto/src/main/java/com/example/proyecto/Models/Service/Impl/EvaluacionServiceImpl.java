@@ -48,5 +48,11 @@ public class EvaluacionServiceImpl implements IEvaluacionService {
     public List<Evaluacion> findByProyectoId(Long proyectoId) {
            return (List<Evaluacion>) evaluacionDao.findByProyectoId(proyectoId);
     }
+
+    @Override
+    public List<Evaluacion> obtenerNotasFinales(Long id_proyecto) {
+        // TODO Auto-generated method stub
+        return evaluacionDao.obtenerNotasFinales(id_proyecto);
+    }
     
 }

@@ -140,13 +140,14 @@
                     type: 'success',
 
                 });
-            }else{
+            }else if(alertParam === 'false'){
                 Swal.fire({
                     icon: 'warning',
                     title: 'El Proyecto ya ha sido Evaluado',
                     type: 'success',
-
                 });
+            }else{
+                
             }
         });
     </script>

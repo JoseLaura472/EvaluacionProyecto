@@ -31,4 +31,10 @@ public interface IEvaluacionDao extends CrudRepository<Evaluacion, Long>{
                "LEFT JOIN jurado j ON j.id_jurado = e.id_jurado " +
                "WHERE p.id_proyecto = ?1 AND j.id_jurado = ?2", nativeQuery = true)
     List<Evaluacion> validacionEvaluacionJurado(Long id_proyecto, Long id_jurado);
+
+    @Query(value = "SELECT e.* FROM evaluacion e \n" + //
+                "LEFT JOIN evaluacion_proyecto ep ON ep.id_evaluacion = e.id_evaluacion \n" + //
+                "LEFT JOIN proyecto p ON p.id_proyecto = ep.id_proyecto \n" + //
+                "WHERE p.id_proyecto =?1",nativeQuery = true)
+    public List<Evaluacion> obtenerNotasFinales(Long id_proyecto);
 }

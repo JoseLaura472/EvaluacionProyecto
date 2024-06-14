@@ -66,7 +66,6 @@ public class Proyecto implements Serializable{
   @ManyToMany(mappedBy = "proyectos")
   private Set<Evaluacion> evaluacion;
 
-
    @Transient
     private MultipartFile file; 
     
