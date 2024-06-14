@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.proyecto.Models.Dao.IDocenteDao;
 import com.example.proyecto.Models.Entity.Docente;
-
+import com.example.proyecto.Models.Entity.Estudiante;
 import com.example.proyecto.Models.Service.IDocenteService;
 
 @Service
@@ -35,6 +35,14 @@ public class DocenteServiceImpl implements IDocenteService {
     public void delete(Long id) {
         docenteDao.deleteById(id);
     }
+
+    @Override
+    public List<Docente> listaDocentes(String estado) {
+        // TODO Auto-generated method stub
+        return docenteDao.listaDocentes(estado);
+    }
+
+    
 
 
     

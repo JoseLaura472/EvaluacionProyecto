@@ -147,7 +147,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr th:each="doc, num : ${docentes}" th:if="${doc.estado != 'X'}">
+                                            <tr th:each="doc, num : ${docentes}" >
                                                 <td th:text="${num.index + 1}"></td>
                                                 <td
                                                     th:text="${doc.persona.nombres}+' '+ ${doc.persona.paterno} +' '+${doc.persona.materno}">
@@ -515,7 +515,7 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr th:each="est, num : ${estudiantes}" th:if="${est.estado != 'X'}">
+                                            <tr th:each="est, num : ${estudiantes}" >
                                                 <td
                                                     th:text="${num.index + 1}">
                                                 </td>

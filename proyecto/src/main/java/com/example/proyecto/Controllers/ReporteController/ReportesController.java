@@ -55,16 +55,11 @@ public class ReportesController {
 
     // @GetMapping("/ReporteProyecoctoOne")
     // public String reporteProyecoctoOne(@RequestParam(value = "id_proyecto")Long id_proyecto, Model model){
-
-
     //     Proyecto proyecto = proyectoService.findOne(id_proyecto); 
-        
     //     //List<Evaluacion> evaluaciones = proyecto.getEvaluacion();
     //     Set<Evaluacion> evaluacionesSet = proyecto.getEvaluacion();
     //     List<Evaluacion> evaluacionesList = new ArrayList<>(evaluacionesSet);
     //     evaluacionesList.sort(Comparator.comparing(evaluacion -> evaluacion.getId_evaluacion()));
-
-        
     //     List<Criterio> c1 = new ArrayList<>();
     //     List<Criterio> c2 = new ArrayList<>();
     //     List<Criterio> c3 = new ArrayList<>();
@@ -93,7 +88,6 @@ public class ReportesController {
     //     model.addAttribute("criterio1", c1);
     //     model.addAttribute("criterio2", c2);
     //     model.addAttribute("criterio3", c3);
-
     //     model.addAttribute("ev", evaluacionesList);
     //     model.addAttribute("proyecto", proyecto);
     //     model.addAttribute("cat", categoriaCriterioService.findAll());

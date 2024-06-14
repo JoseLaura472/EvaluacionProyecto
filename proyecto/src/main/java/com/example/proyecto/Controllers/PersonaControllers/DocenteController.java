@@ -43,7 +43,6 @@ public class DocenteController {
 	public String Docente(HttpServletRequest request, Model model) {
 		if (request.getSession().getAttribute("usuario") != null) {
 
-			model.addAttribute("docentes", docenteService.findAll());
 
 			return "persona/gestionar-docente";
 		} else {
@@ -82,7 +81,7 @@ public class DocenteController {
 	@GetMapping("/tabla_docentes")
 	public String tabla_docentes(Model model) {
 
-		model.addAttribute("docentes", docenteService.findAll());
+		model.addAttribute("docentes", docenteService.listaDocentes("A"));
 
 		return "persona/contentPersona :: Tabla_Docentes";
 	}

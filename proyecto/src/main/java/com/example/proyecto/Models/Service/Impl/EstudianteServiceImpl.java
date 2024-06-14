@@ -3,6 +3,9 @@ package com.example.proyecto.Models.Service.Impl;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.proyecto.Models.Dao.IEstudianteDao;
@@ -37,5 +40,25 @@ public class EstudianteServiceImpl implements IEstudianteService {
     public void delete(Long id) {
         estudianteDao.deleteById(id);
     }
+
+    @Override
+    public Page<Estudiante> findByEstadoWithPersona(String estado, Pageable pageable) {
+        List<Estudiante> estudiantes = estudianteDao.findByEstadoWithPersona(estado, pageable);
+        long total = estudianteDao.countByEstado(estado);
+        return new PageImpl<>(estudiantes, pageable, total);
+    }
+
+    @Override
+    public long countByEstado(String estado) {
+        return estudianteDao.countByEstado(estado);
+    }
+
+    @Override
+    public List<Estudiante> listaEstudiantes(String estado) {
+        // TODO Auto-generated method stub
+        return estudianteDao.listaEstudiantes(estado);
+    }
+
+   
     
 }

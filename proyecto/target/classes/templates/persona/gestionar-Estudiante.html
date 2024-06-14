@@ -36,7 +36,8 @@
         </div>
     </div>
     <script>
-        CargarTabla();
+        CargarTabla(0); // Cargar la primera página
+
         function NuevoRegistro(){
             $.ajax({
                 type: 'GET',
@@ -48,10 +49,10 @@
             });
         }
 
-        function CargarTabla(){
+        function CargarTabla(page){
             $.ajax({
                 type: 'GET',
-                url: "/tabla_estudiantes",
+                url: "/tabla_estudiantes?page=" + page,
                 success: function (response) {
                     $("#vista").html(response);
                 }

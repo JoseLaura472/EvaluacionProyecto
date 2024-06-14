@@ -34,7 +34,6 @@ public class JuradoController {
 	public String Jurado(HttpServletRequest request, Model model) {
 		if (request.getSession().getAttribute("usuario") != null) {
 
-			model.addAttribute("jurados", juradoService.findAll());
 
 			return "persona/gestionar-jurado";
 		} else {

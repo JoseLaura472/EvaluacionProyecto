@@ -3,12 +3,17 @@ package com.example.proyecto.Controllers.PersonaControllers;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -35,7 +40,6 @@ public class EstudianteController {
 	public String EstudianteR(HttpServletRequest request, Model model) {
 		if (request.getSession().getAttribute("usuario") != null) {
 
-			model.addAttribute("estudiantes", estudianteService.findAll());
 
 			return "persona/gestionar-Estudiante";
 		} else {
@@ -75,10 +79,25 @@ public class EstudianteController {
 	@GetMapping("/tabla_estudiantes")
 	public String tabla_estudiantes(Model model) {
 
-		model.addAttribute("estudiantes", estudianteService.findAll());
+		model.addAttribute("estudiantes", estudianteService.listaEstudiantes("A"));
 
 		return "persona/contentPersona :: Tabla_Estudiantes";
 	}
+
+	// @GetMapping("/tabla_estudiantes")
+    // public String tabla_estudiantes(@RequestParam(defaultValue = "0") int page,
+    //                                 @RequestParam(defaultValue = "10") int size,
+    //                                 @RequestParam(defaultValue = "A") String estado,
+    //                                 Model model) {
+    //     Pageable pageable = (Pageable) PageRequest.of(page, size);
+    //     Page<Estudiante> estudiantesPage = estudianteService.findByEstadoWithPersona(estado, pageable);
+        
+    //     model.addAttribute("estudiantes", estudiantesPage.getContent());
+    //     model.addAttribute("totalPages", estudiantesPage.getTotalPages());
+    //     model.addAttribute("currentPage", page);
+
+    //     return "persona/contentPersona :: Tabla_Estudiantes";
+    // }
 
     @RequestMapping(value = "/editar-estudiante/{id_estudiante}")
 	public String editar_estudiante(@PathVariable("id_estudiante") Long id_estudiante, Model model) {
