@@ -3,17 +3,17 @@ package com.example.proyecto.Models.Entity;
 import java.io.Serializable;
 import java.util.Set;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,6 +46,11 @@ public class Proyecto implements Serializable{
     @JoinColumn(name = "id_docente")
     private Docente docente; 
 
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_tipoProyecto")
+    private TipoProyecto tipoProyecto; 
+
     //Tabla Persona
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
@@ -66,16 +71,16 @@ public class Proyecto implements Serializable{
   @ManyToMany(mappedBy = "proyectos")
   private Set<Evaluacion> evaluacion;
 
-   @Transient
-    private MultipartFile file; 
-    
-    @Transient
-    private String nombreArchivo; 
+  @Transient
+  private MultipartFile file; 
+  
+  @Transient
+  private String nombreArchivo; 
 
-       //Tabla Archivo Adjunto
-       @ManyToOne(fetch = FetchType.EAGER)
-       @JoinColumn(name = "id_archivo_adjunto")
-       private ArchivoAdjunto archivoAdjunto;
+  //Tabla Archivo Adjunto
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "id_archivo_adjunto")
+  private ArchivoAdjunto archivoAdjunto;
  
 
 }

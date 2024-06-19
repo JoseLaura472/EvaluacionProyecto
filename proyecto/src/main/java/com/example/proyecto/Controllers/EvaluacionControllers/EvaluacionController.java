@@ -10,8 +10,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -133,13 +133,23 @@ public class EvaluacionController {
             HttpServletRequest request) {
 
         if (request.getSession().getAttribute("usuario") != null) {
-            Evaluacion evaluacion = new Evaluacion();
             Proyecto proyecto = proyectoService.findOne(id_proyecto);
+            Evaluacion evaluacion = new Evaluacion();
 
             model.addAttribute("proyecto", proyecto);
             model.addAttribute("evaluacion", evaluacion);
-            model.addAttribute("criterios", categoriaCriterioService.findAll());
-            return "evaluacion/form-evaluacion_copia";
+            model.addAttribute("criterios", categoriaCriterioService.obtenerCategoriaCriteriosPorTipoProyecto(proyecto.getTipoProyecto().getId_tipoProyecto()));
+
+            if (proyecto.getTipoProyecto().getId_tipoProyecto() == 1) {
+
+                return "evaluacion/form-evaluacion_copia";
+                
+            }else if(proyecto.getTipoProyecto().getId_tipoProyecto() == 4){
+               
+                return "evaluacion/form-evaluacion_escuela_tecnica";
+            }else{
+                return "evaluacion/form-evaluacion";
+            }
         } else {
             return "redirect:/LoginR";
         }
@@ -149,6 +159,83 @@ public class EvaluacionController {
     // Boton para Guardar Documento
     @RequestMapping(value = "/GuardarEvaluacionF", method = RequestMethod.POST)
     public String GuardarEvaluacionF(@Validated Evaluacion evaluacion, RedirectAttributes redirectAttrs,
+            @RequestParam(value = "criterios", required = false) Long[] id_ponderacion,
+            HttpServletRequest request, @RequestParam("proyectos") Long idProyecto) {
+
+        if (id_ponderacion == null || id_ponderacion.length == 0) {
+            // Manejar el caso donde no se seleccionaron checkboxes
+            redirectAttrs.addFlashAttribute("mensaje", "No se seleccionaron criterios.");
+            return "redirect:/ProyectosEvaluacionR?alert=false";
+        }
+
+        Proyecto proyecto = proyectoService.findOne(idProyecto);
+        HttpSession session = request.getSession();
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        Jurado jurado = juradoService.juradoPorIdPersona(usuario.getPersona().getId_persona());
+        List<Jurado> listjurado = juradoService.findByProyectoId(idProyecto);
+        List<Evaluacion> listEvaluacion = evaluacionService.findByProyectoId(idProyecto);
+        int puntajeTotal = 0;
+        int cantidadJurados = listjurado.size();
+
+        if (evaluacionDao.validacionEvaluacionJurado(idProyecto, jurado.getId_jurado()).size() >= 1) {
+            return "redirect:/ProyectosEvaluacionR?alert=false";
+        }
+
+        for (Long id : id_ponderacion) {
+            Ponderacion ponderacion = ponderacionService.findOne(id);
+            if (ponderacion != null) {
+                int pon = ponderacion.getPonderacion();
+                puntajeTotal += pon;
+            }
+        }
+
+        Set<Ponderacion> ponderaciones = new HashSet<>();
+        if (id_ponderacion != null) {
+            for (Long id : id_ponderacion) {
+                Ponderacion ponderacion = ponderacionService.findOne(id);
+                ponderaciones.add(ponderacion);
+            }
+        }
+
+        evaluacion.setEstado("A");
+        evaluacion.setJurado(jurado);
+        evaluacion.getProyectos().add(proyecto);
+        evaluacion.setPonderaciones(ponderaciones);
+        evaluacion.setPuntaje_total(puntajeTotal);
+        evaluacionService.save(evaluacion);
+
+        double promedioActual = proyecto.getPromedio_final()
+                + (evaluacion.getPuntaje_total() / (double) cantidadJurados);
+        if (promedioActual > 100.0) {
+            promedioActual = 100.0;
+        }
+
+        DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.US);
+        symbols.setDecimalSeparator('.');
+        DecimalFormat decimalFormat = new DecimalFormat("#0.00", symbols);
+        promedioActual = Double.parseDouble(decimalFormat.format(promedioActual));
+        proyecto.setPromedio_final(promedioActual);
+        proyecto.setEstado("A");
+        proyecto.setDocente(proyecto.getDocente());
+        proyecto.setEstudiante(proyecto.getEstudiante());
+        proyecto.setEvaluacion(proyecto.getEvaluacion());
+        proyecto.setJurado(proyecto.getJurado());
+        proyecto.setPrograma(proyecto.getPrograma());
+        proyecto.setNombre_proyecto(proyecto.getNombre_proyecto());
+
+        proyectoService.save(proyecto);
+
+        if (listjurado.size() == listEvaluacion.size() + 1) {
+            proyecto.setEstado("E");
+            proyectoService.save(proyecto);
+        }
+
+        redirectAttrs.addFlashAttribute("mensaje", "Proyecto Evaluado Correctamente");
+        return "redirect:/ProyectosEvaluacionR?alert=true";
+    }
+
+    @RequestMapping(value = "/GuardarEvaluacionE", method = RequestMethod.POST)
+    public String GuardarEvaluacionE(@Validated Evaluacion evaluacion, RedirectAttributes redirectAttrs,
             @RequestParam(value = "criterios", required = false) Long[] id_ponderacion,
             HttpServletRequest request, @RequestParam("proyectos") Long idProyecto) {
 

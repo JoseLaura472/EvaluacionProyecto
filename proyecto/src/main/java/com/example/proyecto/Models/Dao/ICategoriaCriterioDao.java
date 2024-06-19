@@ -20,4 +20,8 @@ public interface ICategoriaCriterioDao extends CrudRepository<CategoriaCriterio,
                 "LEFT JOIN jurado j ON j.id_jurado = e.id_jurado \n" +//
                 "WHERE p3.id_proyecto = ?1 GROUP BY cc.id_categoria_criterio ",nativeQuery = true)
     public List<CategoriaCriterio> obtenerPonderacionesPorProyecto(Long id_proyecto);
+
+    @Query(value = "SELECT cc.* FROM categoria_criterio cc \n" + //
+                "WHERE cc.id_tipo_proyecto  = ?1",nativeQuery = true)
+    public List<CategoriaCriterio> obtenerCategoriaCriteriosPorTipoProyecto(Long id_tipo_proyecto);
 }

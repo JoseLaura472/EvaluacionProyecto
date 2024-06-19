@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="layout/head :: head">
+</head>
+
+
+<body class="fixed-left">
+
+    <!-- Loader -->
+    <div id="preloader">
+        <div id="status">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <!-- Begin page -->
+    <div id="wrapper">
+
+        <!-- ========== Left Sidebar Start ========== -->
+        <div th:replace="layout/sidebar :: sidebar">
+        </div>
+        <!-- Left Sidebar End -->
+
+        <!-- Start right Content here -->
+
+        <div class="content-page">
+            <!-- Start content -->
+            <div class="content">
+
+                <!-- Top Bar Start -->
+                <div th:replace="layout/topbar :: topbar">
+                </div>
+                <!-- Top Bar End -->
+
+                <!-- INICIO CONTENIDO -->
+                <div class="page-content-wrapper ">
+
+                    <div class="container-fluid">
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="float-right page-breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="#">Drixo</a></li>
+                                        <li class="breadcrumb-item"><a href="#">Forms</a></li>
+                                        <li class="breadcrumb-item active">Form Validation</li>
+                                    </ol>
+                                </div>
+                                <h5 class="page-title">Form Validation</h5>
+                            </div>
+                        </div>
+                        <!-- end row -->
+
+                        <!-- INICIO FORMULARIO -->
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card m-b-30">
+                                    <div class="card-body">
+
+                                        <h1 class="mt-0 header-title" style="font-size: 30px;">Formulario de Registro
+                                            Proyecto
+                                        </h1>
+
+
+                                        <form th:action="${edit} ?@{/ProyectoModF} :@{/ProyectoF}" method="post"
+                                            enctype="multipart/form-data" th:object="${proyecto}">
+                                            <input type="hidden" name="id_archivo_adjunto"
+                                                th:field="*{archivoAdjunto.id_archivo_adjunto}">
+                                            <input type="hidden" th:field="${proyecto.id_proyecto}">
+                                            <div class="row">
+
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Titulo Proyecto</label>
+                                                    <input class="form-control" type="text"
+                                                        th:field="${proyecto.nombre_proyecto}" required onkeyup="javascript:this.value=this.value.toUpperCase();"
+                                                        style="text-transform:uppercase;">
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Categoria Proyecto</label>
+                                                    <select class="form-control js-choice" th:field="${proyecto.categoria_proyecto}" required>
+                                                        <option value="">Seleccione un tipo de danza</option>
+                                                        <option value="INNOVACIÓN TECNOLÓGICA EN LA AMAZONIA">INNOVACIÓN TECNOLÓGICA EN LA AMAZONIA</option>
+                                                        <option value="INNOVACIÓN Y EMPRENDIMIENTO">INNOVACIÓN Y EMPRENDIMIENTO</option>
+                                                        <option value="SALUD PUBLICA, DERECHOS HUMANOS Y JUSTICIA SOCIAL">SALUD PUBLICA, DERECHOS HUMANOS Y JUSTICIA SOCIAL</option>
+                                                        <option value="INGLES">INGLES</option>
+                                                        <option value="PORTUGUES">PORTUGUES</option>
+                                                        <option value="ESPAÑOL">ESPAÑOL</option>
+                                                        <option value="KABINEÑA">KABINEÑA</option>
+                                                    </select>
+                                                </div>
+<!-- 
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Programa </label>
+                                                    <select class="form-control js-choice"
+                                                        th:field="${proyecto.programa}" name="docente">
+                                                        <option value="">Seleccione un Programa</option>
+                                                        <option th:each="pro : ${programas}"
+                                                            th:value="${pro.id_programa}" th:if="${pro.estado != 'X'}"
+                                                            th:text="${pro.nombre_programa}">
+                                                        </option>
+                                                    </select>
+                                                </div> -->
+
+                                                <div class="col-md-3">
+                                                    <label class="col-form-label">Número de Stand</label>
+                                                    <input class="form-control" type="text"
+                                                        th:field="${proyecto.nro_stand}" required>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label class="col-form-label">Jurados </label>
+                                                    <select class="form-control js-choice" multiple="multiple" size="3"
+                                                        data-options='{"removeItemButton":true,"placeholder":true}'
+                                                        th:field="${proyecto.jurado}" name="id_jurado" id="id_jurado">
+                                                        <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}"
+                                                            th:if="${jur.estado != 'X'}"
+                                                            th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
+                                                        </option>
+                                                    </select>
+
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <label class="col-form-label">Integrantes </label>
+                                                    <select class="form-control js-choice" multiple="multiple" size="3"
+                                                        data-options='{"removeItemButton":true,"placeholder":true}'
+                                                        th:field="${proyecto.estudiante}" name="id_estudiante"
+                                                        id="id_estudiante">
+                                                        <option th:each="est : ${estudiantes}"
+                                                            th:value="${est.id_estudiante}" th:if="${est.estado != 'X'}"
+                                                            th:text="${est.persona.nombres}+' '+${est.persona.paterno}+' '+${est.persona.materno}">
+                                                        </option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label">Docente Asesor</label>
+                                                    <select class="form-control js-choice"
+                                                        th:field="${proyecto.docente}" name="docente">
+                                                        <option value="">Seleccione un Docente</option>
+                                                        <option th:each="doc : ${docentes}" th:value="${doc.id_docente}"
+                                                            th:if="${doc.estado != 'X'}"
+                                                            th:text="${doc.persona.nombres}+' '+${doc.persona.paterno}+' '+${doc.persona.materno}">
+                                                        </option>
+                                                    </select>
+
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label">Tipo Proyecto</label>
+                                                    <select class="form-control js-choice"
+                                                        th:field="${proyecto.tipoProyecto}" name="docente">
+                                                        <option value="">Seleccione...</option>
+                                                        <option th:each="tp : ${tiposProyectos}" th:value="${tp.id_tipoProyecto}"
+                                                            th:if="${tp.estado != 'X'}"
+                                                            th:text="${tp.nom_tipoProyecto}">
+                                                        </option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label" for="customFile">Adjuntar
+                                                        Respaldo</label>
+                                                    <input class="form-control" id="customFile" type="file"
+                                                        th:field="*{file}" accept="application/pdf" />
+                                                </div>
+                                            </div>
+                                            <br>
+                                            <div class="text-center">
+                                                <div>
+                                                    <button class="btn btn-primary" type="submit"
+                                                        th:text="${edit} ?'Actualizar' :'Registrar'">
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- FIN INICIO FORMULARIO -->
+
+                        <!-- INICIO FORMULARIO -->
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card m-b-30">
+                                    <div class="card-body">
+
+                                        <h4 class="mt-0 header-title">Lista de Proyectos</h4>
+
+
+                                        <table id="datatable-buttons"
+                                            class="table table-striped table-bordered dt-responsive "
+                                            style="border-collapse: collapse; border-spacing: 0; width: 100%; text-align: center;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Número de Stan</th>
+                                                    <th>Programa</th>
+                                                    <th>Categoria</th>
+                                                    <th>Proyecto</th>
+                                                    <th>Acciones</th>
+                                                </tr>
+                                            </thead>
+
+
+                                            <tbody>
+
+                                                <tr th:each="por,index : ${proyectos}" th:if="${por.estado != 'X'}">
+                                                    <td th:text="${por.nro_stand}"></td>
+                                                    <td th:text="${por.programa.nombre_programa}"></td>
+                                                    <td th:text="${por.categoria_proyecto}"></td>
+                                                    <td th:text="${por.nombre_proyecto}"></td>
+
+                                                    <td>
+
+                                                        <div
+                                                            style="display: flex; justify-content: center;align-items: center;">
+                                                            <a th:href="${'../../../../editar-proyecto/' + por.id_proyecto}"
+                                                                style="font-size: 24px; margin-right: 10px;"><i
+                                                                    class="mdi mdi-border-color"></i></a>
+
+                                                            <a class="btn"
+                                                                th:attr="onclick=${'MandarURL('+por.id_proyecto+')'}"
+                                                                style="font-size: 28px;">
+                                                                <i class="mdi mdi-close"
+                                                                    style="color: red; pointer-events: none;"></i>
+                                                            </a>
+
+
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FIN INICIO FORMULARIO -->
+
+                    </div><!-- container fluid -->
+
+                </div>
+                <!-- FIN INICIO CONTENIDO -->
+
+            </div>
+            <!-- content -->
+
+            <footer th:replace="layout/footer :: footer">
+            </footer>
+
+        </div>
+        <!-- End Right content here -->
+
+    </div>
+    <!-- END wrapper -->
+
+    <div th:replace="layout/script :: script">
+    </div>
+    <script>
+        function MandarURL(a) {
+            swal({
+                title: 'Eliminar Registro?',
+                type: 'error',
+                showCancelButton: true,
+                showConfirmButton: false,
+                cancelButtonText: "Cancelar",
+                html:
+                    "<a type='button' class='swal2-styled ' style='display: inline-block; background-color: rgb(48, 133, 214); border-left-color: rgb(48, 133, 214); border-right-color: rgb(48, 133, 214); padding: 13px 35px 13px 35px;' data-original-title='' title='' href='../../../../eliminar-proyecto/" + a + "'  >" +
+                    "Eliminar" +
+                    "</a>",
+            }).then().done();
+        }
+    </script>
+</body>
+
+</html>

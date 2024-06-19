@@ -84,9 +84,13 @@
                                                         <option value="INNOVACIÓN TECNOLÓGICA EN LA AMAZONIA">INNOVACIÓN TECNOLÓGICA EN LA AMAZONIA</option>
                                                         <option value="INNOVACIÓN Y EMPRENDIMIENTO">INNOVACIÓN Y EMPRENDIMIENTO</option>
                                                         <option value="SALUD PUBLICA, DERECHOS HUMANOS Y JUSTICIA SOCIAL">SALUD PUBLICA, DERECHOS HUMANOS Y JUSTICIA SOCIAL</option>
+                                                        <option value="INGLES">INGLES</option>
+                                                        <option value="PORTUGUES">PORTUGUES</option>
+                                                        <option value="ESPAÑOL">ESPAÑOL</option>
+                                                        <option value="KABINEÑA">KABINEÑA</option>
                                                     </select>
                                                 </div>
-
+<!-- 
                                                 <div class="col-md-3">
                                                     <label class="col-form-label">Programa </label>
                                                     <select class="form-control js-choice"
@@ -97,8 +101,7 @@
                                                             th:text="${pro.nombre_programa}">
                                                         </option>
                                                     </select>
-
-                                                </div>
+                                                </div> -->
 
                                                 <div class="col-md-3">
                                                     <label class="col-form-label">Número de Stand</label>
@@ -129,9 +132,7 @@
                                                             th:text="${est.persona.nombres}+' '+${est.persona.paterno}+' '+${est.persona.materno}">
                                                         </option>
                                                     </select>
-
                                                 </div>
-
 
                                                 <div class="col-md-4">
                                                     <label class="col-form-label">Docente Asesor</label>
@@ -144,6 +145,17 @@
                                                         </option>
                                                     </select>
 
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label class="col-form-label">Tipo Proyecto</label>
+                                                    <select class="form-control js-choice"
+                                                        th:field="${proyecto.tipoProyecto}" name="docente">
+                                                        <option value="">Seleccione...</option>
+                                                        <option th:each="tp : ${tiposProyectos}" th:value="${tp.id_tipoProyecto}"
+                                                            th:if="${tp.estado != 'X'}"
+                                                            th:text="${tp.nom_tipoProyecto}">
+                                                        </option>
+                                                    </select>
                                                 </div>
 
                                                 <div class="col-md-4">
@@ -196,7 +208,8 @@
 
                                                 <tr th:each="por,index : ${proyectos}" th:if="${por.estado != 'X'}">
                                                     <td th:text="${por.nro_stand}"></td>
-                                                    <td th:text="${por.programa.nombre_programa}"></td>
+                                                    <td th:if="${por.programa != null}" th:text="${por.programa.nombre_programa}"></td>
+                                                    <td th:if="${por.programa == null}" th:text="${'SIN PROGRAMA'}"></td>
                                                     <td th:text="${por.categoria_proyecto}"></td>
                                                     <td th:text="${por.nombre_proyecto}"></td>
 

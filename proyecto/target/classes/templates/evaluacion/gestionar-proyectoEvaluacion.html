@@ -78,7 +78,8 @@
                                             <tbody>
                                                 <tr th:each="por,index : ${proyectos}" th:if="${por.estado != 'X' }">
                                                     <td th:text="${index.index + 1}"></td>
-                                                    <td th:text="${por.programa.nombre_programa}"></td>
+                                                    <td th:if="${por.programa != null}" th:text="${por.programa.nombre_programa}"></td>
+                                                    <td th:if="${por.programa == null}" th:text="${'SIN PROGRAMA'}"></td>
                                                     <td th:text="${por.nombre_proyecto}"></td>
                                                     <td>
                                                         <div

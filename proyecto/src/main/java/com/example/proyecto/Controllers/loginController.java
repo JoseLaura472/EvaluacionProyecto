@@ -2,8 +2,8 @@ package com.example.proyecto.Controllers;
 
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -32,6 +32,11 @@ public class loginController {
     public String LoginR(Model model) {
 
         return "index";
+    }
+    @RequestMapping(value = "/Login", method = RequestMethod.GET)
+    public String LoginRr(Model model) {
+
+        return "index2";
     }
 
     // Funciòn de iniciar sesiòn administrador

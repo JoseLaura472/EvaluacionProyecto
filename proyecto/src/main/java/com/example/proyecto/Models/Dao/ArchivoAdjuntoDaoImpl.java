@@ -4,8 +4,8 @@ package com.example.proyecto.Models.Dao;
 import java.util.List;
 
 
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,7 +15,7 @@ import com.example.proyecto.Models.Entity.ArchivoAdjunto;
 public class ArchivoAdjuntoDaoImpl implements IArchivoAdjuntoDao{
     
     @PersistenceContext
-    private javax.persistence.EntityManager em;
+    private jakarta.persistence.EntityManager em;
 
     @Transactional
   

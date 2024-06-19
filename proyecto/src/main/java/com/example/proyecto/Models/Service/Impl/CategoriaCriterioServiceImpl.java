@@ -44,4 +44,10 @@ public class CategoriaCriterioServiceImpl implements ICategoriaCriterioService {
         return categoriaCriterioDao.obtenerPonderacionesPorProyecto(id_proyecto);
     }
 
+    @Override
+    public List<CategoriaCriterio> obtenerCategoriaCriteriosPorTipoProyecto(Long id_tipo_proyecto) {
+        // TODO Auto-generated method stub
+        return categoriaCriterioDao.obtenerCategoriaCriteriosPorTipoProyecto(id_tipo_proyecto);
+    }
+
 }

@@ -10,9 +10,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -41,6 +41,7 @@ import com.example.proyecto.Models.Service.IEstudianteService;
 import com.example.proyecto.Models.Service.IJuradoService;
 import com.example.proyecto.Models.Service.IProgramaService;
 import com.example.proyecto.Models.Service.IProyectoService;
+import com.example.proyecto.Models.Service.ITipoProyectoService;
 import com.example.proyecto.Models.Utils.AdjuntarArchivo;
 
 @Controller
@@ -64,7 +65,8 @@ public class ProyectoController {
     @Autowired
     private IArchivoAdjuntoService archivoAdjuntoService;
 
-
+    @Autowired
+    private ITipoProyectoService tipoProyectoService;
 
        // FUNCION PARA LA VISUALIZACION DE REGISTRO DE MNACIONALIDAD
 	@RequestMapping(value = "/ProyectoR", method = RequestMethod.GET) // Pagina principal
@@ -75,8 +77,10 @@ public class ProyectoController {
 			model.addAttribute("proyectos", proyectoService.findAll());
             model.addAttribute("docentes", docenteService.findAll());
             model.addAttribute("estudiantes", estudianteService.findAll());
-            model.addAttribute("programas", programaService.findAll());
-             model.addAttribute("jurados", juradoService.findAll());
+            // model.addAttribute("programas", programaService.findAll());
+            model.addAttribute("jurados", juradoService.findAll());
+            model.addAttribute("tiposProyectos", tipoProyectoService.findAll());
+
 
 			return "proyecto/gestionar-proyecto";
 		} else {
@@ -130,8 +134,10 @@ public class ProyectoController {
         model.addAttribute("proyectos", proyectoService.findAll());
         model.addAttribute("estudiantes", estudianteService.findAll());
         model.addAttribute("docentes", docenteService.findAll());
-        model.addAttribute("programas", programaService.findAll());
+        // model.addAttribute("programas", programaService.findAll());
         model.addAttribute("jurados", juradoService.findAll());
+        model.addAttribute("tiposProyectos", tipoProyectoService.findAll());
+
 
         model.addAttribute("edit", "true");
         return "proyecto/gestionar-proyecto";
@@ -172,7 +178,6 @@ public class ProyectoController {
                
             }
 
-
         proyecto.setEstado("A");
         
         proyectoService.save(proyecto);
@@ -208,7 +213,7 @@ public class ProyectoController {
             model.addAttribute("docentes", docenteService.findAll());
             model.addAttribute("estudiantes", estudianteService.findAll());
             model.addAttribute("programas", programaService.findAll());
-             model.addAttribute("jurados", juradoService.findAll());
+            model.addAttribute("jurados", juradoService.findAll());
 
 			return "proyecto/proyectos-evaluados";
 		} else {
