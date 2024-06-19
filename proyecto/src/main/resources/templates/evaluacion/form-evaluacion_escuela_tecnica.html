@@ -179,7 +179,7 @@
                                                             <td style="border: 1px solid black; padding: 5px;" th:text="${p.pregunta}"></td>
                                                             <th:block th:each="pon : ${p.ponderaciones}" >
                                                                 <td width="5%" style="border: 1px solid black; text-align: center; padding: 5px;">
-                                                                
+                                                                    <input type="hidden" name="id_ponderaciones" th:value="${pon.id_ponderacion}">
                                                                     <label  th:for="${'checkbox' + pon.id_ponderacion}"
                                                                         th:text="${pon.ponderacion}"></label>
                                                                 

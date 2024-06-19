@@ -168,7 +168,9 @@
                                                 <tr th:each ="ran,index : ${Ranking}">
                                                     <td th:text="${index.index + 1}">1</td>
                                                     <td th:text="${ran.nombre_proyecto}" >System Architect</td>
-                                                    <td th:text="${ran.programa.nombre_programa}">Edinburgh</td>
+                                                    <td th:text="${ran.nombre_proyecto}" >System Architect</td>
+                                                    <td th:if="${ran.programa != null}" th:text="${ran.programa.nombre_programa}">Edinburgh</td>
+                                                    <td th:if="${ran.programa == null}" th:text="${'Sin Programa'}">Edinburgh</td>
                                                     <td th:text="${ran.promedio_final}">61</td>
                                                 </tr>
 

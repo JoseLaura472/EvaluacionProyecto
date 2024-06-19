@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.proyecto.Models.Entity.Proyecto;
+import com.example.proyecto.Models.Entity.Puntaje;
 import com.example.proyecto.Models.Entity.Usuario;
 import com.example.proyecto.Models.Dao.IEvaluacionDao;
 import com.example.proyecto.Models.Dao.IJuradoDao;
@@ -39,6 +40,7 @@ import com.example.proyecto.Models.Service.IEvaluacionService;
 import com.example.proyecto.Models.Service.IJuradoService;
 import com.example.proyecto.Models.Service.IPonderacionService;
 import com.example.proyecto.Models.Service.IProyectoService;
+import com.example.proyecto.Models.Service.IPuntajeService;
 
 @Controller
 public class EvaluacionController {
@@ -60,6 +62,9 @@ public class EvaluacionController {
 
     @Autowired
     private ICategoriaCriterioService categoriaCriterioService;
+
+    @Autowired
+    private IPuntajeService puntajeService;
 
     @Autowired
     private IPonderacionService ponderacionService;
@@ -236,10 +241,11 @@ public class EvaluacionController {
 
     @RequestMapping(value = "/GuardarEvaluacionE", method = RequestMethod.POST)
     public String GuardarEvaluacionE(@Validated Evaluacion evaluacion, RedirectAttributes redirectAttrs,
-            @RequestParam(value = "criterios", required = false) Long[] id_ponderacion,
+            @RequestParam(value = "criterios", required = false) Long[] values,
+            @RequestParam(value = "id_ponderaciones", required = false) Long[] id_ponderaciones,
             HttpServletRequest request, @RequestParam("proyectos") Long idProyecto) {
 
-        if (id_ponderacion == null || id_ponderacion.length == 0) {
+        if (values == null || values.length == 0) {
             // Manejar el caso donde no se seleccionaron checkboxes
             redirectAttrs.addFlashAttribute("mensaje", "No se seleccionaron criterios.");
             return "redirect:/ProyectosEvaluacionR?alert=false";
@@ -258,28 +264,42 @@ public class EvaluacionController {
             return "redirect:/ProyectosEvaluacionR?alert=false";
         }
 
-        for (Long id : id_ponderacion) {
-            Ponderacion ponderacion = ponderacionService.findOne(id);
-            if (ponderacion != null) {
-                int pon = ponderacion.getPonderacion();
-                puntajeTotal += pon;
-            }
-        }
+        
+        // Set<Ponderacion> ponderaciones = new HashSet<>();
+        // if (id_ponderacion != null) {
+        //     for (Long id : id_ponderacion) {
+        //         Ponderacion ponderacion = ponderacionService.findOne(id);
+        //         ponderaciones.add(ponderacion);
+        //     }
+        // }
 
-        Set<Ponderacion> ponderaciones = new HashSet<>();
-        if (id_ponderacion != null) {
-            for (Long id : id_ponderacion) {
-                Ponderacion ponderacion = ponderacionService.findOne(id);
-                ponderaciones.add(ponderacion);
-            }
+        for (Long id : values) {
+                int pon = id.intValue();
+                puntajeTotal += pon;
+            
         }
 
         evaluacion.setEstado("A");
         evaluacion.setJurado(jurado);
         evaluacion.getProyectos().add(proyecto);
-        evaluacion.setPonderaciones(ponderaciones);
+        // evaluacion.setPonderaciones(ponderaciones);
         evaluacion.setPuntaje_total(puntajeTotal);
         evaluacionService.save(evaluacion);
+
+        if (values != null && id_ponderaciones != null && values.length == id_ponderaciones.length) {
+            for (int i = 0; i < values.length; i++) {
+                Long value = values[i];
+                Long idPonderacion = id_ponderaciones[i];
+
+                Puntaje puntaje = new Puntaje();
+                puntaje.setEvaluaciones(evaluacion);
+                puntaje.setPonderaciones(ponderacionService.findOne(idPonderacion));
+                puntaje.setPuntaje(value.intValue());
+                puntajeService.save(puntaje);
+                // Aquí puedes realizar las operaciones necesarias con ambos elementos
+                System.out.println("Value: " + value + ", ID Ponderación: " + idPonderacion);
+            }
+        }
 
         double promedioActual = proyecto.getPromedio_final()
                 + (evaluacion.getPuntaje_total() / (double) cantidadJurados);
