@@ -296,8 +296,6 @@ public class EvaluacionController {
                 puntaje.setPonderaciones(ponderacionService.findOne(idPonderacion));
                 puntaje.setPuntaje(value.intValue());
                 puntajeService.save(puntaje);
-                // Aquí puedes realizar las operaciones necesarias con ambos elementos
-                System.out.println("Value: " + value + ", ID Ponderación: " + idPonderacion);
             }
         }
 
