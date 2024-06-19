@@ -1,8 +1,10 @@
 package com.example.proyecto.Models.Entity;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -12,8 +14,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -37,6 +41,10 @@ public class Evaluacion implements Serializable{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_jurado")
     private Jurado jurado; 
+
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "evaluaciones", fetch = FetchType.LAZY)
+    private List<Puntaje> puntajes;
 
     @JsonManagedReference
     @ManyToMany(fetch = FetchType.LAZY)

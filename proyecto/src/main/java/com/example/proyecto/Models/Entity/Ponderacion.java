@@ -37,6 +37,10 @@ public class Ponderacion {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "ponderaciones", fetch = FetchType.LAZY)
     private List<Criterio> criterios;
 
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "ponderaciones", fetch = FetchType.LAZY)
+    private List<Puntaje> puntajes;
+
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_pregunta")
