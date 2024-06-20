@@ -138,7 +138,6 @@ public class ProyectoController {
         model.addAttribute("jurados", juradoService.findAll());
         model.addAttribute("tiposProyectos", tipoProyectoService.findAll());
 
-
         model.addAttribute("edit", "true");
         return "proyecto/gestionar-proyecto_escuela_tecnica";
 

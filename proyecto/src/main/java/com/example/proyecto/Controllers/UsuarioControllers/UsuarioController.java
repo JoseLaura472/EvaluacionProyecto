@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.validation.annotation.Validated;
+
+import com.example.proyecto.Models.Service.IJuradoService;
 import com.example.proyecto.Models.Service.IPersonaService;
 import com.example.proyecto.Models.Service.IUsuarioService;
 import com.example.proyecto.Models.Entity.Usuario;
@@ -25,7 +27,8 @@ public class UsuarioController {
     @Autowired
     private IPersonaService personaService;
 
-
+	@Autowired
+	private IJuradoService juradoService;
 
     // FUNCION PARA LA VISUALIZACION DE REGISTRO DE MNACIONALIDAD
 	@RequestMapping(value = "/UsuarioR", method = RequestMethod.GET) // Pagina principal
@@ -34,7 +37,7 @@ public class UsuarioController {
 
 			model.addAttribute("usuario", new Usuario());
 			model.addAttribute("usuarios", usuarioService.findAll());
-            model.addAttribute("personas", personaService.findAll());
+            model.addAttribute("personas", juradoService.findAll());
 
 			return "usuario/gestionar-usuario";
 		} else {

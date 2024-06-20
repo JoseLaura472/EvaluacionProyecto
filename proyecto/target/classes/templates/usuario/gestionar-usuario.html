@@ -71,8 +71,8 @@
                                                     th:field="${usuario.persona}" 
                                                     name="persona">
                                                     <option value="">Seleccione una persona</option>
-                                                    <option th:each="per : ${personas}" th:value="${per.id_persona}"
-                                                        th:if="${per.estado != 'X'}" th:text="${per.nombres}+' '+${per.paterno}+' '+${per.materno}">
+                                                    <option th:each="per : ${personas}" th:value="${per.persona.id_persona}"
+                                                        th:if="${per.persona.estado != 'X'}" th:text="${per.persona.nombres}+' '+${per.persona.paterno}+' '+${per.persona.materno}">
                                                     </option>
                                                 </select>
             
