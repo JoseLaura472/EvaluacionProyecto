@@ -140,7 +140,7 @@ public class ProyectoController {
 
 
         model.addAttribute("edit", "true");
-        return "proyecto/gestionar-proyecto";
+        return "proyecto/gestionar-proyecto_escuela_tecnica";
 
     }
 
