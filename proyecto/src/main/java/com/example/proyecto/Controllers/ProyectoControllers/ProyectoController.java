@@ -82,7 +82,7 @@ public class ProyectoController {
             model.addAttribute("tiposProyectos", tipoProyectoService.findAll());
 
 
-			return "proyecto/gestionar-proyecto";
+			return "proyecto/gestionar-proyecto_escuela_tecnica";
 		} else {
 			return "redirect:LoginR";
 		}
