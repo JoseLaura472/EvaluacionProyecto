@@ -72,6 +72,7 @@
                                                     <th>#</th>
                                                     <th>Programa</th>
                                                     <th>Proyecto</th>
+                                                    <th>Curso</th>
                                                     <th>Acciones</th>
                                                 </tr>
                                             </thead>
@@ -81,6 +82,7 @@
                                                     <td th:if="${por.programa != null}" th:text="${por.programa.nombre_programa}"></td>
                                                     <td th:if="${por.programa == null}" th:text="${'SIN PROGRAMA'}"></td>
                                                     <td th:text="${por.nombre_proyecto}"></td>
+                                                    <td th:text="${por.nro_stand}"></td>
                                                     <td>
                                                         <div
                                                             style="display: flex; justify-content: center;align-items: center;">
