@@ -147,7 +147,7 @@ public class ProyectoController {
     // Boton para Guardar Documento
     @RequestMapping(value = "/ProyectoModF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
     public String ProyectoModF(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
-             @RequestParam(value = "estudiante") Long[] id_estudiantes,
+             @RequestParam(value = "estudiante",required = false) Long[] id_estudiantes,
             @RequestParam(value = "jurado") Long[] id_jurados) throws FileNotFoundException, IOException{ // validar los datos capturados (1)
       
              MultipartFile multipartFile = proyecto.getFile();
