@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.example.proyecto.Models.Dao.ICategoriaCriterioDao;
 import com.example.proyecto.Models.Entity.CategoriaCriterio;
 import com.example.proyecto.Models.Entity.Criterio;
+import com.example.proyecto.Models.Entity.Puntaje;
 import com.example.proyecto.Models.Service.ICategoriaCriterioService;
 
 
@@ -48,6 +49,12 @@ public class CategoriaCriterioServiceImpl implements ICategoriaCriterioService {
     public List<CategoriaCriterio> obtenerCategoriaCriteriosPorTipoProyecto(Long id_tipo_proyecto) {
         // TODO Auto-generated method stub
         return categoriaCriterioDao.obtenerCategoriaCriteriosPorTipoProyecto(id_tipo_proyecto);
+    }
+
+    @Override
+    public List<Puntaje> obtenerPuntajesPorProyecto(Long id_proyecto) {
+        // TODO Auto-generated method stub
+        return categoriaCriterioDao.obtenerPuntajesPorProyecto(id_proyecto);
     }
 
 }

@@ -30,6 +30,7 @@ import com.example.proyecto.Models.Service.ICategoriaCriterioService;
 import com.example.proyecto.Models.Service.IEvaluacionService;
 import com.example.proyecto.Models.Service.IPonderacionService;
 import com.example.proyecto.Models.Service.IProyectoService;
+import com.example.proyecto.Models.Service.IPuntajeService;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Image;
@@ -57,6 +58,9 @@ public class ReportesController {
 
     @Autowired
     private IPonderacionService ponderacionService;
+
+    @Autowired
+    private IPuntajeService puntajeService;
 
 
     @GetMapping("/FormReportes")
@@ -115,56 +119,67 @@ public class ReportesController {
     //     return "reportes/print";
     // }
 
-    // @GetMapping("/ReporteProyecoctoOne")
-    // public String reporteProyecoctoOne(@RequestParam(value = "id_proyecto")Long id_proyecto, Model model){
-
-    //     Proyecto proyecto = proyectoService.findOne(id_proyecto); 
-        
-    //     model.addAttribute("proyecto", proyecto);
-    //     model.addAttribute("categorias", categoriaCriterioService.obtenerPonderacionesPorProyecto(id_proyecto));
-    //     model.addAttribute("ponderaciones", ponderacionService.obtenerPonderacionesPorProyecto(id_proyecto));
-    //     model.addAttribute("evaluaciones", evaluacionService.obtenerNotasFinales(id_proyecto));
-    //     return "reportes/report_dinamico";
-    // }
-
     @GetMapping("/ReporteProyecoctoOne")
-    public ResponseEntity<byte[]> reporteProyecoctoOne(@RequestParam(value = "id_proyecto") Long id_proyecto) {
-        Proyecto proyecto = proyectoService.findOne(id_proyecto);
-        List<CategoriaCriterio> categorias = categoriaCriterioService.obtenerPonderacionesPorProyecto(id_proyecto);
-        List<Ponderacion> ponderaciones = ponderacionService.obtenerPonderacionesPorProyecto(id_proyecto);
-        List<Evaluacion> evaluaciones = evaluacionService.obtenerNotasFinales(id_proyecto);
+    public String reporteProyecoctoOne(@RequestParam(value = "id_proyecto")Long id_proyecto, Model model){
 
-        OutputStream outputStream = new ByteArrayOutputStream();
-        // izquierda, derecha, arriba, abajo
-        Document document = new Document(PageSize.LETTER, 70, 70, 88, 33);
+        Proyecto proyecto = proyectoService.findOne(id_proyecto); 
+        
+        model.addAttribute("proyecto", proyecto);
+        model.addAttribute("categorias", categoriaCriterioService.obtenerCategoriaCriteriosPorTipoProyecto(proyecto.getTipoProyecto().getId_tipoProyecto()));
+        model.addAttribute("evaluaciones", evaluacionService.obtenerNotasFinales(id_proyecto));
 
-        try {
-            
-            PdfWriter writer = PdfWriter.getInstance(document, outputStream);
-            document.open();
+        if (proyecto.getTipoProyecto().getId_tipoProyecto() == 1) {
+            model.addAttribute("ponderaciones", ponderacionService.obtenerPonderacionesPorProyecto(id_proyecto));
+            return "reportes/report_dinamico";
 
-            String rutaImagen = Paths.get("").toAbsolutePath().toString() + "/proyecto/src/main/resources/static/assets/images/menbretado_uap.png";
-            Image imagenFondo = Image.getInstance(rutaImagen);
-            imagenFondo.scaleAbsolute(document.getPageSize());
-            imagenFondo.setAbsolutePosition(0, 0);
-            
-            document.add(imagenFondo);
-            // String nom_completo = personal.getPersona().getNombre() + " " + personal.getPersona().getApellido();
-            // addTitle(numero, personal.getCargo_funcionario(), nom_completo, document);
-            // addCuerpo(document);
-            // document.add(new Paragraph("hola"));
-            addTitle(proyecto, document);
-            document.close();
-            writer.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        }else if(proyecto.getTipoProyecto().getId_tipoProyecto() == 4){
+            model.addAttribute("puntajes", puntajeService.obtenerPuntajesPorProyecto(id_proyecto));
+
+            return "reportes/report_dinamico_escuela_tecnica";
+
+        }else{
+            return "reportes/report_dinamico";
         }
-        byte[] contenidoPDF = ((ByteArrayOutputStream) outputStream).toByteArray();
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(contenidoPDF);
     }
+
+    // @GetMapping("/ReporteProyecoctoOne")
+    // public ResponseEntity<byte[]> reporteProyecoctoOne(@RequestParam(value = "id_proyecto") Long id_proyecto) {
+    //     Proyecto proyecto = proyectoService.findOne(id_proyecto);
+    //     List<CategoriaCriterio> categorias = categoriaCriterioService.obtenerPonderacionesPorProyecto(id_proyecto);
+    //     List<Ponderacion> ponderaciones = ponderacionService.obtenerPonderacionesPorProyecto(id_proyecto);
+    //     List<Evaluacion> evaluaciones = evaluacionService.obtenerNotasFinales(id_proyecto);
+
+    //     OutputStream outputStream = new ByteArrayOutputStream();
+    //     // izquierda, derecha, arriba, abajo
+    //     Document document = new Document(PageSize.LETTER, 70, 70, 88, 33);
+
+    //     try {
+            
+    //         PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+    //         document.open();
+
+    //         String rutaImagen = Paths.get("").toAbsolutePath().toString() + "/proyecto/src/main/resources/static/assets/images/menbretado_uap.png";
+    //         Image imagenFondo = Image.getInstance(rutaImagen);
+    //         imagenFondo.scaleAbsolute(document.getPageSize());
+    //         imagenFondo.setAbsolutePosition(0, 0);
+            
+    //         document.add(imagenFondo);
+    //         // String nom_completo = personal.getPersona().getNombre() + " " + personal.getPersona().getApellido();
+    //         // addTitle(numero, personal.getCargo_funcionario(), nom_completo, document);
+    //         // addCuerpo(document);
+    //         // document.add(new Paragraph("hola"));
+    //         addTitle(proyecto, document);
+    //         document.close();
+    //         writer.close();
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //     }
+    //     byte[] contenidoPDF = ((ByteArrayOutputStream) outputStream).toByteArray();
+    //     return ResponseEntity
+    //             .status(HttpStatus.OK)
+    //             .contentType(MediaType.APPLICATION_PDF)
+    //             .body(contenidoPDF);
+    // }
 
     public static void addTitle(Proyecto proyecto, Document document) throws DocumentException {
         // BaseFont baseFont = BaseFont.createFont(Paths.get("").toAbsolutePath().toString()+ "/planificacion/src/main/resources/static/assets/memo/timesnewromanbold.ttf",BaseFont.IDENTITY_H, BaseFont.EMBEDDED);

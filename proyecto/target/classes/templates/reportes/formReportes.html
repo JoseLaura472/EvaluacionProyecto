@@ -63,8 +63,8 @@
                                                     <label class="col-form-label">Proyectos </label>
                                                     <select class="form-control js-choice" name="id_proyecto">
                                                     <option value="">Seleccione un proyecto</option>
-                                                    <option th:each="pro : ${proyectos}" th:if="${pro.evaluacion.size()==3} or  ${pro.evaluacion.size()==2} and ${pro.estado != 'X'} " 
-                                                    th:value="${pro.id_proyecto}" th:text="${pro.programa.nombre_programa}+' - '+${pro.nombre_proyecto}">
+                                                    <option th:each="pro : ${proyectos}" th:if="${pro.evaluacion.size()==4} or ${pro.evaluacion.size()==3} or  ${pro.evaluacion.size()==2} and ${pro.estado != 'X'} " 
+                                                    th:value="${pro.id_proyecto}" th:text="${pro.nombre_proyecto}">
                                                     </option>
                                                 </select>            
                                                 </div>                                          
@@ -97,7 +97,8 @@
                                             </thead>
                                             <tbody>
                                                 <tr th:each="pro : ${proyectos}" th:if="${pro.evaluacion.size()>=1} and ${pro.estado != 'X'}">
-                                                    <td width="18%" th:text="${pro.programa.nombre_programa}"></td>
+                                                    <td width="18%" th:if="${pro.programa != null}" th:text="${pro.programa.nombre_programa}"></td>
+                                                    <td width="18%" th:if="${pro.programa == null}" th:text="${'SIN PROGRAMA'}"></td>
                                                     <td width="77%" th:text="${pro.nombre_proyecto}"></td>
                                                     <td width="5%" th:text="${pro.promedio_final}"></td>
                                                 </tr>

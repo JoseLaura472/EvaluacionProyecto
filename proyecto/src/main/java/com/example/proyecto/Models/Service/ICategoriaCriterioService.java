@@ -3,6 +3,7 @@ package com.example.proyecto.Models.Service;
 import java.util.List;
 
 import com.example.proyecto.Models.Entity.CategoriaCriterio;
+import com.example.proyecto.Models.Entity.Puntaje;
 
 public interface ICategoriaCriterioService {
     public List<CategoriaCriterio> findAll();
@@ -16,5 +17,8 @@ public interface ICategoriaCriterioService {
     public List<CategoriaCriterio> obtenerPonderacionesPorProyecto(Long id_proyecto);
 
     public List<CategoriaCriterio> obtenerCategoriaCriteriosPorTipoProyecto(Long id_tipo_proyecto);
+
+    public List<Puntaje> obtenerPuntajesPorProyecto(Long id_proyecto);
+
 
 }

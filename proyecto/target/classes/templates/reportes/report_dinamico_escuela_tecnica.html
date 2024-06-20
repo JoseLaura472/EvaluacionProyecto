@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es" dir="ltr">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<!-- Tell the browser to be responsive to screen width -->
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="description" content="" />
+<meta name="author" content="" />
+<!-- Favicon icon -->
+<link rel="stylesheet" type="text/css"
+	href="../../../../assets/libs/select2/dist/css/select2.min.css" />
+<link rel="icon" type="image/png" sizes="16x16"
+	href="../../assets/images/favicon.png" />
+<title>SISTEMA DE EVALUACION DE PROYECTOS 2024</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous" />
+<style type="text/css" >
+body {
+    /* el tamaño por defecto es 14px */
+    font-size: 11px;
+    line-height: 1;
+}
+h1,h2,h3,h4,h5,h6{
+    /* el tamaño por defecto es 14px */
+    line-height: 1;
+}
+</style>
+
+</head>
+<body>
+	
+	<table width="100%" class="table table-sm mt-3" 
+    style="max-width: 88%; margin-left: auto; margin-right: auto;font-size: 12px;">
+		<tr>
+			<td width="24%">
+                <div class="text-align right"><img src="../../../../assets/images/uap.png" 
+                    style="width: 17%; height: 25%; background-repeat: no-repeat;" alt="" height="18" />
+                    </div>
+            </td>
+			<td width="52%" class="text-center" style="vertical-align: middle;">
+                <h5 style="font-size: 140%; text-decoration: underline;">UNIVERSIDAD AMAZONICA DE PANDO</h5>
+            </td>
+            <td width="24%">
+                <div style="text-align: right;"><img src="../../../../assets/images/usic.png"
+                        style="width: 37%; height: 30%; background-repeat: no-repeat;" alt="" height="18" />
+                </div>
+            </td>
+		</tr>
+	</table>
+	<table width="100%" class="table table-sm table-bordered border-dark" 
+    style="max-width: 88%; margin-left: auto; margin-right: auto;font-family: Calibri, Arial, sans-serif;font-size: 12px;">
+		<tr><td colspan="2" style="text-align: center;"><strong style="font-size: 140%;">DETALLE POR PROYECTO</strong></td></tr>
+        <!-- <tr>
+			<th width="28%" style="text-align: right;">PROGRAMA :</th>
+			<td th:text="${proyecto.programa.nombre_programa}" ></td>
+		</tr> -->
+        <tr>
+			<th width="28%" style="text-align: right;">ÁREA DE: :</th>
+			<td th:text="${proyecto.categoria_proyecto}" ></td>
+		</tr>
+		<tr>
+			<th width="28%" style="text-align: right;">NOMBRE DE TEMA DE EXPOSICIÓN  :</th>
+			<td th:text="${proyecto.nombre_proyecto}" ></td>
+		</tr>
+		<tr>
+			<th width="28%" style="text-align: right;">CURSO :</th>
+			<td th:text="${proyecto.nro_stand}" ></td>
+		</tr>
+        <!-- <tr>
+			<th width="28%" style="text-align: right;">PARTICIPANTES :</th>
+			<td style="vertical-align: middle;">
+                <div th:each="e:${proyecto.estudiante}">
+                    <span
+                        th:text="${e.persona.nombres}+' '+${e.persona.paterno}+' '+${e.persona.materno}"></span>
+                </div>
+            </td>
+        </tr> -->
+		<tr>
+			<th width="28%" style="text-align: right;">CAPACITADOR :</th>
+			<td th:text="${proyecto.docente.persona.nombres}+' '+${proyecto.docente.persona.paterno}+' '+${proyecto.docente.persona.materno}" ></td>
+        </tr>
+        
+	</table>
+    <table width="100%" class="table table-sm table-bordered border-dark"
+        style="max-width: 88%; margin-left: auto; margin-right: auto;font-family: Calibri, Arial, sans-serif;font-size: 12px;">
+        <tr>
+            <td colspan="5" style="text-align: center;"> <strong style="font-size: 100%;">NOTAS POR JURADO</strong></td>
+        </tr>
+    
+        <tr>
+            <th width="52%" style="text-align: center;"><strong style="font-size: 100%;">NOMBRES DE JURADO</strong></th>
+            <th:block th:each="e : ${evaluaciones}">
+                <td width="16%"><strong
+                        th:text="${e.jurado.persona.nombres + ' ' + e.jurado.persona.paterno + ' ' + e.jurado.persona.materno}"></strong></td>
+            </th:block>
+        </tr>
+        <th:block th:each="cat : ${categorias}">
+            <tr>
+                <td width="52%" colspan="5"><strong th:text="${cat.nombre_cat_criterio}"></strong></td>
+            </tr>
+            <th:block th:each="pre : ${cat.preguntas}">
+                <tr>
+                    <td th:text="${pre.pregunta}">
+                    </td>
+                    <th:block th:each="pun : ${puntajes}" >
+                        <td class="text-center" th:if="${pre.id_pregunta == pun.ponderaciones.preguntas.id_pregunta}" th:text="${pun.puntaje}"></td>
+                    </th:block>
+                </tr>
+            </th:block>
+        </th:block>
+        <tr>
+            <td width="52%"><strong>NOTA</strong></td>
+            <th:block th:each="e : ${evaluaciones}">
+                <td class="text-center" th:text="${e.puntaje_total}"></td>
+            </th:block>
+        </tr>
+        <tr>
+            <td width="52%"><strong>NOTA FINAL</strong></td>
+            <td width="16%" style="text-align: center;" colspan="4"><strong th:text="${proyecto.promedio_final}"></strong>
+            </td>
+        </tr>
+    </table>
+	<script>
+        window.onload = function() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

@@ -36,6 +36,12 @@ public class PuntajeServiceImpl implements IPuntajeService{
         puntajeDao.deleteById(id);
     }
 
+    @Override
+    public List<Puntaje> obtenerPuntajesPorProyecto(Long id_proyecto) {
+        // TODO Auto-generated method stub
+        return puntajeDao.obtenerPuntajesPorProyecto(id_proyecto);
+    }
+
 
 
     

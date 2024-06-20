@@ -15,4 +15,7 @@ public interface IPuntajeService {
 	public Puntaje findOne(Long id);
 
 	public void delete(Long id);
+
+    public List<Puntaje> obtenerPuntajesPorProyecto(Long id_proyecto);
+
 }
