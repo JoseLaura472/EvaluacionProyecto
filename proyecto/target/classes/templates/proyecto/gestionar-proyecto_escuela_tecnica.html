@@ -71,19 +71,19 @@
                                             <div class="row">
 
                                                 <div class="col-md-3">
-                                                    <label class="col-form-label">Titulo Proyecto</label>
+                                                    <label class="col-form-label">NOMBRE DE TEMA DE EXPOSICIÓN :</label>
                                                     <input class="form-control" type="text"
                                                         th:field="${proyecto.nombre_proyecto}" required onkeyup="javascript:this.value=this.value.toUpperCase();"
                                                         style="text-transform:uppercase;">
                                                 </div>
 
                                                 <div class="col-md-3">
-                                                    <label class="col-form-label">Categoria Proyecto</label>
+                                                    <label class="col-form-label">ÁREA DE: </label>
                                                     <select class="form-control js-choice" th:field="${proyecto.categoria_proyecto}" required>
-                                                        <option value="">Seleccione un tipo de danza</option>
-                                                        <option value="INNOVACIÓN TECNOLÓGICA EN LA AMAZONIA">INNOVACIÓN TECNOLÓGICA EN LA AMAZONIA</option>
+                                                        <option value="">Seleccione...</option>
+                                                        <!-- <option value="INNOVACIÓN TECNOLÓGICA EN LA AMAZONIA">INNOVACIÓN TECNOLÓGICA EN LA AMAZONIA</option>
                                                         <option value="INNOVACIÓN Y EMPRENDIMIENTO">INNOVACIÓN Y EMPRENDIMIENTO</option>
-                                                        <option value="SALUD PUBLICA, DERECHOS HUMANOS Y JUSTICIA SOCIAL">SALUD PUBLICA, DERECHOS HUMANOS Y JUSTICIA SOCIAL</option>
+                                                        <option value="SALUD PUBLICA, DERECHOS HUMANOS Y JUSTICIA SOCIAL">SALUD PUBLICA, DERECHOS HUMANOS Y JUSTICIA SOCIAL</option> -->
                                                         <option value="INGLES">INGLES</option>
                                                         <option value="PORTUGUES">PORTUGUES</option>
                                                         <option value="ESPAÑOL">ESPAÑOL</option>
@@ -104,13 +104,13 @@
                                                 </div> -->
 
                                                 <div class="col-md-3">
-                                                    <label class="col-form-label">Número de Stand</label>
+                                                    <label class="col-form-label">CURSO : </label>
                                                     <input class="form-control" type="text"
                                                         th:field="${proyecto.nro_stand}" required>
                                                 </div>
 
                                                 <div class="col-md-6">
-                                                    <label class="col-form-label">Jurados </label>
+                                                    <label class="col-form-label">JRUADOS : </label>
                                                     <select class="form-control js-choice" multiple="multiple" size="3"
                                                         data-options='{"removeItemButton":true,"placeholder":true}'
                                                         th:field="${proyecto.jurado}" name="id_jurado" id="id_jurado">
@@ -121,7 +121,7 @@
                                                     </select>
 
                                                 </div>
-                                                <div class="col-md-6">
+                                                <!-- <div class="col-md-6">
                                                     <label class="col-form-label">Integrantes </label>
                                                     <select class="form-control js-choice" multiple="multiple" size="3"
                                                         data-options='{"removeItemButton":true,"placeholder":true}'
@@ -132,10 +132,10 @@
                                                             th:text="${est.persona.nombres}+' '+${est.persona.paterno}+' '+${est.persona.materno}">
                                                         </option>
                                                     </select>
-                                                </div>
+                                                </div> -->
 
                                                 <div class="col-md-4">
-                                                    <label class="col-form-label">Docente Asesor</label>
+                                                    <label class="col-form-label">CAPACITADOR</label>
                                                     <select class="form-control js-choice"
                                                         th:field="${proyecto.docente}" name="docente">
                                                         <option value="">Seleccione un Docente</option>
@@ -147,7 +147,7 @@
 
                                                 </div>
                                                 <div class="col-md-4">
-                                                    <label class="col-form-label">Tipo Proyecto</label>
+                                                    <label class="col-form-label">TIPO DE PROYECTO</label>
                                                     <select class="form-control js-choice"
                                                         th:field="${proyecto.tipoProyecto}" name="docente">
                                                         <option value="">Seleccione...</option>
