@@ -71,7 +71,7 @@
                                             <div class="float-right">
                                                 <h5 class="m-0" th:text="${pr.promedio_final}">3567<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
                                             </div>
-                                            <h5 class="m-0" th:text="${pr.programa.nombre_programa}">1456<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                            <h5 class="m-0" th:if="${pr.programa != null}" th:text="${pr.programa.nombre_programa}">1456<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
     
                                         </div>
                                     </div>
@@ -95,7 +95,7 @@
                                             <div class="float-right">
                                                 <h5 class="m-0" th:text="${sg.promedio_final}">3567<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
                                             </div>
-                                            <h5 class="m-0" th:text="${sg.programa.nombre_programa}">1456<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                            <h5 class="m-0" th:if="${sg.programa != null}" th:text="${sg.programa.nombre_programa}">1456<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
 
                                         </div>
                                     </div>
@@ -120,7 +120,7 @@
                                             <div class="float-right">
                                                 <h5 class="m-0" th:text="${ter.promedio_final}">3567<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
                                             </div>
-                                            <h5 class="m-0" th:text="${ter.programa.nombre_programa}">1456<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                            <h5 class="m-0" th:if="${ter.programa != null}" th:text="${ter.programa.nombre_programa}">1456<i class="mdi mdi-arrow-up text-success ml-2"></i></h5>
 
                                         </div>
                                     </div>
