@@ -7,7 +7,6 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.example.proyecto.Models.Entity.Evaluacion;
-import com.example.proyecto.Models.Entity.Jurado;
 
 public interface IEvaluacionDao extends CrudRepository<Evaluacion, Long>{
     

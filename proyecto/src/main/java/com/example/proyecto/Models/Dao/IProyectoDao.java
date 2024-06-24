@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import com.example.proyecto.Models.Entity.Jurado;
 import com.example.proyecto.Models.Entity.Proyecto;
 
 

@@ -48,6 +48,11 @@ public class Proyecto implements Serializable{
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_categoriaProyecto")
+    private CategoriaProyecto categoriaProyecto; 
+
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tipoProyecto")
     private TipoProyecto tipoProyecto; 
 
