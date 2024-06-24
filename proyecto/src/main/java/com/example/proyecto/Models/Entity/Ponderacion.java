@@ -35,10 +35,6 @@ public class Ponderacion {
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "ponderaciones", fetch = FetchType.LAZY)
-    private List<Criterio> criterios;
-
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "ponderaciones", fetch = FetchType.LAZY)
     private List<Puntaje> puntajes;
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

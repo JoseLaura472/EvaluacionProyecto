@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.proyecto.Models.Dao.ICategoriaCriterioDao;
 import com.example.proyecto.Models.Entity.CategoriaCriterio;
-import com.example.proyecto.Models.Entity.Criterio;
 import com.example.proyecto.Models.Entity.Puntaje;
 import com.example.proyecto.Models.Service.ICategoriaCriterioService;
 

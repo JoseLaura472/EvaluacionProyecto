@@ -29,13 +29,11 @@ import com.example.proyecto.Models.Entity.Usuario;
 import com.example.proyecto.Models.Dao.IEvaluacionDao;
 import com.example.proyecto.Models.Dao.IJuradoDao;
 import com.example.proyecto.Models.Entity.CategoriaCriterio;
-import com.example.proyecto.Models.Entity.Criterio;
 import com.example.proyecto.Models.Entity.Evaluacion;
 import com.example.proyecto.Models.Entity.Jurado;
 import com.example.proyecto.Models.Entity.Ponderacion;
 import com.example.proyecto.Models.Entity.Pregunta;
 import com.example.proyecto.Models.Service.ICategoriaCriterioService;
-import com.example.proyecto.Models.Service.ICriterioService;
 import com.example.proyecto.Models.Service.IEvaluacionService;
 import com.example.proyecto.Models.Service.IJuradoService;
 import com.example.proyecto.Models.Service.IPonderacionService;
@@ -47,9 +45,6 @@ public class EvaluacionController {
 
     @Autowired
     private IEvaluacionService evaluacionService;
-
-    @Autowired
-    private ICriterioService criterioService;
 
     @Autowired
     private IProyectoService proyectoService;

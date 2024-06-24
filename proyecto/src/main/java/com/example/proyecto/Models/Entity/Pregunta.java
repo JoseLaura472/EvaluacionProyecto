@@ -34,10 +34,6 @@ public class Pregunta implements Serializable{
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "preguntas", fetch = FetchType.LAZY)
-    private List<Criterio> criterio;
-
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "preguntas", fetch = FetchType.LAZY)
     private List<Ponderacion> ponderaciones;
     
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

@@ -48,11 +48,6 @@ public class Evaluacion implements Serializable{
 
     @JsonManagedReference
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "evaluacion_criterio", joinColumns = @JoinColumn(name = "id_evaluacion"), inverseJoinColumns = @JoinColumn(name = "id_criterio"))
-    private Set<Criterio> criterios;
-
-    @JsonManagedReference
-    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "evaluacion_ponderacion", joinColumns = @JoinColumn(name = "id_evaluacion"), inverseJoinColumns = @JoinColumn(name = "id_ponderacion"))
     private Set<Ponderacion> ponderaciones;
 
