@@ -65,9 +65,8 @@
                                             <h5 class="m-0 text-center" th:text="${proyecto.nombre_proyecto}"></h5>
                                         </div>
                                         <div class="mt-4 text-muted">
-                                            
-                                                <h5 class="m-0" th:text="${proyecto.programa.nombre_programa}" style="text-align: center;"></h5>
-                                           
+                                            <h5 class="m-0" th:if="${proyecto.programa != null}" th:text="${proyecto.programa.nombre_programa}"
+                                                style="text-align: center;"></h5>
                                         </div>
                                     </div>
                                 </div>
