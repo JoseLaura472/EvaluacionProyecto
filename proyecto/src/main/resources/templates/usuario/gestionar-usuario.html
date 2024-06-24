@@ -141,7 +141,7 @@
                                            
                                                 <tr th:each="usu : ${usuarios}" th:if="${usu.estado != 'X'}">
                                                     <td th:text="${usu.usuario_nom}"></td>
-                                                    <td th:if="${usu.person}" th:text="${usu.persona.nombres}+' '+ ${usu.persona.paterno} +' '+${usu.persona.materno}"></td>
+                                                    <td th:if="${usu.persona != null}" th:text="${usu.persona.nombres}+' '+ ${usu.persona.paterno} +' '+${usu.persona.materno}"></td>
                                                     <td th:text="${usu.estado}"></td>
                                                     <td>
 
