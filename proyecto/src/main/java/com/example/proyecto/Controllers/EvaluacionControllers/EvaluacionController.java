@@ -184,7 +184,7 @@ public class EvaluacionController {
         for (Long id : id_ponderacion) {
             Ponderacion ponderacion = ponderacionService.findOne(id);
             if (ponderacion != null) {
-                int pon = ponderacion.getPonderacion();
+                int pon = ponderacion.getNum_ponderacion();
                 puntajeTotal += pon;
             }
         }

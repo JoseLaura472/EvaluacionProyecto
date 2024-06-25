@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:insert="~{layout/head :: head}">
+</head>
+
+<body class="fixed-left">
+
+    <div id="preloader">
+        <div id="status">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <div id="wrapper">
+
+        <div th:insert="~{layout/sidebar :: sidebar}">
+        </div>
+
+        <div class="content-page">
+            <!-- Start content -->
+            <div class="content">
+
+                <div th:insert="~{layout/topbar :: topbar}">
+                </div>
+                <div class="page-content-wrapper ">
+
+                    <div class="container-fluid">
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="float-right page-breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="#">Criterios</a></li>
+                                        <li class="breadcrumb-item"><a href="#">Ponderacion</a></li>
+                                    </ol>
+                                </div>
+                                <h5 class="page-title">Formulario Validation</h5>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card m-b-30">
+                                    <div class="card-body">
+
+                                        <h1 class="mt-0 header-title" style="font-size: 30px;">Formulario de Registro Ponderacion</h1>
+
+                                        <form th:action="@{/PonderacionF}" id="form1" method="post">
+                                            <input type="hidden" th:field="${pon.id_ponderacion}">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <label class="col-form-label">Ponderacion</label>
+                                                    <input class="form-control" type="number" min="0" th:field="${pon.num_ponderacion}" required>
+                                                </div>
+
+                                                <div class="col-md-6">
+                                                    <label class="col-form-label">Pregunta</label>
+                                                    <select class="form-control js-choice"
+                                                        th:field="*{pon.preguntas}"  th:required>
+                                                        <option value="">Seleccione una Pregunta</option>
+                                                        <option th:each="pre : ${preguntas}"
+                                                            th:value="${pre.id_pregunta}" th:if="${pre.estado != 'X'}"
+                                                            th:text="${pre.pregunta}">
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <br>
+                                            <div class="text-center">
+                                                <div>
+                                                    <button class="btn btn-primary" type="submit"
+                                                        th:text="${edit} ?'Actualizar' :'Registrar'">
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card m-b-30">
+                                    <div class="card-body">
+
+                                        <h4 class="mt-0 header-title">Lista de Ponderaciones</h4>
+
+                                        <table id="datatable-buttons"
+                                            class="table table-striped table-bordered dt-responsive "
+                                            style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                            <thead>
+                                                <tr style="text-align: center;">
+                                                    <th>#</th>
+                                                    <th>Preguntas</th>
+                                                    <th>Ponderación</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody>
+
+                                                <tr th:each="pre,index : ${preguntas}" th:if="${pre.estado != 'X'}">
+                                                    <td th:text="${index.index + 1}"></td>
+                                                    <td th:text="${pre.pregunta}"></td>
+                                                    <td>
+                                                        <ul>
+                                                            <li th:each="pon : ${pre.ponderaciones}" th:if="${pon.estado != 'X'}">
+                                                                <a th:href="@{/editar_ponderacion/{id_ponderacion}(id_ponderacion=${pon.id_ponderacion})}"> <span
+                                                                        class="badge badge-success" th:text="${pon.num_ponderacion}" style="font-size: 20px;"></span></a>
+                                                                <a href="#" th:attr="onclick='confirmDelete(event, \'/eliminar_ponderacion/' + ${pon.id_ponderacion} + '\')'"> <span
+                                                                        class="badge badge-danger" style="font-size: 20px;">Eliminar</span></a>
+                                                            </li>
+                                                            <li th:if="${pre.ponderaciones.size() == 0}" th:text="${'SIN PONDERACIONES ASIGNADAS'}">
+                                                            </li>
+                                                        </ul>
+                                                    </td>
+                                                    
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <footer th:insert="~{layout/footer :: footer}">
+            </footer>
+
+        </div>
+
+    </div>
+    <!-- END wrapper -->
+
+    <div th:insert="~{layout/script :: script}">
+    </div>
+    <script>
+        $(document).ready(function(){
+            $('#form1').submit(function (event) {
+                event.preventDefault();
+
+                var form = document.getElementById("form1");
+                var action = form.action;
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    type: 'POST',
+                    url: $(this).attr('action'),
+                    data: formData,
+                    contentType: 'application/x-www-form-urlencoded',
+                    success: function (response) {
+                        var mensaje = response;
+                        if (mensaje == "1") {
+                            Swal.fire({
+                                title: 'Registro Exitoso!',
+                                icon: "success",
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                            setTimeout(function() {
+                                window.location.href = '/PonderacionR';
+                            }, 1600);
+                        }else if (mensaje == "3") {
+                            Swal.fire({
+                                title: 'Error, Ya existe una persona con ese C.I.!',
+                                icon: "warning",
+                                showConfirmButton: false,
+                                timer: 2000
+                            });
+                        }
+                        else if(mensaje == "2"){
+                            Swal.fire({
+                                title: 'Actualización Exitosa!',
+                                icon: "success",
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                            setTimeout(function() {
+                                window.location.href = '/PonderacionR';
+                            }, 1600);
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error('Ha ocurrido un error. Por favor, intenta nuevamente.' + xhr, status, error);
+                        console.error(error);
+                        // Manejo de errores
+                    }
+                });
+
+            });
+
+           
+        })
+    </script>
+
+    <script>
+        function confirmDelete(event, url) {
+            event.preventDefault(); // Prevenir la navegación por defecto
+         
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, eliminarlo',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirige a la URL de eliminación
+                    $.ajax({
+                        type: 'GET',
+                        url: url,
+                        success: function (response) {
+                            window.location.href = '/PonderacionR';
+                        },
+                        error: function (xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+                   
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

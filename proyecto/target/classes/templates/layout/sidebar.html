@@ -6,9 +6,7 @@
 
     <div class="left-side-logo d-block d-lg-none">
         <div class="text-center">
-
-            <a href="index.html" class="logo"><img src="../../../../assets/images/logo-dark.png" height="20"
-                    alt="logo"></a>
+            <a href="index.html" class="logo"><img src="../../../../assets/images/logo-dark.png" height="20" alt="logo"></a>
         </div>
     </div>
 
@@ -17,45 +15,6 @@
         <div id="sidebar-menu">
             <ul>
 
-                <!--
-                <li class="has_sub">
-                    <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-briefcase"></i>
-                        <span>Identificación</span> <span class="menu-arrow float-right"><i
-                                class="mdi mdi-chevron-right"></i></span></a>
-                    <ul class="list-unstyled">
-                        <li><a href="ui-alerts.html">Administrar Identificación</a></li>
-                    </ul>
-                </li>
-
-                <li class="has_sub">
-                    <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-briefcase"></i>
-                        <span> Objetivos </span> <span class="menu-arrow float-right"><i
-                                class="mdi mdi-chevron-right"></i></span></a>
-                    <ul class="list-unstyled">
-                        <li><a href="ui-alerts.html">Administrar Objetivo</a></li>
-                        <li><a href="ui-buttons.html">Administrar Actividad</a></li>
-                        <li><a href="ui-badge.html">Administrar Continuos</a></li>
-                    </ul>
-                </li>
-
-                <li class="has_sub">
-                    <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-briefcase"></i>
-                        <span> Supervición</span> <span class="menu-arrow float-right"><i
-                                class="mdi mdi-chevron-right"></i></span></a>
-                    <ul class="list-unstyled">
-                        <li><a >Administrar supervisión</a></li>
-                    </ul>
-                </li>
-
-                <li class="has_sub">
-                    <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-briefcase"></i>
-                        <span> Reporte POAI</span> <span class="menu-arrow float-right"><i
-                                class="mdi mdi-chevron-right"></i></span></a>
-                    <ul class="list-unstyled">
-                        <li><a href="ui-alerts.html">Reporte Unidad</a></li>
-                    </ul>
-                </li>
-                -->
                 <li class="has_sub" th:if="${session.usuario.estado == 'A'}">
                     <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-user"></i>
                         <span> Personas </span> <span class="menu-arrow float-right"><i
@@ -66,41 +25,30 @@
                         <li><a href="/JuradoR">Jurados</a></li>
                         <li><a href="/EstudianteR">Estudiantes</a></li>
 
-
-
                     </ul>
                 </li>
-                <!--
-                <li class="has_sub" >
-                    <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-user"></i>
-                        <span> Personal </span> <span class="menu-arrow float-right"><i
-                                class="mdi mdi-chevron-right"></i></span></a>
-                    <ul class="list-unstyled">
-                        <li><a href="/PersonalAdmL">Personal Administrativo</a></li>
-                        <li><a href="/PoaiSupervisorR">Supervisor</a></li>
-                        <li><a href="/CargoR">Cargo</a></li>
-                        <li><a href="/TipoAdmR">Tipo Administrativo</a></li>
-                        <li><a href="/SedeR">Sede</a></li>
-                        <li><a href="/DireccionFunR">Dirección Funcional</a></li>
-                        <li><a href="/UnidadFunR">Unidad Funcional</a></li>
-                     
-                    </ul>
-                </li>
-                -->
-
+                
                 <li>
                     <a href="/UsuarioR" class="waves-effect" th:if="${session.usuario.estado == 'A'}">
                         <i class="dripicons-user"></i>
                         <span>Usuarios</span>
                     </a>
                 </li>
-
-
-                <li th:if="${session.usuario.estado == 'A'}">
+                <!-- <li th:if="${session.usuario.estado == 'A'}">
                     <a href="/CriterioR" class="waves-effect">
                         <i class="dripicons-user"></i>
                         <span>Criterios</span>
                     </a>
+                </li> -->
+                <li class="has_sub" th:if="${session.usuario.estado == 'A'}">
+                    <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-user"></i>
+                        <span> Criterios </span> <span class="menu-arrow float-right"><i
+                                class="mdi mdi-chevron-right"></i></span></a>
+                    <ul class="list-unstyled">
+                        <li><a th:href="@{/Categoria_CriterioR}">Categoria Criterio</a></li>
+                        <li><a th:href="@{/PreguntaR}">Pregunta</a></li>
+                        <li><a th:href="@{/PonderacionR}">Ponderacion</a></li>
+                    </ul>
                 </li>
                 <li class="has_sub" th:if="${session.usuario.estado == 'A'}">
                     <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-user"></i>
@@ -110,12 +58,9 @@
                         <li><a href="/ProyectoR">Proyectos</a></li>
                         <li><a href="/ProyectoE">Proyectos Evaluados</a></li>
 
-
-
-
                     </ul>
                 </li>
-                <li>
+                <li th:if="${session.usuario.estado == 'J'}">
                     <a href="/ProyectosEvaluacionR" class="waves-effect">
                         <i class="dripicons-user"></i>
                         <span>Evaluación</span>
@@ -138,16 +83,8 @@
                     </a>
                 </li>
 
-
-
-
-
-
-
-
             </ul>
         </div>
         <div class="clearfix"></div>
     </div> <!-- end sidebarinner -->
 </div>
-<!-- Left Sidebar End -->

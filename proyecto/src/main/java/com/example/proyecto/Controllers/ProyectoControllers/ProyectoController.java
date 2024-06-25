@@ -84,7 +84,7 @@ public class ProyectoController {
 
 			return "proyecto/gestionar-proyecto_escuela_tecnica";
 		} else {
-			return "redirect:LoginR";
+			return "redirect:/LoginR";
 		}
 	}
 
