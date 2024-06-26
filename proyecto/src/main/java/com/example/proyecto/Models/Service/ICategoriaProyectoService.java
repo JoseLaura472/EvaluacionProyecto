@@ -13,4 +13,7 @@ public interface ICategoriaProyectoService {
 	public CategoriaProyecto findOne(Long id);
 
 	public void delete(Long id);
+
+    public List<CategoriaProyecto> getCategoriasPorTipoProyecto(Long id_tipoProyecto);
+
 }

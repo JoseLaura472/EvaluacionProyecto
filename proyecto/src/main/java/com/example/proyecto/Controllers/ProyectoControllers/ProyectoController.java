@@ -36,6 +36,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.proyecto.Models.Entity.ArchivoAdjunto;
 import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Service.IArchivoAdjuntoService;
+import com.example.proyecto.Models.Service.ICategoriaProyectoService;
 import com.example.proyecto.Models.Service.IDocenteService;
 import com.example.proyecto.Models.Service.IEstudianteService;
 import com.example.proyecto.Models.Service.IJuradoService;
@@ -68,26 +69,42 @@ public class ProyectoController {
     @Autowired
     private ITipoProyectoService tipoProyectoService;
 
+    @Autowired
+    private ICategoriaProyectoService categoriaProyectoService;
+
        // FUNCION PARA LA VISUALIZACION DE REGISTRO DE MNACIONALIDAD
 	@RequestMapping(value = "/ProyectoR", method = RequestMethod.GET) // Pagina principal
 	public String ProyectoR(HttpServletRequest request, Model model) {
 		if (request.getSession().getAttribute("usuario") != null) {
 
-			model.addAttribute("proyecto", new Proyecto());
-			model.addAttribute("proyectos", proyectoService.findAll());
-            model.addAttribute("docentes", docenteService.findAll());
-            model.addAttribute("estudiantes", estudianteService.findAll());
-            // model.addAttribute("programas", programaService.findAll());
-            model.addAttribute("jurados", juradoService.findAll());
             model.addAttribute("tiposProyectos", tipoProyectoService.findAll());
 
-
-			return "proyecto/gestionar-proyecto_escuela_tecnica";
+			return "proyecto/gestionar-proyectos";
 		} else {
 			return "redirect:/LoginR";
 		}
 	}
 
+    @GetMapping("/ProyectoForm/{id_tipoProyecto}")
+    public String ProyectoForm(Model model, @PathVariable(name = "id_tipoProyecto") Long id_tipoProyecto) {
+
+        // Definir un array con los nombres de los fragmentos
+        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4" };
+
+        // Verificar si el id_tipoProyecto es válido
+        if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
+            // Devolver el fragmento correspondiente
+            model.addAttribute("categorias", categoriaProyectoService.getCategoriasPorTipoProyecto(id_tipoProyecto));
+            model.addAttribute("proyecto", new Proyecto());
+            model.addAttribute("jurados", juradoService.findAll());
+            model.addAttribute("docentes", docenteService.findAll());
+            return "Content/form_proyecto :: " + fragments[id_tipoProyecto.intValue() - 1];
+        } else {
+            // Manejar el caso en el que el id_tipoProyecto no es válido
+            return "Content/form_proyecto :: default_fragment";
+        }
+    }
+    
 
      // Boton para Guardar Documento
     @RequestMapping(value = "/ProyectoF", method = RequestMethod.POST) // Enviar datos de Registro a Lista

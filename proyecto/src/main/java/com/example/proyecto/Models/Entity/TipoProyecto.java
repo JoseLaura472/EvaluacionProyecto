@@ -34,4 +34,8 @@ public class TipoProyecto {
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "tipoProyecto", fetch = FetchType.LAZY)
     private List<CategoriaCriterio> categoriaCriterios;
+
+    @JsonIgnore
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "tipoProyecto", fetch = FetchType.LAZY)
+    private List<CategoriaProyecto> categoriaProyectos;
 }

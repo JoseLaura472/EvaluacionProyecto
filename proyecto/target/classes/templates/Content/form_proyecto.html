@@ -1,0 +1,76 @@
+<div th:fragment="card_body4" class="card-body">
+
+    <h3 class="mt-0 header-title" style="font-size: 30px;" th:text="${'FORMULARIO'}"></h3>
+
+    <form th:action="${edit} ?@{/ProyectoModF} :@{/ProyectoF}" method="post"
+        enctype="multipart/form-data" th:object="${proyecto}">
+        <input type="hidden" name="id_archivo_adjunto"
+            th:field="*{archivoAdjunto.id_archivo_adjunto}">
+        <input type="hidden" th:field="${proyecto.id_proyecto}">
+        <input type="hidden" id="id_tipoProyecto" name="id_tipoProyecto" value="">
+        <div class="row">
+
+            <div class="col-md-4">
+                <label class="col-form-label">NOMBRE DE TEMA DE EXPOSICIÓN :</label>
+                <input class="form-control" type="text"
+                    th:field="${proyecto.nombre_proyecto}" required onkeyup="javascript:this.value=this.value.toUpperCase();"
+                    style="text-transform:uppercase;">
+            </div>
+
+            <div class="col-md-4">
+                <label class="col-form-label">CATEGORIA O GRUPO: </label>
+                <select class="js-example-basic-single form-control" th:field="${proyecto.categoriaProyecto}" required>
+                    <option value="">Seleccione...</option>
+                    <option th:each="cat : ${categorias}" th:value="${cat.id_categoriaProyecto}" th:text="${cat.nom_categoria}">INGLES</option>
+                </select>
+            </div>
+            
+            <div class="col-md-4">
+                <label class="col-form-label">CURSO : </label>
+                <input class="form-control" type="text"
+                    th:field="${proyecto.nro_stand}" required>
+            </div>
+
+            <div class="col-md-4">
+                <label class="col-form-label">JURADOS : </label>
+                <select class="js-example-basic-multiple form-control" multiple="multiple" th:field="${proyecto.jurado}">
+                    <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                        th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
+                    </option>
+                </select>
+
+            </div>
+            
+            <div class="col-md-4">
+                <label class="col-form-label">CAPACITADOR</label>
+                <select class="js-example-basic-single form-control" th:field="${proyecto.docente}">
+                    <option value="">Seleccione un Docente</option>
+                    <option th:each="doc : ${docentes}" th:value="${doc.id_docente}" th:if="${doc.estado != 'X'}"
+                        th:text="${doc.persona.nombres}+' '+${doc.persona.paterno}+' '+${doc.persona.materno}">
+                    </option>
+                </select>
+
+            </div>
+            <div class="col-md-4">
+                <label class="col-form-label" for="customFile">Adjuntar
+                    Respaldo</label>
+                <input class="form-control" id="customFile" type="file"
+                    th:field="*{file}" accept="application/pdf" />
+            </div>
+        </div>
+        <br>
+        <div class="text-center">
+            <div>
+                <button class="btn btn-primary" type="submit"
+                    th:text="${edit} ?'Actualizar' :'Registrar'">
+                </button>
+            </div>
+        </div>
+    </form>
+    <script>
+        $(document).ready(function(){
+            $('.js-example-basic-single').select2();
+            $('.js-example-basic-multiple').select2();
+        });
+    </script>
+</div>

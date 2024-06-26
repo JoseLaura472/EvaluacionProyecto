@@ -38,5 +38,11 @@ public class CategoriaProyectoServiceImpl implements ICategoriaProyectoService{
         // TODO Auto-generated method stub
         categoriaProyectoDao.deleteById(id);
     }
+
+    @Override
+    public List<CategoriaProyecto> getCategoriasPorTipoProyecto(Long id_tipoProyecto) {
+        // TODO Auto-generated method stub
+        return categoriaProyectoDao.getCategoriasPorTipoProyecto(id_tipoProyecto);
+    }
     
 }

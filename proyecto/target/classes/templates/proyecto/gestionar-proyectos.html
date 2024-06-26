@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="layout/head :: head">
+</head>
+
+
+<body class="fixed-left">
+
+    <!-- Loader -->
+    <div id="preloader">
+        <div id="status">
+            <div class="spinner"></div>
+        </div>
+    </div>
+
+    <!-- Begin page -->
+    <div id="wrapper">
+
+        <!-- ========== Left Sidebar Start ========== -->
+        <div th:replace="layout/sidebar :: sidebar">
+        </div>
+
+        <div class="content-page">
+            <!-- Start content -->
+            <div class="content">
+
+                <!-- Top Bar Start -->
+                <div th:replace="layout/topbar :: topbar">
+                </div>
+                <!-- Top Bar End -->
+
+                <!-- INICIO CONTENIDO -->
+                <div class="page-content-wrapper ">
+
+                    <div class="container-fluid">
+
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div class="float-right page-breadcrumb">
+                                    <ol class="breadcrumb">
+                                        <li class="breadcrumb-item"><a href="#">Drixo</a></li>
+                                        <li class="breadcrumb-item"><a href="#">Forms</a></li>
+                                        <li class="breadcrumb-item active">Form Validation</li>
+                                    </ol>
+                                </div>
+                                <h5 class="page-title">Form Validation</h5>
+                            </div>
+                        </div>
+                        <!-- end row -->
+
+                        <!-- INICIO FORMULARIO -->
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="card m-b-30">
+                                    <div class="card-body">
+                                    
+                                        <h3 class="mt-0 header-title" style="font-size: 30px;">Seleccione Tipo de Proyecto</h3>
+                                    
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <label class="col-form-label">Tipo Proyecto: </label>
+                                                <select class="js-example-basic-single form-control" id="tiposProyectos" required>
+                                                    <option value="">Seleccione...</option>
+                                                    <option th:each="tp : ${tiposProyectos}" th:value="${tp.id_tipoProyecto}"
+                                                        th:text="${tp.nom_tipoProyecto}"></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                       <br>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card m-b-30">
+                                    <div id="replace_form">
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card m-b-30">
+                                    
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div><!-- container fluid -->
+
+                </div>
+                
+
+            </div>
+            <!-- content -->
+
+            <footer th:replace="layout/footer :: footer">
+            </footer>
+
+        </div>
+        <!-- End Right content here -->
+
+    </div>
+    <!-- END wrapper -->
+
+    <div th:replace="layout/script :: script">
+    </div>
+    <script>
+        $(document).ready(function(){
+            $('.js-example-basic-single').select2();
+
+            $('#tiposProyectos').on('change', function() {
+                // Obtener el valor seleccionado
+                var selectedValue = $(this).val();
+                // Realizar la solicitud Ajax
+                $.ajax({
+                    url: '/ProyectoForm/'+ selectedValue, // Cambia esta URL por la ruta a tu servidor
+                    type: 'GET',
+                    success: function(response) {
+                        // Manejar la respuesta del servidor
+                        console.log('Éxito');
+                        $("#id_tipoProyecto").val(selectedValue);
+                        $("#replace_form").html(response);
+                    },
+                    error: function(xhr, status, error) {
+                        // Manejar el error
+                        console.error('Error:', error);
+                    }
+                });
+            });
+
+        });
+    </script>
+    <script>
+
+    </script>
+</body>
+
+</html>
