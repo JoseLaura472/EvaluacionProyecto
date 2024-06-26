@@ -61,7 +61,7 @@
                                                         <option value="">Seleccione una Pregunta</option>
                                                         <option th:each="pre : ${preguntas}"
                                                             th:value="${pre.id_pregunta}" th:if="${pre.estado != 'X'}"
-                                                            th:text="${pre.pregunta}">
+                                                            th:text="${pre.nom_pregunta}">
                                                         </option>
                                                     </select>
                                                 </div>
@@ -103,7 +103,7 @@
 
                                                 <tr th:each="pre,index : ${preguntas}" th:if="${pre.estado != 'X'}">
                                                     <td th:text="${index.index + 1}"></td>
-                                                    <td th:text="${pre.pregunta}"></td>
+                                                    <td th:text="${pre.nom_pregunta}"></td>
                                                     <td>
                                                         <ul>
                                                             <li th:each="pon : ${pre.ponderaciones}" th:if="${pon.estado != 'X'}">
