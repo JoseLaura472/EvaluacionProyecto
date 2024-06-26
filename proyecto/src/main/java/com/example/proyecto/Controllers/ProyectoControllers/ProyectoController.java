@@ -98,6 +98,7 @@ public class ProyectoController {
             model.addAttribute("proyecto", new Proyecto());
             model.addAttribute("jurados", juradoService.findAll());
             model.addAttribute("docentes", docenteService.findAll());
+            model.addAttribute("id_tipoProyecto", id_tipoProyecto);
             return "Content/form_proyecto :: " + fragments[id_tipoProyecto.intValue() - 1];
         } else {
             // Manejar el caso en el que el id_tipoProyecto no es válido

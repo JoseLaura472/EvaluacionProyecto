@@ -7,7 +7,7 @@
         <input type="hidden" name="id_archivo_adjunto"
             th:field="*{archivoAdjunto.id_archivo_adjunto}">
         <input type="hidden" th:field="${proyecto.id_proyecto}">
-        <input type="hidden" id="id_tipoProyecto" name="id_tipoProyecto" value="">
+        <input type="hidden" id="id_tipoProyecto" name="id_tipoProyecto" th:value="${id_tipoProyecto}">
         <div class="row">
 
             <div class="col-md-4">

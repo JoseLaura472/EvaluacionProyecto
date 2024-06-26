@@ -123,7 +123,6 @@
                     success: function(response) {
                         // Manejar la respuesta del servidor
                         console.log('Éxito');
-                        $("#id_tipoProyecto").val(selectedValue);
                         $("#replace_form").html(response);
                     },
                     error: function(xhr, status, error) {
