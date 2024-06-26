@@ -33,9 +33,6 @@ public class PonderacionController {
     @Autowired
     private IPreguntaService preguntaService;
 
-    @Autowired
-    private ICategoriaCriterioService categoriaCriterioService;
-
     @GetMapping("/PonderacionR")
     public String PonderacionR(Model model, HttpServletRequest request) {
         if (request.getSession().getAttribute("usuario") != null) {
