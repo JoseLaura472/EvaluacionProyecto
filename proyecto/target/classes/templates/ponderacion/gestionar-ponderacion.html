@@ -108,9 +108,9 @@
                                                         <ul>
                                                             <li th:each="pon : ${pre.ponderaciones}" th:if="${pon.estado != 'X'}">
                                                                 <a th:href="@{/editar_ponderacion/{id_ponderacion}(id_ponderacion=${pon.id_ponderacion})}"> <span
-                                                                        class="badge badge-success" th:text="${pon.num_ponderacion}" style="font-size: 20px;"></span></a>
+                                                                        class="badge badge-success" th:text="${pon.num_ponderacion}" style="font-size: 16px;"></span></a> &nbsp;&nbsp;
                                                                 <a href="#" th:attr="onclick='confirmDelete(event, \'/eliminar_ponderacion/' + ${pon.id_ponderacion} + '\')'"> <span
-                                                                        class="badge badge-danger" style="font-size: 20px;">Eliminar</span></a>
+                                                                        class="badge badge-danger" style="font-size: 16px;">Eliminar</span></a>
                                                             </li>
                                                             <li th:if="${pre.ponderaciones.size() == 0}" th:text="${'SIN PONDERACIONES ASIGNADAS'}">
                                                             </li>

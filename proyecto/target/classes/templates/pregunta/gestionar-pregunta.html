@@ -46,12 +46,12 @@
 
                                         <h1 class="mt-0 header-title" style="font-size: 30px;">Formulario de Registro Preguntas</h1>
 
-                                        <form th:action="@{/PonderacionF}" id="form1" method="post">
+                                        <form th:action="@{/PreguntaF}" id="form1" method="post">
                                             <input type="hidden" th:field="${pre.id_pregunta}">
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <label class="col-form-label">Pregunta</label>
-                                                    <input class="form-control" type="text" th:field="${pre.pregunta}" required>
+                                                    <input class="form-control" type="text" th:field="${pre.nom_pregunta}" required>
                                                 </div>
 
                                                 <div class="col-md-6">
@@ -108,12 +108,21 @@
                                                     <td >
                                                         <ul>
                                                             <li th:each="pre : ${cat.preguntas}" th:if="${pre.estado != 'X'}">
-                                                                <a href="#"><span class="badge badge-success" th:text="${pre.pregunta}" style="font-size: 13px;" ></span></a>
+                                                                <a ><span class="badge badge-success" th:text="${pre.nom_pregunta}" style="font-size: 13px;" ></span></a>
                                                             </li>
                                                         </ul>     
                                                     </td>
                                                     <td>
-
+                                                        <ul>
+                                                            <li th:each="pre : ${cat.preguntas}" th:if="${pre.estado != 'X'}">
+                                                                <a th:href="@{/editar_pregunta/{id}(id=${pre.id_pregunta})}"><span class="badge badge-secondary"
+                                                                        th:text="${'EDITAR'}" style="font-size: 13px;"></span></a>
+                                                                &nbsp;&nbsp;
+                                                                <a href="#" th:attr="onclick='confirmDelete(event, \'/eliminar_pregunta/' + ${pre.id_pregunta} + '\')'"><span
+                                                                        class="badge badge-danger" th:text="${'ELIMINAR'}" style="font-size: 13px;"></span></a>
+                                                            
+                                                            </li>
+                                                        </ul> 
                                                     </td>
                                                 </tr>
                                             </tbody>
@@ -178,7 +187,7 @@
                                 timer: 1500
                             })
                             setTimeout(function() {
-                                window.location.href = '/PonderacionR';
+                                window.location.href = '/PreguntaR';
                             }, 1600);
                         }
                     },
@@ -215,7 +224,7 @@
                         type: 'GET',
                         url: url,
                         success: function (response) {
-                            window.location.href = '/PonderacionR';
+                            window.location.href = '/PreguntaR';
                         },
                         error: function (xhr, status, error) {
                             console.log(error);

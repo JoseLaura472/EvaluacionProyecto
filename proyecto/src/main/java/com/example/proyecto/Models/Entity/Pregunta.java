@@ -30,7 +30,7 @@ public class Pregunta implements Serializable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_pregunta;
     private String estado;
-    private String pregunta;
+    private String nom_pregunta;
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "preguntas", fetch = FetchType.LAZY)
