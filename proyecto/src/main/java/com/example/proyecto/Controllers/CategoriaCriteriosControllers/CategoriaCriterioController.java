@@ -1,4 +1,4 @@
-package com.example.proyecto.Controllers.CategoriaCriterios;
+package com.example.proyecto.Controllers.CategoriaCriteriosControllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,8 +10,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.example.proyecto.Models.Entity.CategoriaCriterio;
-import com.example.proyecto.Models.Entity.Ponderacion;
-import com.example.proyecto.Models.Entity.Pregunta;
 import com.example.proyecto.Models.Entity.TipoProyecto;
 import com.example.proyecto.Models.Service.ICategoriaCriterioService;
 import com.example.proyecto.Models.Service.ITipoProyectoService;
@@ -20,8 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
 
 
 
