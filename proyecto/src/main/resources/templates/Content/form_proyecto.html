@@ -121,7 +121,7 @@
     </script>
 </div>
 
-<div th:fragment="card_body1" class="card-body">
+<div th:fragment="card_body5" class="card-body">
 
     <h3 class="mt-0 header-title" style="font-size: 30px;" th:text="${'FORMULARIO REGISTRO DE PROYECTO'}"></h3>
 
@@ -134,7 +134,7 @@
         <div class="row">
 
             <div class="col-md-4">
-                <label class="col-form-label">NOMBRE DE TEMA DE EXPOSICIÓN :</label>
+                <label class="col-form-label">TÍTULO DEL PROYECTO :</label>
                 <input class="form-control" type="text"
                     th:field="${proyecto.nombre_proyecto}" required onkeyup="javascript:this.value=this.value.toUpperCase();"
                     style="text-transform:uppercase;">
@@ -147,13 +147,35 @@
                     <option th:each="cat : ${categorias}" th:value="${cat.id_categoriaProyecto}" th:text="${cat.nom_categoria}">INGLES</option>
                 </select>
             </div>
+            <div class="col-md-4">
+                <label class="col-form-label">CARRERA O PROGRAMA: </label>
+                <select class="js-example-basic-single" style="width: 100%;" th:field="${proyecto.programa}" required>
+                    <option value=""></option>
+                    <option th:each="ca : ${carreras}" th:value="${ca.id_programa}" th:text="${ca.nombre_programa}">INGLES</option>
+                </select>
+            </div>
             
             <div class="col-md-4">
-                <label class="col-form-label">CURSO : </label>
+                <label class="col-form-label">ASIGNATURA (S): </label>
                 <input class="form-control" type="text"
-                    th:field="${proyecto.nro_stand}" required>
+                    th:field="${proyecto.nro_stand}" onkeyup="javascript:this.value=this.value.toUpperCase();" required>
             </div>
 
+            <div class="col-md-4">
+                <label class="col-form-label">SEMESTRE : </label>
+                <input class="form-control" type="text"
+                    th:field="${proyecto.categoria_proyecto}" required>
+            </div>
+
+            <div class="col-md-4">
+                <label class="col-form-label">ESTUDIANTES : </label>
+                <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple" th:field="${proyecto.estudiante}">
+                    <option th:each="es : ${estudiantes}" th:value="${es.id_estudiante}" th:if="${es.estado != 'X'}"
+                        th:text="${es.persona.nombres}+' '+${es.persona.paterno}+' '+${es.persona.materno}">
+                    </option>
+                </select>
+
+            </div>
             <div class="col-md-4">
                 <label class="col-form-label">JURADOS : </label>
                 <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple" th:field="${proyecto.jurado}">

@@ -88,7 +88,7 @@ public class ProyectoController {
     public String ProyectoForm(Model model, @PathVariable(name = "id_tipoProyecto") Long id_tipoProyecto) {
 
         // Definir un array con los nombres de los fragmentos
-        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4" };
+        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4","card_body5" };
 
         // Verificar si el id_tipoProyecto es válido
         if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
@@ -97,6 +97,8 @@ public class ProyectoController {
             model.addAttribute("proyecto", new Proyecto());
             model.addAttribute("jurados", juradoService.findAll());
             model.addAttribute("docentes", docenteService.findAll());
+            model.addAttribute("estudiantes", estudianteService.findAll());
+            model.addAttribute("carreras", programaService.findAll());
             model.addAttribute("id_tipoProyecto", id_tipoProyecto);
             return "Content/form_proyecto :: " + fragments[id_tipoProyecto.intValue() - 1];
         } else {
@@ -108,7 +110,7 @@ public class ProyectoController {
     @GetMapping("/lista_proyectos/{id_tipoProyecto}")
     public String lista_proyectos(@PathVariable(name = "id_tipoProyecto") Long id_tipoProyecto, Model model) {
         // Definir un array con los nombres de los fragmentos
-        String[] fragments = { "table1", "table2", "table3", "table4" };
+        String[] fragments = { "table1", "table2", "table3", "table4", "table5"};
 
         // Verificar si el id_tipoProyecto es válido
         if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
@@ -127,10 +129,57 @@ public class ProyectoController {
     }
 
     // Boton para Guardar Documento
-    @RequestMapping(value = "/ProyectoF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
+    // @RequestMapping(value = "/ProyectoF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
+    // public ResponseEntity<String> ProyectoF(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
+    //         @RequestParam(value = "estudiante", required = false) Long[] id_estudiantes,
+    //         @RequestParam(value = "jurado") Long[] id_jurados) throws FileNotFoundException, IOException { 
+
+    //     MultipartFile multipartFile = proyecto.getFile();
+    //     ArchivoAdjunto archivoAdjunto = new ArchivoAdjunto();
+    //     AdjuntarArchivo adjuntarArchivo = new AdjuntarArchivo();
+
+    //     Path rootPath = Paths.get("archivos/");
+    //     Path rootAbsolutPath = rootPath.toAbsolutePath();
+    //     String rutaDirectorio = rootAbsolutPath + "";
+
+    //     String rutaArchivo = adjuntarArchivo.crearSacDirectorio(rutaDirectorio);
+    //     List<ArchivoAdjunto> listArchivos = archivoAdjuntoService.listarArchivoAdjunto();
+    //     proyecto.setNombreArchivo((listArchivos.size() + 1) + ".pdf");
+    //     Integer ad = adjuntarArchivo.adjuntarArchivoProyecto(proyecto, rutaArchivo);
+    //     if (ad == 1) {
+    //         ArchivoAdjunto barchivoAdjunto = archivoAdjuntoService
+    //                 .buscarArchivoAdjuntoPorProyecto(proyecto.getId_proyecto());
+    //         if (barchivoAdjunto == null) {
+    //             ArchivoAdjunto archivoAdjunt = new ArchivoAdjunto();
+    //             archivoAdjunt.setNombre_archivo(proyecto.getNombreArchivo());
+    //             archivoAdjunt.setRuta_archivo(rutaArchivo);
+    //             archivoAdjunt.setEstado("A");
+    //             archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt);
+    //             proyecto.setArchivoAdjunto(archivoAdjunt);
+    //         } else {
+    //             barchivoAdjunto.setNombre_archivo(proyecto.getNombreArchivo());
+    //             barchivoAdjunto.setRuta_archivo(rutaArchivo);
+    //             archivoAdjuntoService.modificarArchivoAdjunto(barchivoAdjunto);
+    //         }
+    //     } else if (ad == 2) {
+    //         // Opcional: Manejar el caso donde no se adjuntó ningún archivo, si es necesario
+    //         System.out.println("No se adjuntó ningún archivo, pero el proyecto fue actualizado.");
+    //     }
+    //     proyecto.setEstado("A");
+    //     proyectoService.save(proyecto);
+    //     redirectAttrs
+    //             .addFlashAttribute("mensaje", "Registro Exitoso del Documento")
+    //             .addFlashAttribute("clase", "success alert-dismissible fade show");
+
+    //     return ResponseEntity.ok("1");
+    // }
+
+    @RequestMapping(value = "/ProyectoF", method = RequestMethod.POST)
     public ResponseEntity<String> ProyectoF(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
-            @RequestParam(value = "estudiante", required = false) Long[] id_estudiantes,
-            @RequestParam(value = "jurado") Long[] id_jurados) throws FileNotFoundException, IOException { 
+            @RequestParam(name = "estudiante", required = false) Long[] id_estudiantes,
+            @RequestParam(name = "docente") Long id_docente,
+            @RequestParam(name = "categoriaProyecto") Long id_categoriaProyecto,
+            @RequestParam(name = "jurado") Long[] id_jurados) throws FileNotFoundException, IOException {
 
         MultipartFile multipartFile = proyecto.getFile();
         ArchivoAdjunto archivoAdjunto = new ArchivoAdjunto();
@@ -138,20 +187,37 @@ public class ProyectoController {
 
         Path rootPath = Paths.get("archivos/");
         Path rootAbsolutPath = rootPath.toAbsolutePath();
-        String rutaDirectorio = rootAbsolutPath + "";
+        String rutaDirectorio = rootAbsolutPath.toString();
 
         String rutaArchivo = adjuntarArchivo.crearSacDirectorio(rutaDirectorio);
         List<ArchivoAdjunto> listArchivos = archivoAdjuntoService.listarArchivoAdjunto();
         proyecto.setNombreArchivo((listArchivos.size() + 1) + ".pdf");
         Integer ad = adjuntarArchivo.adjuntarArchivoProyecto(proyecto, rutaArchivo);
-        archivoAdjunto.setNombre_archivo((listArchivos.size() + 1) + ".pdf");
-        archivoAdjunto.setTipo_archivo(multipartFile.getContentType());
-        archivoAdjunto.setRuta_archivo(rutaArchivo);
-        archivoAdjunto.setEstado("A");
-        ArchivoAdjunto archivoAdjunto2 = archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunto);
 
+        if (ad == 1) {
+            ArchivoAdjunto barchivoAdjunto = archivoAdjuntoService
+                    .buscarArchivoAdjuntoPorProyecto(proyecto.getId_proyecto());
+            if (barchivoAdjunto == null) {
+                ArchivoAdjunto archivoAdjunt = new ArchivoAdjunto();
+                archivoAdjunt.setNombre_archivo(proyecto.getNombreArchivo());
+                archivoAdjunt.setRuta_archivo(rutaArchivo);
+                archivoAdjunt.setEstado("A");
+                archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt); // Guarda y asigna el
+                                                                                              // ArchivoAdjunto
+                proyecto.setArchivoAdjunto(archivoAdjunt);
+            } else {
+                barchivoAdjunto.setNombre_archivo(proyecto.getNombreArchivo());
+                barchivoAdjunto.setRuta_archivo(rutaArchivo);
+                archivoAdjuntoService.modificarArchivoAdjunto(barchivoAdjunto);
+                proyecto.setArchivoAdjunto(barchivoAdjunto); // Asegúrate de asignarlo también aquí
+            }
+        } else if (ad == 2) {
+            System.out.println("No se adjuntó ningún archivo, pero el proyecto fue actualizado.");
+        }
+
+        proyecto.setDocente(docenteService.findOne(id_docente));
+        proyecto.setCategoriaProyecto(categoriaProyectoService.findOne(id_categoriaProyecto));
         proyecto.setEstado("A");
-        proyecto.setArchivoAdjunto(archivoAdjunto2);
         proyectoService.save(proyecto);
         redirectAttrs
                 .addFlashAttribute("mensaje", "Registro Exitoso del Documento")
