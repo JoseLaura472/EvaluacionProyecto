@@ -56,6 +56,7 @@ public class PonderacionController {
 
         if (ponderacion.getId_ponderacion() == null) {
             // Nueva Ponderación
+            
             ponderacion.setEstado("A");
             ponderacion.setPreguntas(pregunta);
             ponderacionService.save(ponderacion);

@@ -36,18 +36,18 @@ public class AdjuntarArchivo {
 
         // Save file on system
     file = proyecto.getFile();
-    if (!file.getOriginalFilename().isEmpty()) {
-       BufferedOutputStream outputStream = new BufferedOutputStream(
-             new FileOutputStream(
-                   new File(rutaArchivo, proyecto.getNombreArchivo())));//file.getOriginalFilename())));
-       outputStream.write(file.getBytes());
-       outputStream.flush();
-       outputStream.close();
-    }else{
-       return 0; // Error: No es posible adjuntar
+    if (file != null && !file.getOriginalFilename().isEmpty()) {
+        // Guarda el archivo en el sistema
+        BufferedOutputStream outputStream = new BufferedOutputStream(
+                new FileOutputStream(new File(rutaArchivo, proyecto.getNombreArchivo())));
+        outputStream.write(file.getBytes());
+        outputStream.flush();
+        outputStream.close();
+        return 1; // Adjuntado Correctamente
+    } else {
+        // No se subió ningún archivo, pero no es un error
+        return 2; // Opcional: Código para indicar que no se adjuntó archivo pero no es un error
     }
-    
-    return 1; // Adjuntado Correctamente
  }
 
  

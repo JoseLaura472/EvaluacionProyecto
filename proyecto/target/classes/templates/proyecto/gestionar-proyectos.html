@@ -115,14 +115,13 @@
             });
 
             $('#tiposProyectos').on('change', function() {
-                // Obtener el valor seleccionado
+
                 var selectedValue = $(this).val();
-                // Realizar la solicitud Ajax
+
                 $.ajax({
-                    url: '/ProyectoForm/'+ selectedValue, // Cambia esta URL por la ruta a tu servidor
+                    url: '/ProyectoForm/'+ selectedValue, 
                     type: 'GET',
                     success: function(response) {
-                        // Manejar la respuesta del servidor
                         console.log('Éxito');
                         $("#replace_form").html(response);
                     },
@@ -131,16 +130,15 @@
                         console.error('Error:', error);
                     }
                 });
+
                 $.ajax({
-                    url: '/lista_proyectos/'+ selectedValue, // Cambia esta URL por la ruta a tu servidor
+                    url: '/lista_proyectos/'+ selectedValue, 
                     type: 'GET',
                     success: function(response) {
-                        // Manejar la respuesta del servidor
                         console.log('Éxito');
                         $("#table_replace").html(response);
                     },
                     error: function(xhr, status, error) {
-                        // Manejar el error
                         console.error('Error:', error);
                     }
                 });
@@ -149,18 +147,73 @@
         });
     </script>
     <script>
-        function cargarTabla(id){
+
+        function nuevoRegistro(id_tipoProyecto){
             $.ajax({
-                url: '/lista_proyectos/'+ id, // Cambia esta URL por la ruta a tu servidor
+                url: '/ProyectoForm/'+ id_tipoProyecto, 
                 type: 'GET',
                 success: function(response) {
-                    // Manejar la respuesta del servidor
                     console.log('Éxito');
-                    $("#table_replace").html(response);
+                    $("#replace_form").html(response);
                 },
                 error: function(xhr, status, error) {
                     // Manejar el error
                     console.error('Error:', error);
+                }
+            });
+        }
+
+        function cargarTabla(id_tipoProyecto){
+            $.ajax({
+                url: '/lista_proyectos/'+ id_tipoProyecto, 
+                type: 'GET',
+                success: function(response) {
+                    console.log('Éxito');
+                    $("#table_replace").html(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+        function editarRegistro(id_proyecto,id_tipoProyecto){
+            $.ajax({
+                url: '/editar_proyecto/'+ id_proyecto+'/'+id_tipoProyecto, 
+                type: 'GET',
+                success: function(response) {
+                    console.log('Éxito');
+                    $("#replace_form").html(response);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                }
+            });
+        }
+
+        function eliminarRegistro(id_proyecto, nombre ,id_tipoProyecto) {
+            Swal.fire({
+                title: "Atencion!",
+                text: "¿Estas seguro que desea eliminar el registro: " + nombre + "?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "SI, Eliminar",
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: 'GET',
+                        url: "/eliminar_proyecto/" + id_proyecto,
+                        success: function (response) {
+                            cargarTabla(id_tipoProyecto);
+                        },
+                        error: function (xhr, status, error) {
+                            console.log(error);
+                        }
+                    });
+
                 }
             });
         }

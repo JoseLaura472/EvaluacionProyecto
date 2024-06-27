@@ -45,16 +45,14 @@
         </div>
         <div class="content-page">
             <div class="content">
-                <div th:replace="layout/topbar :: topbar">
-                </div>
+                <div th:replace="layout/topbar :: topbar"></div>
                 <div class="page-content-wrapper ">
                     <div class="container-fluid">
                         <hr>
-                        <div class="row mt-1">
+                        <div class="row">
                             <div class="col-lg-12">
                                 <div class="card m-b-30">
                                     <div class="card-body">
-
                                         <h1 class="mt-0 header-title" style="font-size: 30px;">Formulario de reportes
                                         </h1>
                                         <form th:action="@{/ReporteProyecoctoOne}" method="get" target="_blank">
@@ -86,7 +84,7 @@
                                 <div class="card m-b-30">
                                     <div class="card-body">
         
-                                        <h4 class="mt-0 header-title">LISTA DE PROYECTOS</h4>
+                                        <h4 class="mt-0 header-title">LISTA DE PROYECTOS EVALUADOS</h4>
                                         <table id="example1" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                             <thead>
                                             <tr>
