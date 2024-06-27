@@ -147,6 +147,8 @@ public class EvaluacionController {
             }else if(proyecto.getTipoProyecto().getId_tipoProyecto() == 4){
                
                 return "evaluacion/form-evaluacion_escuela_tecnica";
+            }else if(proyecto.getTipoProyecto().getId_tipoProyecto() == 5){
+                return "evaluacion/form-evaluacion_copia";
             }else{
                 return "evaluacion/form-evaluacion";
             }

@@ -69,7 +69,7 @@
                             <div class="col-sm-12">
                                 <div style="display: flex; justify-content: space-between; background-color: #f2f2f2; padding: 10px;">
                                     <a class="btn btn-primary"  type="submit" href="/ProyectosEvaluacionR">Volver</a>
-                                    <a class="btn btn-warning" type="button" target="_blank" th:href="${'../../../../openFileProyectoN/' + proyecto.id_proyecto}" >Ver Documento</a>
+                                    <!-- <a class="btn btn-warning" type="button" target="_blank" th:href="${'../../../../openFileProyectoN/' + proyecto.id_proyecto}" >Ver Documento</a> -->
                                   </div>
                             </div>
                         </div>
@@ -125,7 +125,7 @@
                                                 style="border: 1px solid black; width: 100%; margin-left: auto; margin-right: auto;">
 
                                                 <tr>
-                                                    <td colspan="4"
+                                                    <td colspan="5"
                                                         style="border-top: 1px solid black; text-align: center; background-color: #1B40A6; color: white; padding: 5px; font-family: Verdana, sans-serif;">
                                                         CRITERIOS
                                                         DE EVALUACIÓN</td>
@@ -146,6 +146,8 @@
                                                             B</td>
                                                         <td style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
                                                             E</td>
+                                                            <td style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
+                                                                E</td>
                                                     </tr>
                                                     <!-- <tr>
                                                         <td style="border: 1px solid black; text-align: center; padding: 5px;"  >
@@ -160,7 +162,7 @@
                                                     </tr> -->
                                                     <th:block th:each="p : ${c.preguntas}">
                                                         <tr>
-                                                            <td style="border: 1px solid black; padding: 5px;" th:text="${p.pregunta}"></td>
+                                                            <td style="border: 1px solid black; padding: 5px;" th:text="${p.nom_pregunta}"></td>
                                                             <th:block th:each="pon : ${p.ponderaciones}">
                                                                 <td width="5%" style="border: 1px solid black; text-align: center; padding: 5px;">
                                                                         <div class="custom-control custom-checkbox">
@@ -171,7 +173,7 @@
                                                                                    th:data-group="${'grupo'+p.id_pregunta}">
                                                                             <label class="custom-control-label" 
                                                                                    th:for="${'checkbox' + pon.id_ponderacion}" 
-                                                                                   th:text="${pon.ponderacion}"></label>
+                                                                                   th:text="${pon.num_ponderacion}"></label>
                                                                         </div>
                                                                 </td>
                                                             </th:block>
@@ -182,6 +184,7 @@
                                                         <td></td>
                                                         <td></td>
                                                         <td></td>
+                                                        <td></td>
                                                     </tr>
                                                 </th:block>
                                                 
@@ -189,7 +192,7 @@
                                                     <td style="border: 1px solid black;  text-align: right; padding: 5px;">
                                                         Puntaje Total
                                                     </td>
-                                                    <td colspan="3" style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                    <td colspan="4" style="border: 1px solid black; text-align: center; padding: 5px;">
                                                         <div id="resultado"></div>
                                                     </td>
                                                 </tr>
