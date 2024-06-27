@@ -1,4 +1,4 @@
-<div th:fragment="table1" class="card-body">
+<div th:fragment="table4" class="card-body">
 
     <h4 class="mt-0 header-title">Lista de Proyectos</h4>
 
@@ -7,10 +7,10 @@
         style="border-collapse: collapse; border-spacing: 0; width: 100%; text-align: center;">
         <thead>
             <tr>
-                <th>Número de Stan</th>
+                <th>Curso</th>
                 <th>Programa</th>
                 <th>Categoria</th>
-                <th>Proyecto</th>
+                <th>Nombre Proyecto</th>
                 <th>Acciones</th>
             </tr>
         </thead>
@@ -21,7 +21,8 @@
                 <td th:text="${por.nro_stand}"></td>
                 <td th:if="${por.programa != null}" th:text="${por.programa.nombre_programa}"></td>
                 <td th:if="${por.programa == null}" th:text="${'SIN PROGRAMA'}"></td>
-                <td th:text="${por.categoria_proyecto}"></td>
+                <td th:if="${por.categoriaProyecto != null}" th:text="${por.categoriaProyecto.nom_categoria}"></td>
+                <td th:if="${por.categoriaProyecto == null}" th:text="${'SIN CATEGORIA'}"></td>
                 <td th:text="${por.nombre_proyecto}"></td>
 
                 <td>
@@ -44,5 +45,5 @@
             </tr>
         </tbody>
     </table>
-
+    <div th:replace="layout/script :: script"></div>
 </div>

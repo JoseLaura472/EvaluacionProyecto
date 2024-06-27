@@ -105,6 +105,24 @@ public class ProyectoController {
             return "Content/form_proyecto :: default_fragment";
         }
     }
+
+    @GetMapping("/lista_proyectos/{id_tipoProyecto}")
+    public String lista_proyectos(@PathVariable(name = "id_tipoProyecto")Long id_tipoProyecto, Model model) {
+        // Definir un array con los nombres de los fragmentos
+        String[] fragments = { "table1", "table2", "table3", "table4" };
+
+        // Verificar si el id_tipoProyecto es válido
+        if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
+            // Devolver el fragmento correspondiente
+            model.addAttribute("proyectos", proyectoService.obtenerProyectosPorTipoProyecto(id_tipoProyecto));
+           
+            return "Content/lista_proyecto :: " + fragments[id_tipoProyecto.intValue() - 1];
+        } else {
+            // Manejar el caso en el que el id_tipoProyecto no es válido
+            return "Content/lista_proyecto :: default_fragment";
+        }
+    }
+    
     
 
      // Boton para Guardar Documento
@@ -167,7 +185,7 @@ public class ProyectoController {
              @RequestParam(value = "estudiante",required = false) Long[] id_estudiantes,
             @RequestParam(value = "jurado") Long[] id_jurados) throws FileNotFoundException, IOException{ // validar los datos capturados (1)
       
-             MultipartFile multipartFile = proyecto.getFile();
+            MultipartFile multipartFile = proyecto.getFile();
             ArchivoAdjunto archivoAdjunto = new ArchivoAdjunto();
             AdjuntarArchivo adjuntarArchivo = new AdjuntarArchivo();
             
@@ -252,24 +270,25 @@ public class ProyectoController {
     }
 
     @GetMapping(value = "/openFileProyectoN/{id}", produces = "application/pdf")
-public void abrirDocumentoPDF(@PathVariable("id") long id_proyecto, HttpServletResponse response) throws IOException {
-    ArchivoAdjunto archivoAdjunto = archivoAdjuntoService.buscarArchivoAdjuntoPorProyecto(id_proyecto);
+    public void abrirDocumentoPDF(@PathVariable("id") long id_proyecto, HttpServletResponse response)
+            throws IOException {
+        ArchivoAdjunto archivoAdjunto = archivoAdjuntoService.buscarArchivoAdjuntoPorProyecto(id_proyecto);
 
-    File file = new File(archivoAdjunto.getRuta_archivo() + archivoAdjunto.getNombre_archivo());
-    response.setContentType("application/pdf");
-    response.setHeader("Content-Disposition", "inline; filename=" + file.getName());
-    response.setHeader("Content-Length", String.valueOf(file.length()));
+        File file = new File(archivoAdjunto.getRuta_archivo() + archivoAdjunto.getNombre_archivo());
+        response.setContentType("application/pdf");
+        response.setHeader("Content-Disposition", "inline; filename=" + file.getName());
+        response.setHeader("Content-Length", String.valueOf(file.length()));
 
-    try (InputStream inputStream = new FileInputStream(file);
-         OutputStream outputStream = response.getOutputStream()) {
+        try (InputStream inputStream = new FileInputStream(file);
+                OutputStream outputStream = response.getOutputStream()) {
 
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            outputStream.write(buffer, 0, bytesRead);
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
+            }
         }
     }
-}
 
 
 

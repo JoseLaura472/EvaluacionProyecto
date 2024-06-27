@@ -39,9 +39,8 @@
                             <div class="col-sm-12">
                                 <div class="float-right page-breadcrumb">
                                     <ol class="breadcrumb">
-                                        <li class="breadcrumb-item"><a href="#">Drixo</a></li>
-                                        <li class="breadcrumb-item"><a href="#">Forms</a></li>
-                                        <li class="breadcrumb-item active">Form Validation</li>
+                                        <li class="breadcrumb-item"><a href="#">Pryectos</a></li>
+                                        <li class="breadcrumb-item"><a href="#">Registro de Proyectos</a></li>
                                     </ol>
                                 </div>
                                 <h5 class="page-title">Form Validation</h5>
@@ -60,8 +59,8 @@
                                         <div class="row">
                                             <div class="col-md-12">
                                                 <label class="col-form-label">Tipo Proyecto: </label>
-                                                <select class="js-example-basic-single form-control" id="tiposProyectos" required>
-                                                    <option value="">Seleccione...</option>
+                                                <select class="js-example-basic-single" style="width: 100%;" id="tiposProyectos" required>
+                                                    <option value="" ></option>
                                                     <option th:each="tp : ${tiposProyectos}" th:value="${tp.id_tipoProyecto}"
                                                         th:text="${tp.nom_tipoProyecto}"></option>
                                                 </select>
@@ -84,17 +83,17 @@
                         <div class="row">
                             <div class="col-12">
                                 <div class="card m-b-30">
-                                    
+                                    <div id="table_replace">
+
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
 
                     </div><!-- container fluid -->
 
                 </div>
                 
-
             </div>
             <!-- content -->
 
@@ -111,7 +110,9 @@
     </div>
     <script>
         $(document).ready(function(){
-            $('.js-example-basic-single').select2();
+            $('.js-example-basic-single').select2({
+                placeholder : "Seleccione..."
+            });
 
             $('#tiposProyectos').on('change', function() {
                 // Obtener el valor seleccionado
@@ -130,12 +131,39 @@
                         console.error('Error:', error);
                     }
                 });
+                $.ajax({
+                    url: '/lista_proyectos/'+ selectedValue, // Cambia esta URL por la ruta a tu servidor
+                    type: 'GET',
+                    success: function(response) {
+                        // Manejar la respuesta del servidor
+                        console.log('Éxito');
+                        $("#table_replace").html(response);
+                    },
+                    error: function(xhr, status, error) {
+                        // Manejar el error
+                        console.error('Error:', error);
+                    }
+                });
             });
 
         });
     </script>
     <script>
-
+        function cargarTabla(id){
+            $.ajax({
+                url: '/lista_proyectos/'+ id, // Cambia esta URL por la ruta a tu servidor
+                type: 'GET',
+                success: function(response) {
+                    // Manejar la respuesta del servidor
+                    console.log('Éxito');
+                    $("#table_replace").html(response);
+                },
+                error: function(xhr, status, error) {
+                    // Manejar el error
+                    console.error('Error:', error);
+                }
+            });
+        }
     </script>
 </body>
 

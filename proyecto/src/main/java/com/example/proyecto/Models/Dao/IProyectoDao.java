@@ -38,4 +38,9 @@ public interface IProyectoDao extends CrudRepository<Proyecto, Long>{
 
     @Query(value = "SELECT * FROM proyecto as p WHERE p.categoria_proyecto='SALUD PUBLICA, DERECHOS HUMANOS Y JUSTICIA SOCIAL' AND p.estado != 'X' ORDER BY p.promedio_final DESC", nativeQuery = true)
     List<Proyecto> proyectosRankingSalud();
+
+    @Query(value = "SELECT p.* FROM proyecto p \n" + //
+                "LEFT JOIN tipo_proyecto tp ON tp.id_tipo_proyecto = p.id_tipo_proyecto \n" + //
+                "WHERE tp.id_tipo_proyecto = ?1",nativeQuery = true)
+    public List<Proyecto> obtenerProyectosPorTipoProyecto(Long id_tipo_proyecto);
 }

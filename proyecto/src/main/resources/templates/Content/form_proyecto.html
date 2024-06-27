@@ -19,8 +19,8 @@
 
             <div class="col-md-4">
                 <label class="col-form-label">CATEGORIA O GRUPO: </label>
-                <select class="js-example-basic-single form-control" th:field="${proyecto.categoriaProyecto}" required>
-                    <option value="">Seleccione...</option>
+                <select class="js-example-basic-single" style="width: 100%;" th:field="${proyecto.categoriaProyecto}" required>
+                    <option value=""></option>
                     <option th:each="cat : ${categorias}" th:value="${cat.id_categoriaProyecto}" th:text="${cat.nom_categoria}">INGLES</option>
                 </select>
             </div>
@@ -33,7 +33,7 @@
 
             <div class="col-md-4">
                 <label class="col-form-label">JURADOS : </label>
-                <select class="js-example-basic-multiple form-control" multiple="multiple" th:field="${proyecto.jurado}">
+                <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple" th:field="${proyecto.jurado}">
                     <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
                         th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
                     </option>
@@ -43,8 +43,8 @@
             
             <div class="col-md-4">
                 <label class="col-form-label">CAPACITADOR</label>
-                <select class="js-example-basic-single form-control" th:field="${proyecto.docente}">
-                    <option value="">Seleccione un Docente</option>
+                <select class="js-example-basic-single" style="width: 100%;" th:field="${proyecto.docente}">
+                    <option value=""></option>
                     <option th:each="doc : ${docentes}" th:value="${doc.id_docente}" th:if="${doc.estado != 'X'}"
                         th:text="${doc.persona.nombres}+' '+${doc.persona.paterno}+' '+${doc.persona.materno}">
                     </option>
@@ -69,8 +69,12 @@
     </form>
     <script>
         $(document).ready(function(){
-            $('.js-example-basic-single').select2();
-            $('.js-example-basic-multiple').select2();
+            $('.js-example-basic-single').select2({
+                placeholder:"Seleccione..."
+            });
+            $('.js-example-basic-multiple').select2({
+                placeholder:"Seleccione..."
+            });
         });
     </script>
 </div>
