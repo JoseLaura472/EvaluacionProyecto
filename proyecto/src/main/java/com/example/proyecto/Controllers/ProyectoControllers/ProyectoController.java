@@ -88,7 +88,7 @@ public class ProyectoController {
     public String ProyectoForm(Model model, @PathVariable(name = "id_tipoProyecto") Long id_tipoProyecto) {
 
         // Definir un array con los nombres de los fragmentos
-        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4","card_body5" };
+        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4", "card_body5" };
 
         // Verificar si el id_tipoProyecto es válido
         if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
@@ -110,7 +110,7 @@ public class ProyectoController {
     @GetMapping("/lista_proyectos/{id_tipoProyecto}")
     public String lista_proyectos(@PathVariable(name = "id_tipoProyecto") Long id_tipoProyecto, Model model) {
         // Definir un array con los nombres de los fragmentos
-        String[] fragments = { "table1", "table2", "table3", "table4", "table5"};
+        String[] fragments = { "table1", "table2", "table3", "table4", "table5" };
 
         // Verificar si el id_tipoProyecto es válido
         if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
@@ -129,49 +129,55 @@ public class ProyectoController {
     }
 
     // Boton para Guardar Documento
-    // @RequestMapping(value = "/ProyectoF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
-    // public ResponseEntity<String> ProyectoF(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
-    //         @RequestParam(value = "estudiante", required = false) Long[] id_estudiantes,
-    //         @RequestParam(value = "jurado") Long[] id_jurados) throws FileNotFoundException, IOException { 
+    // @RequestMapping(value = "/ProyectoF", method = RequestMethod.POST) // Enviar
+    // datos de Registro a Lista
+    // public ResponseEntity<String> ProyectoF(@Validated Proyecto proyecto,
+    // RedirectAttributes redirectAttrs,
+    // @RequestParam(value = "estudiante", required = false) Long[] id_estudiantes,
+    // @RequestParam(value = "jurado") Long[] id_jurados) throws
+    // FileNotFoundException, IOException {
 
-    //     MultipartFile multipartFile = proyecto.getFile();
-    //     ArchivoAdjunto archivoAdjunto = new ArchivoAdjunto();
-    //     AdjuntarArchivo adjuntarArchivo = new AdjuntarArchivo();
+    // MultipartFile multipartFile = proyecto.getFile();
+    // ArchivoAdjunto archivoAdjunto = new ArchivoAdjunto();
+    // AdjuntarArchivo adjuntarArchivo = new AdjuntarArchivo();
 
-    //     Path rootPath = Paths.get("archivos/");
-    //     Path rootAbsolutPath = rootPath.toAbsolutePath();
-    //     String rutaDirectorio = rootAbsolutPath + "";
+    // Path rootPath = Paths.get("archivos/");
+    // Path rootAbsolutPath = rootPath.toAbsolutePath();
+    // String rutaDirectorio = rootAbsolutPath + "";
 
-    //     String rutaArchivo = adjuntarArchivo.crearSacDirectorio(rutaDirectorio);
-    //     List<ArchivoAdjunto> listArchivos = archivoAdjuntoService.listarArchivoAdjunto();
-    //     proyecto.setNombreArchivo((listArchivos.size() + 1) + ".pdf");
-    //     Integer ad = adjuntarArchivo.adjuntarArchivoProyecto(proyecto, rutaArchivo);
-    //     if (ad == 1) {
-    //         ArchivoAdjunto barchivoAdjunto = archivoAdjuntoService
-    //                 .buscarArchivoAdjuntoPorProyecto(proyecto.getId_proyecto());
-    //         if (barchivoAdjunto == null) {
-    //             ArchivoAdjunto archivoAdjunt = new ArchivoAdjunto();
-    //             archivoAdjunt.setNombre_archivo(proyecto.getNombreArchivo());
-    //             archivoAdjunt.setRuta_archivo(rutaArchivo);
-    //             archivoAdjunt.setEstado("A");
-    //             archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt);
-    //             proyecto.setArchivoAdjunto(archivoAdjunt);
-    //         } else {
-    //             barchivoAdjunto.setNombre_archivo(proyecto.getNombreArchivo());
-    //             barchivoAdjunto.setRuta_archivo(rutaArchivo);
-    //             archivoAdjuntoService.modificarArchivoAdjunto(barchivoAdjunto);
-    //         }
-    //     } else if (ad == 2) {
-    //         // Opcional: Manejar el caso donde no se adjuntó ningún archivo, si es necesario
-    //         System.out.println("No se adjuntó ningún archivo, pero el proyecto fue actualizado.");
-    //     }
-    //     proyecto.setEstado("A");
-    //     proyectoService.save(proyecto);
-    //     redirectAttrs
-    //             .addFlashAttribute("mensaje", "Registro Exitoso del Documento")
-    //             .addFlashAttribute("clase", "success alert-dismissible fade show");
+    // String rutaArchivo = adjuntarArchivo.crearSacDirectorio(rutaDirectorio);
+    // List<ArchivoAdjunto> listArchivos =
+    // archivoAdjuntoService.listarArchivoAdjunto();
+    // proyecto.setNombreArchivo((listArchivos.size() + 1) + ".pdf");
+    // Integer ad = adjuntarArchivo.adjuntarArchivoProyecto(proyecto, rutaArchivo);
+    // if (ad == 1) {
+    // ArchivoAdjunto barchivoAdjunto = archivoAdjuntoService
+    // .buscarArchivoAdjuntoPorProyecto(proyecto.getId_proyecto());
+    // if (barchivoAdjunto == null) {
+    // ArchivoAdjunto archivoAdjunt = new ArchivoAdjunto();
+    // archivoAdjunt.setNombre_archivo(proyecto.getNombreArchivo());
+    // archivoAdjunt.setRuta_archivo(rutaArchivo);
+    // archivoAdjunt.setEstado("A");
+    // archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt);
+    // proyecto.setArchivoAdjunto(archivoAdjunt);
+    // } else {
+    // barchivoAdjunto.setNombre_archivo(proyecto.getNombreArchivo());
+    // barchivoAdjunto.setRuta_archivo(rutaArchivo);
+    // archivoAdjuntoService.modificarArchivoAdjunto(barchivoAdjunto);
+    // }
+    // } else if (ad == 2) {
+    // // Opcional: Manejar el caso donde no se adjuntó ningún archivo, si es
+    // necesario
+    // System.out.println("No se adjuntó ningún archivo, pero el proyecto fue
+    // actualizado.");
+    // }
+    // proyecto.setEstado("A");
+    // proyectoService.save(proyecto);
+    // redirectAttrs
+    // .addFlashAttribute("mensaje", "Registro Exitoso del Documento")
+    // .addFlashAttribute("clase", "success alert-dismissible fade show");
 
-    //     return ResponseEntity.ok("1");
+    // return ResponseEntity.ok("1");
     // }
 
     @RequestMapping(value = "/ProyectoF", method = RequestMethod.POST)
@@ -179,6 +185,7 @@ public class ProyectoController {
             @RequestParam(name = "estudiante", required = false) Long[] id_estudiantes,
             @RequestParam(name = "docente") Long id_docente,
             @RequestParam(name = "categoriaProyecto") Long id_categoriaProyecto,
+            @RequestParam(name = "id_tipoProyecto")Long id_tipoProyecto,
             @RequestParam(name = "jurado") Long[] id_jurados) throws FileNotFoundException, IOException {
 
         MultipartFile multipartFile = proyecto.getFile();
@@ -191,32 +198,19 @@ public class ProyectoController {
 
         String rutaArchivo = adjuntarArchivo.crearSacDirectorio(rutaDirectorio);
         List<ArchivoAdjunto> listArchivos = archivoAdjuntoService.listarArchivoAdjunto();
-        proyecto.setNombreArchivo((listArchivos.size() + 1) + ".pdf");
         Integer ad = adjuntarArchivo.adjuntarArchivoProyecto(proyecto, rutaArchivo);
+        proyecto.setNombreArchivo((listArchivos.size() + 1) + ".pdf");
 
-        if (ad == 1) {
-            ArchivoAdjunto barchivoAdjunto = archivoAdjuntoService
-                    .buscarArchivoAdjuntoPorProyecto(proyecto.getId_proyecto());
-            if (barchivoAdjunto == null) {
-                ArchivoAdjunto archivoAdjunt = new ArchivoAdjunto();
-                archivoAdjunt.setNombre_archivo(proyecto.getNombreArchivo());
-                archivoAdjunt.setRuta_archivo(rutaArchivo);
-                archivoAdjunt.setEstado("A");
-                archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt); // Guarda y asigna el
-                                                                                              // ArchivoAdjunto
-                proyecto.setArchivoAdjunto(archivoAdjunt);
-            } else {
-                barchivoAdjunto.setNombre_archivo(proyecto.getNombreArchivo());
-                barchivoAdjunto.setRuta_archivo(rutaArchivo);
-                archivoAdjuntoService.modificarArchivoAdjunto(barchivoAdjunto);
-                proyecto.setArchivoAdjunto(barchivoAdjunto); // Asegúrate de asignarlo también aquí
-            }
-        } else if (ad == 2) {
-            System.out.println("No se adjuntó ningún archivo, pero el proyecto fue actualizado.");
-        }
+        ArchivoAdjunto archivoAdjunt = new ArchivoAdjunto();
+        archivoAdjunt.setNombre_archivo(proyecto.getNombreArchivo());
+        archivoAdjunt.setRuta_archivo(rutaArchivo);
+        archivoAdjunt.setEstado("A");
+        archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt); 
+        proyecto.setArchivoAdjunto(archivoAdjunt);
 
         proyecto.setDocente(docenteService.findOne(id_docente));
         proyecto.setCategoriaProyecto(categoriaProyectoService.findOne(id_categoriaProyecto));
+        proyecto.setTipoProyecto(tipoProyectoService.findOne(id_tipoProyecto));
         proyecto.setEstado("A");
         proyectoService.save(proyecto);
         redirectAttrs
@@ -273,14 +267,15 @@ public class ProyectoController {
 
     }
 
-
     // Boton para Guardar Documento
     @RequestMapping(value = "/ProyectoModF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
     public ResponseEntity<String> ProyectoModF(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
             @RequestParam(name = "estudiante", required = false) Long[] id_estudiantes,
-            @RequestParam(name = "categoriaProyecto" ,required = true)Long id_categoriaProyecto,
-            @RequestParam(name = "docente",required = false)Long id_docente,
-            @RequestParam(name = "jurado",required = true) Long[] id_jurados) throws FileNotFoundException, IOException {
+            @RequestParam(name = "categoriaProyecto", required = true) Long id_categoriaProyecto,
+            @RequestParam(name = "id_tipoProyecto")Long id_tipoProyecto,
+            @RequestParam(name = "docente", required = false) Long id_docente,
+            @RequestParam(name = "jurado", required = true) Long[] id_jurados)
+            throws FileNotFoundException, IOException {
 
         Proyecto p = proyectoService.findOne(proyecto.getId_proyecto());
         p.setNombre_proyecto(proyecto.getNombre_proyecto());
@@ -289,11 +284,11 @@ public class ProyectoController {
         p.setDocente(docenteService.findOne(id_docente));
         // Elimina todos los jurados actuales del proyecto
         p.getJurado().clear();
-        
+
         // Asigna la nueva lista de jurados al proyecto
         for (Long idJurado : id_jurados) {
             Jurado jurado = juradoService.findOne(idJurado); // Asegúrate de tener un método para encontrar el jurado
-                                                              // por ID
+                                                             // por ID
             if (jurado != null) {
                 p.getJurado().add(jurado);
             }
