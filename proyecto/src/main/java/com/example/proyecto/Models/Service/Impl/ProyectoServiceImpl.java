@@ -94,5 +94,19 @@ public class ProyectoServiceImpl implements IProyectoService {
         // TODO Auto-generated method stub
         return proyectoDao.obtenerProyectosPorTipoProyecto(id_tipo_proyecto);
     }
+
+    @Override
+    public List<Proyecto> obternerProyectosPorCategoriaProyecto(Long id_categoria_proyecto) {
+        // TODO Auto-generated method stub
+        return proyectoDao.obternerProyectosPorCategoriaProyecto(id_categoria_proyecto);
+    }
+
+    @Override
+    public List<Proyecto> obtenerRankingDeProyectosPorCategoria(Long id_categoria_proyecto) {
+        // TODO Auto-generated method stub
+        return obtenerRankingDeProyectosPorCategoria(id_categoria_proyecto);
+    }
+
+    
     
 }

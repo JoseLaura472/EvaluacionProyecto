@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="layout/head :: head">
+</head>
+
+
+<body class="fixed-left">
+
+    <!-- Loader -->
+    <div id="preloader">
+        <div id="status">
+            <div class="spinner"></div>
+        </div>
+    </div>
+    <div id="wrapper">
+        <div th:replace="layout/sidebar :: sidebar">
+        </div>
+        <div class="content-page">
+            <div class="content">
+                <div th:replace="layout/topbar :: topbar"></div>
+                <div class="page-content-wrapper ">
+                    <div class="container-fluid">
+                        <hr>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="card m-b-30">
+                                    <div class="card-body">
+                                    
+                                        <h3 class="mt-0 header-title" style="font-size: 30px;">Seleccione Tipo de Proyecto</h3>
+                                    
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <label class="col-form-label">Tipo Proyecto: </label>
+                                                <select class="js-example-basic-single" style="width: 100%;" id="tiposProyectos" required>
+                                                    <option value="" ></option>
+                                                    <option th:each="tp : ${tiposProyectos}" th:value="${tp.id_tipoProyecto}"
+                                                        th:text="${tp.nom_tipoProyecto}"></option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                       <br>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card m-b-30">
+                                    <div id="replace" >
+                                    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card m-b-30">
+                                    <div id="replace_table">
+        
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer th:replace="layout/footer :: footer">
+            </footer>
+        </div>
+    </div>
+    <div th:replace="layout/script :: script">
+    </div>
+    <script>
+        $(document).ready(function(){
+            $('.js-example-basic-single').select2({
+                placeholder : "Seleccione..."
+            });
+
+            $('#tiposProyectos').on('change', function() {
+
+                var selectedValue = $(this).val();
+
+                $.ajax({
+                    url: '/cargar_categorias/'+ selectedValue, 
+                    type: 'GET',
+                    success: function(response) {
+                        console.log('Éxito');
+                        $("#replace").html(response);
+                    },
+                    error: function(xhr, status, error) {
+                        // Manejar el error
+                        console.error('Error:', error);
+                    }
+                });
+
+            });
+            
+        });
+    </script>
+    <script>
+        
+        $(function() {
+            $("#example1").DataTable({
+                "responsive" : true,
+                "lengthChange" : false,
+                "autoWidth" : false,
+                "buttons" : [ "copy", "csv", "excel", "pdf", "print" ]
+            //, "colvis"
+            }).buttons().container().appendTo(
+                    '#example1_wrapper .col-md-6:eq(0)');
+        });
+
+        
+    </script>
+</body>
+
+</html>

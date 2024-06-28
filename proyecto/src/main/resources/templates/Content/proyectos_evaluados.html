@@ -1,0 +1,60 @@
+<div th:fragment="table_proyectos" class="card-body">
+        
+    <h2 class="mt-0 text-center" th:text="${'LISTA DE PROYECTOS EVALUADOS ('+ categoria.nom_categoria+')'}">LISTA DE PROYECTOS EVALUADOS</h2>
+    <table id="example1" class="table table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+        <thead>
+        <tr>
+            <th>POSICION</th>
+            <th>PROGRAMA</th>
+            <th>PROYECTO</th>
+            <th>NOTA FINAL</th>
+            <th>DETALLE</th>
+        </tr>
+        </thead>
+        <tbody>
+            <tr th:each="pro, num : ${proyectos}" >
+                <td width="3%" th:text="${'N°'} + ${num.index + 1}"></td>
+                <td width="18%" th:if="${pro.programa != null}" th:text="${pro.programa.nombre_programa}"></td>
+                <td width="18%" th:if="${pro.programa == null}" th:text="${'SIN PROGRAMA'}"></td>
+                <td width="77%" th:text="${pro.nombre_proyecto}"></td>
+                <td width="5%" th:text="${pro.promedio_final}"></td>
+                <td>
+                    <button class="btn btn-success" 
+                        th:attr="onclick='imprimirDetalle(\'' +${pro.id_proyecto}+ '\')'"
+                    > Detalle</button>
+                </td>
+            </tr>
+        
+        </tbody>
+    </table>
+
+    <script>
+        $(function() {
+            $("#example1").DataTable({
+                "responsive" : true,
+                "lengthChange" : false,
+                "autoWidth" : false,
+                "buttons" : [ "copy", "csv", "excel", "pdf", "print" ]
+            //, "colvis"
+            }).buttons().container().appendTo(
+                    '#example1_wrapper .col-md-6:eq(0)');
+        });
+
+        function imprimirDetalle(id_proyecto) {
+            // Crear el formulario dinámicamente
+            var form = document.createElement("form");
+            form.method = "GET";
+            form.action = "/ReporteProyecoctoOne/" + id_proyecto;
+            form.target = "_blank";  // Esto asegura que se abra en una nueva ventana
+        
+            // Añadir el formulario al documento
+            document.body.appendChild(form);
+        
+            // Enviar el formulario
+            form.submit();
+        
+            // Eliminar el formulario del documento
+            document.body.removeChild(form);
+        }
+    </script>
+</div>

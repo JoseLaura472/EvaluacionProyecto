@@ -13,4 +13,5 @@ public interface ICategoriaProyectoDao extends CrudRepository<CategoriaProyecto,
                 "LEFT JOIN tipo_proyecto tp ON tp.id_tipo_proyecto = cp.id_tipo_proyecto \n" + //
                 "WHERE tp.id_tipo_proyecto = ?1",nativeQuery = true)
     public List<CategoriaProyecto> getCategoriasPorTipoProyecto(Long id_tipoProyecto);
+   
 }

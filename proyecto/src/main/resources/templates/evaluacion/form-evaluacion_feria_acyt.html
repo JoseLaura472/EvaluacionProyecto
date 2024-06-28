@@ -94,9 +94,16 @@
                                                 <tr>
                                                     <td width="25%"
                                                         style="border: 1px solid black; border-right: none; background-color: #1B40A6; color: white; padding: 5px; font-family: Verdana, sans-serif;">
-                                                        PROGRAMA:</td>
+                                                        PROGRAMA O CARRERA:</td>
                                                     <td colspan="3" style="border: 1px solid black; padding: 5px;"
                                                         th:text="${proyecto.programa.nombre_programa}">Columna 2</td>
+                                                </tr>
+                                                <tr>
+                                                    <td width="25%"
+                                                        style="border: 1px solid black; border-right: none; background-color: #1B40A6; color: white; padding: 5px; font-family: Verdana, sans-serif;">
+                                                        ASIGNATURA:</td>
+                                                    <td colspan="3" style="border: 1px solid black; padding: 5px;"
+                                                        th:text="${proyecto.nro_stand}">Columna 2</td>
                                                 </tr>
 
                                                 <tr>
@@ -132,7 +139,7 @@
                                                 </tr>
 
                                                 <tr>
-                                                    <td style="border-top: 1px; font-weight: bold; font-size: larger; padding-left: 380px; text-align: center;"> R=Regular; B=Bien; E=Excelente </td>
+                                                    <td style="border-top: 1px; font-weight: bold; font-size: larger; padding-left: 380px; text-align: center;"> I=Inicial; B=Basico; A=Autonomo; E=Estrategico </td>
                                                  
                                                 </tr>
                                                 <th:block th:each="c : ${criterios}">
@@ -141,13 +148,14 @@
                                                             I. Originalidad y Creatividad (30 PUNTOS)
                                                         </td>
                                                         <td style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
-                                                            R</td>
+                                                            I</td>
                                                         <td style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
                                                             B</td>
                                                         <td style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
-                                                            E</td>
+                                                            A</td>
                                                         <td style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
                                                             E</td>
+                                                        
                                                     </tr>
                                                     <!-- <tr>
                                                         <td style="border: 1px solid black; text-align: center; padding: 5px;"  >

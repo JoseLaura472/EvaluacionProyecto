@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.io.OutputStream;
 
@@ -27,10 +28,12 @@ import com.example.proyecto.Models.Entity.Evaluacion;
 import com.example.proyecto.Models.Entity.Ponderacion;
 import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Service.ICategoriaCriterioService;
+import com.example.proyecto.Models.Service.ICategoriaProyectoService;
 import com.example.proyecto.Models.Service.IEvaluacionService;
 import com.example.proyecto.Models.Service.IPonderacionService;
 import com.example.proyecto.Models.Service.IProyectoService;
 import com.example.proyecto.Models.Service.IPuntajeService;
+import com.example.proyecto.Models.Service.ITipoProyectoService;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Image;
@@ -62,18 +65,56 @@ public class ReportesController {
     @Autowired
     private IPuntajeService puntajeService;
 
+    @Autowired
+    private ITipoProyectoService tipoProyectoService;
+
+    @Autowired
+    private ICategoriaProyectoService categoriaProyectoService;
+
+
+    // @GetMapping("/FormReportes")
+    // public String formReportes(HttpServletRequest request, Model model){
+    //     if (request.getSession().getAttribute("usuario") != null) {
+
+    //         model.addAttribute("proyectos", proyectoService.findAll());
+
+    //     return "reportes/formReportes";
+    //     }else{
+    //         return "redirect:LoginR";
+    //     }
+    // }
 
     @GetMapping("/FormReportes")
     public String formReportes(HttpServletRequest request, Model model){
         if (request.getSession().getAttribute("usuario") != null) {
 
+            model.addAttribute("tiposProyectos", tipoProyectoService.findAll());
             model.addAttribute("proyectos", proyectoService.findAll());
 
-        return "reportes/formReportes";
+        return "reportes/form_Reportes";
         }else{
             return "redirect:LoginR";
         }
     }
+
+    @GetMapping("/cargar_categorias/{id_tipoProyecto}")
+    public String cargar_categorias(Model model,@PathVariable(name = "id_tipoProyecto")Long id_tipoProyecto) {
+
+        model.addAttribute("categorias", categoriaProyectoService.getCategoriasPorTipoProyecto(id_tipoProyecto));
+
+        return "Content/form_reportes :: categorias";
+    }
+
+    @GetMapping("/proyectos/{id_categoria_proyecto}")
+    public String proyectos(Model model,@PathVariable(name = "id_categoria_proyecto")Long id_categoria_proyecto) {
+
+        model.addAttribute("categoria", categoriaProyectoService.findOne(id_categoria_proyecto));
+        model.addAttribute("proyectos", proyectoService.obternerProyectosPorCategoriaProyecto(id_categoria_proyecto));
+
+        return "Content/proyectos_evaluados :: table_proyectos";
+    }
+    
+    
 
     // @GetMapping("/ReporteProyecoctoOne")
     // public String reporteProyecoctoOne(@RequestParam(value = "id_proyecto")Long id_proyecto, Model model){
@@ -119,8 +160,8 @@ public class ReportesController {
     //     return "reportes/print";
     // }
 
-    @GetMapping("/ReporteProyecoctoOne")
-    public String reporteProyecoctoOne(@RequestParam(value = "id_proyecto")Long id_proyecto, Model model){
+    @GetMapping("/ReporteProyecoctoOne/{id_proyecto}")
+    public String reporteProyecoctoOne(@PathVariable(name = "id_proyecto")Long id_proyecto, Model model){
 
         Proyecto proyecto = proyectoService.findOne(id_proyecto); 
         
@@ -137,8 +178,11 @@ public class ReportesController {
 
             return "reportes/report_dinamico_escuela_tecnica";
 
+        }else if(proyecto.getTipoProyecto().getId_tipoProyecto() == 5){
+            model.addAttribute("ponderaciones", ponderacionService.obtenerPonderacionesPorProyecto(id_proyecto));
+            return "reportes/report_dinamico_feria_acyt";
         }else{
-            return "reportes/report_dinamico";
+            return "redirect:/FormReportes";
         }
     }
 

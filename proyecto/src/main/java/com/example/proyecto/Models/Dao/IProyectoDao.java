@@ -43,4 +43,21 @@ public interface IProyectoDao extends CrudRepository<Proyecto, Long>{
                 "LEFT JOIN tipo_proyecto tp ON tp.id_tipo_proyecto = p.id_tipo_proyecto \n" + //
                 "WHERE tp.id_tipo_proyecto = ?1",nativeQuery = true)
     public List<Proyecto> obtenerProyectosPorTipoProyecto(Long id_tipo_proyecto);
+
+    @Query(value = "SELECT p.* FROM proyecto p \n" + //
+                "LEFT JOIN tipo_proyecto tp ON tp.id_tipo_proyecto = p.id_tipo_proyecto \n" + //
+                "LEFT JOIN categoria_proyecto cp ON cp.id_tipo_proyecto = tp.id_tipo_proyecto \n" + //
+                "WHERE p.estado = 'E' AND p.id_categoria_proyecto = ?1 \n" + //
+                "GROUP BY p.id_proyecto ",nativeQuery = true)
+    public List<Proyecto> obternerProyectosPorCategoriaProyecto(Long id_categoria_proyecto);
+
+    @Query(value = "SELECT p.* \n" + //
+                "FROM proyecto p \n" + //
+                "LEFT JOIN tipo_proyecto tp ON tp.id_tipo_proyecto = p.id_tipo_proyecto \n" + //
+                "LEFT JOIN categoria_proyecto cp ON cp.id_categoria_proyecto = p.id_categoria_proyecto \n" + //
+                "WHERE p.estado = 'E' AND p.id_categoria_proyecto = ?1 \n" + //
+                "GROUP BY p.id_proyecto \n" + //
+                "ORDER BY p.promedio_final DESC \n" + //
+                "LIMIT 3",nativeQuery = true)
+    public List<Proyecto> obtenerRankingDeProyectosPorCategoria(Long id_categoria_proyecto);
 }
