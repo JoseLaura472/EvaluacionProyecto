@@ -245,7 +245,7 @@ public class ProyectoController {
             @PathVariable(name = "id_tipoProyecto") Long id_tipoProyecto, Model model) {
 
         // Definir un array con los nombres de los fragmentos
-        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4" };
+        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4", "card_body5"};
 
         // Verificar si el id_tipoProyecto es válido
         if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
@@ -257,6 +257,8 @@ public class ProyectoController {
             model.addAttribute("categorias", categoriaProyectoService.getCategoriasPorTipoProyecto(id_tipoProyecto));
             model.addAttribute("jurados", juradoService.findAll());
             model.addAttribute("docentes", docenteService.findAll());
+            model.addAttribute("estudiantes", estudianteService.findAll());
+            model.addAttribute("carreras", programaService.findAll());
             model.addAttribute("id_tipoProyecto", id_tipoProyecto);
             model.addAttribute("edit", true);
             return "Content/form_proyecto :: " + fragments[id_tipoProyecto.intValue() - 1];
