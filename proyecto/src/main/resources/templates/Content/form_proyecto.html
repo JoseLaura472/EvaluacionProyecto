@@ -207,6 +207,11 @@
                 <button class="btn btn-primary" type="submit"
                     th:text="${edit} ?'Actualizar' :'Registrar'">
                 </button>
+
+                <button th:if="${proyecto.id_proyecto != null}" class="btn btn-danger" type="button"
+                th:attr="onclick='nuevoRegistro(\''+ ${id_tipoProyecto} + '\')'"
+                    th:text="${'Cancelar'}">
+                </button>
             </div>
         </div>
     </form>
