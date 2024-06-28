@@ -4,7 +4,9 @@
     <div class="topbar-left	d-none d-lg-block">
         <div class="text-center">
 
-            <a href="/AdmPG" class="logo"><img src="../../../../assets/images/FEXCOIN.png" height="60"
+            <a href="/AdmPG" class="logo"><img src="../../../../assets/images/Logo UAP (1).png" height="70"
+                    alt="logo"></a>
+            <a href="/AdmPG" class="logo"><img src="../../../../assets/images/USIC APP.png" height="55"
                     alt="logo"></a>
         </div>
     </div>
@@ -19,6 +21,7 @@
                     data-toggle="dropdown" href="#" role="button" aria-haspopup="false"
                     aria-expanded="false">
                     <img src="../../../../assets/images/users/user-1.jpg" alt="user" class="rounded-circle">
+                    <span th:text="${session.usuario.persona.nombres + ' ' + session.usuario.persona.paterno +' '+ session.usuario.persona.materno}" style="color: aliceblue;"> </span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-animated profile-dropdown ">
                     <!-- <a class="dropdown-item" href="#"><i
