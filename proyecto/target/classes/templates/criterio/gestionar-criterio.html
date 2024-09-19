@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head th:replace="layout/head :: head">
+<head th:replace="~{layout/head :: head}">
 </head>
 
 <body class="fixed-left">
@@ -17,7 +17,7 @@
     <div id="wrapper">
 
         <!-- ========== Left Sidebar Start ========== -->
-        <div th:replace="layout/sidebar :: sidebar">
+        <div th:replace="~{layout/sidebar :: sidebar}">
         </div>
         <!-- Left Sidebar End -->
 
@@ -28,7 +28,7 @@
             <div class="content">
 
                 <!-- Top Bar Start -->
-                <div th:replace="layout/topbar :: topbar">
+                <div th:replace="~{layout/topbar :: topbar}">
                 </div>
                 <!-- Top Bar End -->
 
@@ -180,7 +180,7 @@
             </div>
             <!-- content -->
 
-            <footer th:replace="layout/footer :: footer">
+            <footer th:replace="~{layout/footer :: footer}">
             </footer>
 
         </div>
@@ -189,7 +189,7 @@
     </div>
     <!-- END wrapper -->
 
-    <div th:replace="layout/script :: script">
+    <div th:replace="~{layout/script :: script}">
     </div>
     <script>
         function MandarURL(a) {
