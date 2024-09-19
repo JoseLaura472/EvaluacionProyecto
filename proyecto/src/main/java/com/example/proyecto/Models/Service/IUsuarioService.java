@@ -17,4 +17,6 @@ public interface IUsuarioService {
     public Usuario getUsuarioContraseña(String correo, String password);
 	
     public Usuario getUsuarioPersona(Long id_persona);
+
+    Usuario buscarPorNombreUser(String nombre);
 }

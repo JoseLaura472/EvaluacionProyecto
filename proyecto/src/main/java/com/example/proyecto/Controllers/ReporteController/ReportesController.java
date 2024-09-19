@@ -1,31 +1,12 @@
 package com.example.proyecto.Controllers.ReporteController;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.List;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
-import jakarta.servlet.http.HttpServletRequest;
-
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import java.io.OutputStream;
 
-
-import com.example.proyecto.Models.Entity.CategoriaCriterio;
 import com.example.proyecto.Models.Entity.Estudiante;
-import com.example.proyecto.Models.Entity.Evaluacion;
-import com.example.proyecto.Models.Entity.Ponderacion;
 import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Service.ICategoriaCriterioService;
 import com.example.proyecto.Models.Service.ICategoriaProyectoService;
@@ -34,21 +15,17 @@ import com.example.proyecto.Models.Service.IPonderacionService;
 import com.example.proyecto.Models.Service.IProyectoService;
 import com.example.proyecto.Models.Service.IPuntajeService;
 import com.example.proyecto.Models.Service.ITipoProyectoService;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.Paragraph;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.lowagie.text.Cell;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
-import com.itextpdf.text.Phrase;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+
+import jakarta.servlet.http.HttpServletRequest;
 @Controller
 public class ReportesController {
     

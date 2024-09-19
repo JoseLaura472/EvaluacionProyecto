@@ -8,13 +8,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -43,6 +38,9 @@ import com.example.proyecto.Models.Service.IProgramaService;
 import com.example.proyecto.Models.Service.IProyectoService;
 import com.example.proyecto.Models.Service.ITipoProyectoService;
 import com.example.proyecto.Models.Utils.AdjuntarArchivo;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Controller
 public class ProyectoController {

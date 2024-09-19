@@ -7,11 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.Map;
-
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,22 +18,22 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.example.proyecto.Models.Entity.Proyecto;
-import com.example.proyecto.Models.Entity.Puntaje;
-import com.example.proyecto.Models.Entity.Usuario;
 import com.example.proyecto.Models.Dao.IEvaluacionDao;
-import com.example.proyecto.Models.Dao.IJuradoDao;
-import com.example.proyecto.Models.Entity.CategoriaCriterio;
 import com.example.proyecto.Models.Entity.Evaluacion;
 import com.example.proyecto.Models.Entity.Jurado;
 import com.example.proyecto.Models.Entity.Ponderacion;
-import com.example.proyecto.Models.Entity.Pregunta;
+import com.example.proyecto.Models.Entity.Proyecto;
+import com.example.proyecto.Models.Entity.Puntaje;
+import com.example.proyecto.Models.Entity.Usuario;
 import com.example.proyecto.Models.Service.ICategoriaCriterioService;
 import com.example.proyecto.Models.Service.IEvaluacionService;
 import com.example.proyecto.Models.Service.IJuradoService;
 import com.example.proyecto.Models.Service.IPonderacionService;
 import com.example.proyecto.Models.Service.IProyectoService;
 import com.example.proyecto.Models.Service.IPuntajeService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class EvaluacionController {
@@ -63,6 +58,7 @@ public class EvaluacionController {
 
     @Autowired
     private IPonderacionService ponderacionService;
+
     // FUNCION PARA LA VISUALIZACION DE REGISTRO DE MNACIONALIDAD
     @RequestMapping(value = "/ProyectosEvaluacionR", method = RequestMethod.GET) // Pagina principal
     public String EvaluacionR(HttpServletRequest request, Model model) {
@@ -102,34 +98,38 @@ public class EvaluacionController {
 
     // Boton para Editar Documentos
     // @RequestMapping(value = "/form-evaluacion/{id_proyecto}")
-    // public String editar_proyecto(@PathVariable("id_proyecto") Long id_proyecto, Model model, HttpSession session, HttpServletRequest request) {
+    // public String editar_proyecto(@PathVariable("id_proyecto") Long id_proyecto,
+    // Model model, HttpSession session, HttpServletRequest request) {
 
-    //     if (request.getSession().getAttribute("usuario") != null) {
-    //         Evaluacion evaluacion = new Evaluacion();
-    //     Proyecto proyecto = proyectoService.findOne(id_proyecto);
-        
-    //     model.addAttribute("proyecto", proyecto);
-    //     model.addAttribute("evaluacion", evaluacion);
+    // if (request.getSession().getAttribute("usuario") != null) {
+    // Evaluacion evaluacion = new Evaluacion();
+    // Proyecto proyecto = proyectoService.findOne(id_proyecto);
 
-    
-    //     Long[] idsCriterios = new Long[] {
-    //         1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L, 20L,
-    //         21L, 22L, 23L, 24L, 25L, 26L, 27L, 28L, 29L, 30L, 31L, 32L, 33L, 34L, 35L, 36L, 37L, 38L, 39L, 40L, 41L, 42L
-    //     };
-    
-    //     for (int i = 0; i < idsCriterios.length; i++) {
-    //         model.addAttribute("criterio" + (i + 1), criterioService.findOne(idsCriterios[i]));
-    //     }
-    
-    //     return "evaluacion/form-evaluacion";
-    //     }else{
-    //         return "redirect:LoginR";
-    //     }
-        
+    // model.addAttribute("proyecto", proyecto);
+    // model.addAttribute("evaluacion", evaluacion);
+
+    // Long[] idsCriterios = new Long[] {
+    // 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L,
+    // 18L, 19L, 20L,
+    // 21L, 22L, 23L, 24L, 25L, 26L, 27L, 28L, 29L, 30L, 31L, 32L, 33L, 34L, 35L,
+    // 36L, 37L, 38L, 39L, 40L, 41L, 42L
+    // };
+
+    // for (int i = 0; i < idsCriterios.length; i++) {
+    // model.addAttribute("criterio" + (i + 1),
+    // criterioService.findOne(idsCriterios[i]));
+    // }
+
+    // return "evaluacion/form-evaluacion";
+    // }else{
+    // return "redirect:LoginR";
+    // }
+
     // }
 
     @RequestMapping(value = "/form-evaluacion/{id_proyecto}")
-    public String form_evaluacion(@PathVariable(name = "id_proyecto") Long id_proyecto, Model model, HttpSession session,
+    public String form_evaluacion(@PathVariable(name = "id_proyecto") Long id_proyecto, Model model,
+            HttpSession session,
             HttpServletRequest request) {
 
         if (request.getSession().getAttribute("usuario") != null) {
@@ -138,18 +138,19 @@ public class EvaluacionController {
 
             model.addAttribute("proyecto", proyecto);
             model.addAttribute("evaluacion", evaluacion);
-            model.addAttribute("criterios", categoriaCriterioService.obtenerCategoriaCriteriosPorTipoProyecto(proyecto.getTipoProyecto().getId_tipoProyecto()));
+            model.addAttribute("criterios", categoriaCriterioService
+                    .obtenerCategoriaCriteriosPorTipoProyecto(proyecto.getTipoProyecto().getId_tipoProyecto()));
 
             if (proyecto.getTipoProyecto().getId_tipoProyecto() == 1) {
 
                 return "evaluacion/form-evaluacion_copia";
-                
-            }else if(proyecto.getTipoProyecto().getId_tipoProyecto() == 4){
-               
+
+            } else if (proyecto.getTipoProyecto().getId_tipoProyecto() == 4) {
+
                 return "evaluacion/form-evaluacion_escuela_tecnica";
-            }else if(proyecto.getTipoProyecto().getId_tipoProyecto() == 5){
+            } else if (proyecto.getTipoProyecto().getId_tipoProyecto() == 5) {
                 return "evaluacion/form-evaluacion_feria_acyt";
-            }else{
+            } else {
                 return "evaluacion/form-evaluacion";
             }
         } else {
@@ -261,19 +262,18 @@ public class EvaluacionController {
             return "redirect:/ProyectosEvaluacionR?alert=false";
         }
 
-        
         // Set<Ponderacion> ponderaciones = new HashSet<>();
         // if (id_ponderacion != null) {
-        //     for (Long id : id_ponderacion) {
-        //         Ponderacion ponderacion = ponderacionService.findOne(id);
-        //         ponderaciones.add(ponderacion);
-        //     }
+        // for (Long id : id_ponderacion) {
+        // Ponderacion ponderacion = ponderacionService.findOne(id);
+        // ponderaciones.add(ponderacion);
+        // }
         // }
 
         for (Long id : values) {
-                int pon = id.intValue();
-                puntajeTotal += pon;
-            
+            int pon = id.intValue();
+            puntajeTotal += pon;
+
         }
 
         evaluacion.setEstado("A");
