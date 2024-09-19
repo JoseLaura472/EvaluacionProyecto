@@ -8,6 +8,9 @@ import org.springframework.ui.Model;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.proyecto.Models.Entity.CategoriaCriterio;
 import com.example.proyecto.Models.Entity.TipoProyecto;
@@ -15,9 +18,6 @@ import com.example.proyecto.Models.Service.ICategoriaCriterioService;
 import com.example.proyecto.Models.Service.ITipoProyectoService;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.PostMapping;
 
 
 
@@ -61,7 +61,7 @@ public class CategoriaCriterioController {
             if (existingCategoriaCriterio != null) {
                 // Actualiza solo los campos necesarios
                 existingCategoriaCriterio.setTipoProyecto(tipoProyecto);
-                existingCategoriaCriterio.setNombre_cat_criterio(categoriaCriterio.getNombre_cat_criterio());
+                existingCategoriaCriterio.setNombre_cat_criterio(categoriaCriterio.getNombre_cat_criterio().toUpperCase());
                 categoriaCriterioService.save(existingCategoriaCriterio);
                 return ResponseEntity.ok("2");
             } else {

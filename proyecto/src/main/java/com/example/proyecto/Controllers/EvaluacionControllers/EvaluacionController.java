@@ -149,7 +149,7 @@ public class EvaluacionController {
 
                 return "evaluacion/form-evaluacion_escuela_tecnica";
             } else if (proyecto.getTipoProyecto().getId_tipoProyecto() == 5) {
-                return "evaluacion/form-evaluacion_feria_acyt";
+                return "evaluacion/form-evaluacion_dicyt_emprende";
             } else {
                 return "evaluacion/form-evaluacion";
             }
