@@ -157,7 +157,7 @@ public class ReportesController {
 
         }else if(proyecto.getTipoProyecto().getId_tipoProyecto() == 5){
             model.addAttribute("ponderaciones", ponderacionService.obtenerPonderacionesPorProyecto(id_proyecto));
-            return "reportes/report_dinamico_feria_acyt";
+            return "reportes/report_dinamico_feria_dicyt";
         }else{
             return "redirect:/FormReportes";
         }
