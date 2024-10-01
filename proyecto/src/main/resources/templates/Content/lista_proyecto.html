@@ -139,6 +139,7 @@
                 <th>Titulo del Proyecto</th>
                 <th>Categoria</th>
                 <th>Estudiantes</th>
+                <th>Docentes</th>
                 <th>Jurados</th>
                 <th>Acciones</th>
             </tr>
@@ -156,6 +157,7 @@
                         <li th:each="e : ${por.estudiante}" th:text="${e.persona.nombres}"></li>
                     </ul>
                 </td>
+                <td th:text="${por.docente.persona.nombres}"></td>
 
                 <td >
                     <ul>
