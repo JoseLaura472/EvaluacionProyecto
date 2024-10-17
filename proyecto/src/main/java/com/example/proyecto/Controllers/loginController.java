@@ -2,12 +2,11 @@ package com.example.proyecto.Controllers;
 
 import java.util.List;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,7 +15,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Entity.Usuario;
 import com.example.proyecto.Models.Service.IProyectoService;
+import com.example.proyecto.Models.Service.ITipoProyectoService;
 import com.example.proyecto.Models.Service.IUsuarioService;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class loginController {
@@ -26,6 +29,9 @@ public class loginController {
 
     @Autowired
     private IProyectoService proyectoService;
+
+    @Autowired
+    private ITipoProyectoService tipoProyectoService;
 
     // Funcion de visualizacion de iniciar sesiòn administrador
     @RequestMapping(value = "/LoginR", method = RequestMethod.GET)
@@ -77,18 +83,29 @@ public class loginController {
             List<Proyecto> PrimerL = proyectoService.Primerlugar();
             List<Proyecto> SegundoL = proyectoService.Segundolugar();
             List<Proyecto> TercerL = proyectoService.Tercerlugar();
-            List<Proyecto> Ranking = proyectoService.proyectosRanking();
+            // List<Proyecto> Ranking = proyectoService.proyectosRanking();
 
+            model.addAttribute("tiposProyectos", tipoProyectoService.findAll());
             model.addAttribute("PrimerL", PrimerL);
 			model.addAttribute("SegundoL", SegundoL);
             model.addAttribute("TercerL", TercerL);
-            model.addAttribute("Ranking", Ranking);
+            // model.addAttribute("Ranking", Ranking);
 
             model.addAttribute("usuario", usuario);
 			return "Inicio";
 		} else {
 			return "redirect:LoginR";
 		}
+	}
+
+    @PostMapping("/tabla-ranking-tipo-proyecto/{idTp}")
+	public String cargarTablaRegistrosEstudiante(Model model, @PathVariable Long idTp) throws Exception {
+		// List<Estudiante> listaEstudiantes = iEstudianteService.findAll();
+		List<Proyecto> listaProyectos = proyectoService.RankingPorTipoProyecto(idTp);
+
+		model.addAttribute("listaProyectos", listaProyectos);
+
+		return "proyecto/tabla-registro-proyecto-tp";
 	}
 
     @RequestMapping(value = "/Tecnologia", method = RequestMethod.GET) // Pagina principal

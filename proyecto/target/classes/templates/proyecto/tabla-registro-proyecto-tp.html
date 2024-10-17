@@ -1,0 +1,23 @@
+<div>
+    <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive "
+        style="border-collapse: collapse; border-spacing: 0; width: 100%; text-align: center;">
+        <thead>
+            <tr>
+                <th>Posición</th>
+                <th>Nombre Proyecto</th>
+                <th>Puntaje</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr th:each="ran,index : ${listaProyectos}">
+                <td th:text="${index.index + 1}">1</td>
+                <td th:text="${ran.nombre_proyecto}">System Architect</td>
+                <td th:text="${ran.promedio_final}">61</td>
+            </tr>
+
+        </tbody>
+    </table>
+</div>
+<script src="../../../../assets/pages/datatables.init.js"></script>
+<!-- <div th:replace="~{layout/script :: script}"></div> -->

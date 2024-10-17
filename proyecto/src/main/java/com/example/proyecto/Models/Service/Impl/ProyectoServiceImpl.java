@@ -107,6 +107,11 @@ public class ProyectoServiceImpl implements IProyectoService {
         return obtenerRankingDeProyectosPorCategoria(id_categoria_proyecto);
     }
 
+    @Override
+    public List<Proyecto> RankingPorTipoProyecto(Long idTipoProyecto) {
+        return proyectoDao.RankingPorTipoProyecto(idTipoProyecto);
+    }
+
     
     
 }

@@ -34,6 +34,8 @@ public interface IProyectoService {
 
     List<Proyecto> proyectosRankingSalud();
 
+    List<Proyecto> RankingPorTipoProyecto(Long idTipoProyecto);
+
     public List<Proyecto> obtenerProyectosPorTipoProyecto(Long id_tipo_proyecto);
 
     public List<Proyecto> obternerProyectosPorCategoriaProyecto(Long id_categoria_proyecto);
