@@ -34,7 +34,7 @@ public class Ponderacion {
     private String estado;
 
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "ponderaciones", fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "ponderacion", fetch = FetchType.LAZY)
     private List<Puntaje> puntajes;
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})

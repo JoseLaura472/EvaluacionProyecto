@@ -22,17 +22,22 @@ public class Puntaje {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id_puntaje;
-    private int puntaje;
+    private int valor;
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_evaluacion")
-    private Evaluacion evaluaciones; 
+    private Evaluacion evaluaciones;
+
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_jurado")
+    private Jurado jurado;
 
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_ponderacion")
-    private Ponderacion ponderaciones; 
+    private Ponderacion ponderacion;
 
 }

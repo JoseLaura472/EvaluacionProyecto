@@ -42,7 +42,19 @@ public class PuntajeServiceImpl implements IPuntajeService{
         return puntajeDao.obtenerPuntajesPorProyecto(id_proyecto);
     }
 
+    @Override
+    public Puntaje puntajePonderacionEvaluacionJurado(Long idJurado, Long idEvaluacion, Long idPonderacion) {
+        return puntajeDao.puntajePonderacionEvaluacionJurado(idJurado, idEvaluacion, idPonderacion);
+    }
 
+    @Override
+    public List<Puntaje> puntajesEvaluacionJurado(Long idJurado, Long idEvaluacion) {
+        return puntajeDao.puntajesEvaluacionJurado(idJurado, idEvaluacion);
+    }
 
+    @Override
+    public Puntaje puntajePonderacionJurado(Long idJurado, Long idPonderacion) {
+        return puntajeDao.puntajePonderacionJurado(idJurado, idPonderacion);
+    }
     
 }

@@ -18,4 +18,10 @@ public interface IPuntajeService {
 
     public List<Puntaje> obtenerPuntajesPorProyecto(Long id_proyecto);
 
+    Puntaje puntajePonderacionEvaluacionJurado(Long idJurado, Long idEvaluacion, Long idPonderacion);
+
+    List<Puntaje> puntajesEvaluacionJurado(Long idJurado, Long idEvaluacion);
+
+    Puntaje puntajePonderacionJurado(Long idJurado, Long idPonderacion);
+
 }

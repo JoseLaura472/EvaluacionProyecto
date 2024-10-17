@@ -202,3 +202,78 @@
     <!-- Datatable init js -->
     <script src="../../../../assets/pages/datatables.init.js"></script>
 </div>
+
+<div th:fragment="table6" class="card-body">
+
+    <h4 class="mt-0 header-title">Lista de Proyectos</h4>
+
+    <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive "
+        style="border-collapse: collapse; border-spacing: 0; width: 100%; text-align: center;">
+        <thead>
+            <tr>
+                <th>Titulo del Proyecto</th>
+                <th>Categoria</th>
+                <th>Estudiantes</th>
+                <th>Docentes</th>
+                <th>Jurados</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr th:each="por,index : ${proyectos}" th:if="${por.estado != 'X'}">
+                <td th:text="${por.nombre_proyecto}"></td>
+                <td th:if="${por.categoriaProyecto != null}" th:text="${por.categoriaProyecto.nom_categoria}"></td>
+                <td th:if="${por.categoriaProyecto == null}" th:text="${'SIN CATEGORIA'}"></td>
+
+                <td >
+                    <ul>
+                        <li th:each="e : ${por.estudiante}" th:text="${e.persona.nombres}"></li>
+                    </ul>
+                </td>
+                <td th:text="${por.docente.persona.nombres}"></td>
+
+                <td >
+                    <ul>
+                        <li th:each="e : ${por.jurado}" th:text="${e.persona.nombres}"></li>
+                    </ul>
+                </td>
+                
+                <td>
+                    <div style="display: flex; justify-content: center;align-items: center;">
+
+                        <a href="#" th:attr="onclick='editarRegistro(\''+ ${por.id_proyecto} + '\', \'' + ${por.tipoProyecto.id_tipoProyecto} + '\')'"
+                            class="btn btn-success">
+                            <i class="mdi mdi-border-color"></i>
+                        </a>
+                            &nbsp;
+                        <a th:attr="onclick='eliminarRegistro(\''+ ${por.id_proyecto} + '\',\'' + ${por.nombre_proyecto} + '\', \'' + ${por.tipoProyecto.id_tipoProyecto} + '\')'"
+                            class="btn btn-danger">
+                            <i class="mdi mdi-close" style="color: aliceblue;"></i>
+                        </a>
+
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <!-- Required datatable js -->
+    <script src="../../../../assets/plugins/datatables/jquery.dataTables.min.js"></script>
+    <script src="../../../../assets/plugins/datatables/dataTables.bootstrap4.min.js"></script>
+    <!-- Buttons examples -->
+    <script src="../../../../assets/plugins/datatables/dataTables.buttons.min.js"></script>
+    <script src="../../../../assets/plugins/datatables/buttons.bootstrap4.min.js"></script>
+    <script src="../../../../assets/plugins/datatables/jszip.min.js"></script>
+    <script src="../../../../assets/plugins/datatables/pdfmake.min.js"></script>
+    <script src="../../../../assets/plugins/datatables/vfs_fonts.js"></script>
+    <script src="../../../../assets/plugins/datatables/buttons.html5.min.js"></script>
+    <script src="../../../../assets/plugins/datatables/buttons.print.min.js"></script>
+    <script src="../../../../assets/plugins/datatables/buttons.colVis.min.js"></script>
+    <!-- Responsive examples -->
+    <script src="../../../../assets/plugins/datatables/dataTables.responsive.min.js"></script>
+    <script src="../../../../assets/plugins/datatables/responsive.bootstrap4.min.js"></script>
+
+    <!-- Datatable init js -->
+    <script src="../../../../assets/pages/datatables.init.js"></script>
+</div>

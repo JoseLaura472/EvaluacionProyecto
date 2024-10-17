@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="~{layout/head :: head}">
+    <style>
+        .button-container {
+            display: flex;
+            align-items: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #007bff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 2s linear infinite;
+            margin-left: 10px;
+            display: none;
+            /* Por defecto, ocultar el spinner */
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="fixed-left">
+    <!-- Loader -->
+    <div id="preloader">
+        <div id="status">
+            <div class="spinner"></div>
+        </div>
+    </div>
+    <!-- Begin page -->
+    <div id="wrapper">
+        <!-- ========== Left Sidebar Start ========== -->
+        <div th:replace="~{layout/sidebar :: sidebar}">
+        </div>
+        <!-- Left Sidebar End -->
+        <!-- Start right Content here -->
+        <div class="content-page">
+            <!-- Start content -->
+            <div class="content">
+                <!-- Top Bar Start -->
+                <div th:replace="~{layout/topbar :: topbar}">
+                </div>
+                <!-- Top Bar End -->
+                <!-- INICIO CONTENIDO -->
+                <div class="page-content-wrapper ">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <div
+                                    style="display: flex; justify-content: space-between; background-color: #f2f2f2; padding: 10px;">
+                                    <a class="btn btn-primary" type="submit" href="/ProyectosEvaluacionR">Volver</a>
+                                    <!-- <a class="btn btn-warning" type="button" target="_blank" th:href="${'../../../../openFileProyectoN/' + proyecto.id_proyecto}" >Ver Documento</a> -->
+                                </div>
+                            </div>
+                        </div>
+                        <!-- INICIO FORMULARIO -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card m-b-30">
+                                    <div class="card-body">
+                                        <form id="myForm" th:action="@{/GuardarEvaluacionBanda}" method="post">
+
+                                            <input type="hidden" name="proyectos" th:value="${proyecto.id_proyecto}">
+                                            <input type="hidden" th:field="${evaluacion.id_evaluacion}">
+                                            <h4 th:text="${evaluacion.id_evaluacion}"></h4>
+
+                                            <table
+                                                style="border: 1px solid black; width: 100%; margin-left: auto; margin-right: auto;">
+                                                <tr>
+                                                    <td colspan="4"
+                                                        style="border-bottom: 1px solid black; text-align: center; background-color: #1B40A6; color: white; padding: 5px; font-family: Verdana, sans-serif;">
+                                                        FORMULARIO DE EVALUACIÓN </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td
+                                                        style="border: 1px solid black; border-right: none; background-color: #1B40A6; color: white; padding: 5px; font-family: Verdana, sans-serif;">
+                                                        UNIDAD EDUCATIVA:</td>
+                                                    <td colspan="3" style="border: 1px solid black;"
+                                                        th:text="${proyecto.nombre_proyecto}"></td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td
+                                                        style="border: 1px solid black; border-right: none; background-color: #1B40A6; color: white; padding: 5px; font-family: Verdana, sans-serif;">
+                                                        CATEGORIA:
+                                                    </td>
+                                                    <td colspan="3" style="border: 1px solid black;"
+                                                        th:text="${proyecto.categoriaProyecto.nom_categoria}">
+                                                    </td>
+                                                </tr>
+                                            </table>
+
+                                            <p></p>
+
+                                            <table
+                                                style="border: 1px solid black; width: 100%; margin-left: auto; margin-right: auto;">
+
+                                                <tr>
+                                                    <td colspan="5"
+                                                        style="border-top: 1px solid black; text-align: center; background-color: #1B40A6; color: white; padding: 5px; font-family: Verdana, sans-serif;">
+                                                        CRITERIOS
+                                                        DE EVALUACIÓN</td>
+                                                </tr>
+                                                <tr>
+                                                    <td
+                                                        style="border: 1px solid black; background-color: #D3D8E5; padding: 5px;">
+                                                        CRITERIOS DEFINIDOS
+                                                    </td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
+                                                        Limite de Ponderacion</td>
+                                                    <td
+                                                        style="border: 1px solid black; text-align: center; background-color: #D3D8E5; padding: 5px;">
+                                                        Ponderacion</td>
+
+                                                </tr>
+                                                <th:block th:each="c : ${criterios}">
+
+                                                    <th:block th:each="p : ${c.preguntas}">
+                                                        <tr style="background-color: #D3D8E5;">
+                                                            <td style="border: 1px solid black; padding: 5px;"
+                                                                th:text="${p.nom_pregunta}"></td>
+                                                            <th:block th:each="pon : ${p.ponderaciones}">
+                                                                <td style="border: 1px solid black;"
+                                                                    class="text-center">
+                                                                    <p class="mb-0" th:text="${pon.num_ponderacion}">
+                                                                    </p>
+                                                                </td>
+                                                                <td width="30%"
+                                                                    style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                                    <div class="input-group">
+                                                                        <input type="hidden" name="id_ponderaciones"
+                                                                            th:value="${pon.id_ponderacion}">
+                                                                        <th:block th:each="puntaje: ${pon.puntajes}">
+                                                                            <input type="number"
+                                                                                th:value="${puntaje.valor}"
+                                                                                th:if="${puntaje != null}"
+                                                                                name="calificaciones" min="0"
+                                                                                th:max="${pon.num_ponderacion}"
+                                                                                class="form-control text-center"
+                                                                                th:data-blur="'guardarCalificacion(' + ${pon.id_ponderacion} + ', this.value)'">
+                                                                        </th:block>
+                                                                        <input type="number" value="0"
+                                                                            th:if="${pon.puntajes.size == 0}"
+                                                                            name="calificaciones" min="0"
+                                                                            th:max="${pon.num_ponderacion}"
+                                                                            class="form-control text-center"
+                                                                            th:data-blur="'guardarCalificacion(' + ${pon.id_ponderacion} + ', this.value)'">
+                                                                    </div>
+                                                                </td>
+                                                            </th:block>
+                                                        </tr>
+                                                    </th:block>
+                                                    <tr>
+                                                        <td style="color: white;">d</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                    </tr>
+                                                </th:block>
+
+                                                <tr>
+                                                    <td
+                                                        style="border: 1px solid black;  text-align: right; padding: 5px;">
+                                                        Puntaje Total
+                                                    </td>
+                                                    <td colspan="4"
+                                                        style="border: 1px solid black; text-align: center; padding: 5px;">
+                                                        <div id="resultado"></div>
+                                                    </td>
+                                                </tr>
+
+                                            </table>
+                                            <br>
+                                            <div class="button-container text-center">
+                                                <div id="Dsubmit">
+                                                    <button class="btn btn-primary" type="submit"
+                                                        th:text="${edit} ?'Actualizar' :'Enviar'"></button>
+                                                </div>
+                                            </div>
+                                        </form>
+
+
+                                        <div class="modal fade" tabindex="-1" id="ModalEvaluacion" role="dialog"
+                                            aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+
+                                                    <div>
+
+
+                                                        <iframe width="800" height="800" id="iframe-pdf" frameborder="0"
+                                                            allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FIN INICIO FORMULARIO -->
+
+                    </div><!-- container fluid -->
+
+                </div>
+                <!-- FIN INICIO CONTENIDO -->
+
+            </div>
+            <!-- content -->
+
+            <footer th:replace="~{layout/footer :: footer}">
+            </footer>
+
+        </div>
+        <!-- End Right content here -->
+
+    </div>
+    <!-- END wrapper -->
+
+    <div th:replace="~{layout/script :: script}">
+    </div>
+
+    <script type="text/javascript">
+        function renombrar(id_archivo_adjunto) {
+            var id_a = id_archivo_adjunto;
+
+            //alert(id_archivo_adjunto);
+
+            $("#ModalEvaluacion").modal("show");
+
+            $("#id_a").val(id_a);
+
+            $("#iframe-pdf").attr("src", `/openFileProyecto/${id_a}`)
+
+        }
+    </script>
+    <script>
+        $(document).ready(function () {
+            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            var groups = {};
+
+            checkboxes.forEach(function (checkbox) {
+                var group = checkbox.getAttribute('data-group');
+
+                if (group) {
+                    if (!groups[group]) {
+                        groups[group] = [];
+                    }
+                    groups[group].push(checkbox);
+                }
+
+                checkbox.addEventListener('change', function () {
+                    var groupCheckboxes = groups[group];
+
+                    groupCheckboxes.forEach(function (groupCheckbox) {
+                        if (groupCheckbox !== checkbox) {
+                            groupCheckbox.disabled = checkbox.checked;
+                        }
+                    });
+                });
+            });
+
+            $('#myForm').submit(function (event) {
+                var allCheckboxesSelected = true;
+
+                for (var group in groups) {
+                    var checkedGroupCheckboxes = groups[group].filter(function (groupCheckbox) {
+                        return groupCheckbox.checked;
+                    });
+
+                    if (checkedGroupCheckboxes.length !== 1) {
+                        allCheckboxesSelected = false;
+                        break;
+                    }
+                }
+
+                if (!allCheckboxesSelected) {
+                    event.preventDefault();
+                    Swal.fire({
+                        title: 'Debe seleccionar una Casilla en cada criterio',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        showConfirmButton: false,
+                        cancelButtonText: "aceptar",
+                    }).then().done();
+                } else {
+                    $('#Dsubmit').html('<br><div class="spinner"></div>');
+                }
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const inputs = document.querySelectorAll('input[type="number"]');
+            const resultadoDiv = document.getElementById('resultado');
+
+            inputs.forEach(input => {
+                input.addEventListener('input', calcularSuma);
+            });
+
+            function calcularSuma() {
+                let suma = 0;
+                inputs.forEach(input => {
+                    let valor = parseFloat(input.value); // Cambiar a let
+                    const max = parseFloat(input.max);
+
+                    if (valor > max) {
+                        valor = max; // Asignar el valor máximo si se excede
+                        input.value = max; // También actualizar el input
+                    }
+
+                    if (!isNaN(valor)) {
+                        suma += valor;
+                    }
+                });
+                resultadoDiv.textContent = suma;
+            }
+
+            // Llamada inicial para mostrar la suma si hay valores predefinidos
+            calcularSuma();
+
+        });
+    </script>
+    <script>
+        $(document).ready(function () {
+            $('input[name="calificaciones"]').on('blur', function () {
+                var funcion = $(this).data('blur');
+                if (typeof window[funcion.split('(')[0]] === 'function') {
+                    eval(funcion);  // Llama a la función con los parámetros
+                }
+            });
+        });
+
+        // Define la función que se llamará
+        function guardarCalificacion(ponderacion, valor) {
+            //console.log('ID:'+ id+ '  Valor:'+ valor);
+            $.ajax({
+                type: 'POST',
+                url: "/GuardarPuntaje/" + ponderacion + "/" + valor,
+                success: function (response) {
+                    $("#").html(response);
+                }
+            });
+        }
+
+
+    </script>
+</body>
+
+</html>

@@ -56,7 +56,4 @@ public class Evaluacion implements Serializable{
     @JoinTable(name = "evaluacion_proyecto", joinColumns = @JoinColumn(name = "id_evaluacion"), inverseJoinColumns = @JoinColumn(name = "id_proyecto"))
     private Set<Proyecto> proyectos;
 
-
-
-
 }
