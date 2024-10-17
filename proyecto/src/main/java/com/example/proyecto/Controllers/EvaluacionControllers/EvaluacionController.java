@@ -362,20 +362,23 @@ public class EvaluacionController {
         // ponderaciones.add(ponderacion);
         // }
         // }
-
-        for (Long id : id_ponderaciones) {
-            Puntaje puntaje = puntajeService.puntajePonderacionJurado(jurado.getId_jurado(), id);
-            puntaje.setEvaluaciones(evaluacion);
-            puntajeService.save(puntaje);
-            puntajeTotal += puntaje.getValor();
-        }
+        // for (Long id : id_ponderaciones) {
+        //     Puntaje puntaje = puntajeService.puntajePonderacionJuradoProyecto+(jurado.getId_jurado(), id, proyecto.getId_proyecto());
+        //     puntajeTotal += puntaje.getValor();
+        // }
 
         evaluacion.setEstado("A");
         evaluacion.setJurado(jurado);
         evaluacion.getProyectos().add(proyecto);
         // evaluacion.setPonderaciones(id_ponderaciones);
-        evaluacion.setPuntaje_total(puntajeTotal);
+        //evaluacion.setPuntaje_total(puntajeTotal);
         evaluacionService.save(evaluacion);
+
+        for (Long id : id_ponderaciones) {
+            Puntaje puntaje = puntajeService.puntajePonderacionJuradoProyecto(jurado.getId_jurado(), id, proyecto.getId_proyecto());
+            puntaje.setEvaluaciones(evaluacion);
+            puntajeService.save(puntaje);
+        }
 
         double promedioActual = proyecto.getPromedio_final()
                 + (evaluacion.getPuntaje_total() / (double) cantidadJurados);
@@ -402,32 +405,40 @@ public class EvaluacionController {
             proyecto.setEstado("E");
             proyectoService.save(proyecto);
         }
+        // for (Long id : id_ponderaciones) {
+        //     Puntaje puntaje = puntajeService.puntajePonderacionEvaluacionJurado(jurado.getId_jurado(), evaluacion.getId_evaluacion() ,id);
+        //     puntaje.setProyecto(proyecto);
+        //     puntajeService.save(puntaje);
+        // }
 
         redirectAttrs.addFlashAttribute("mensaje", "Proyecto Evaluado Correctamente");
         return "redirect:/ProyectosEvaluacionR?alert=true";
     }
 
-    @PostMapping(value = "/GuardarPuntaje/{ponderacion}/{valor}")
+    @PostMapping(value = "/GuardarPuntaje/{ponderacion}/{valor}/{proyecto}")
     public ResponseEntity<String> guardaPuntaje(HttpServletRequest request,
             @PathVariable(value = "ponderacion") Long id_ponderacion,
-            @PathVariable(value = "valor") Integer calificacion) {
+            @PathVariable(value = "valor") Integer calificacion,
+            @PathVariable(value = "proyecto") Long idProyecto) {
 
         HttpSession session = request.getSession();
         Usuario us = (Usuario) session.getAttribute("usuario");
         Usuario user = usuarioService.findOne(us.getId_usuario());
         Ponderacion ponderacion = ponderacionService.findOne(id_ponderacion);
         Jurado jurado = juradoService.juradoPorIdPersona(user.getPersona().getId_persona());
-        Puntaje puntaje = puntajeService.puntajePonderacionJurado(jurado.getId_jurado(),
-                ponderacion.getId_ponderacion());
+        Puntaje puntaje = puntajeService.puntajePonderacionJuradoProyecto(jurado.getId_jurado(),
+                ponderacion.getId_ponderacion(), idProyecto);
+        Proyecto proyecto = proyectoService.findOne(idProyecto);
         if (puntaje == null) {
             puntaje = new Puntaje();
             puntaje.setJurado(jurado);
+            puntaje.setProyecto(proyecto);
             puntaje.setPonderacion(ponderacion);
         }
         puntaje.setValor(calificacion);
         puntajeService.save(puntaje);
 
-        System.out.println("guardado");
+        //System.out.println("guardado");
         return ResponseEntity.ok("Guardado");
     }
 

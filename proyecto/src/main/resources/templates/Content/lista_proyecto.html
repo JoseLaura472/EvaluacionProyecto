@@ -213,8 +213,6 @@
             <tr>
                 <th>Titulo del Proyecto</th>
                 <th>Categoria</th>
-                <th>Estudiantes</th>
-                <th>Docentes</th>
                 <th>Jurados</th>
                 <th>Acciones</th>
             </tr>
@@ -226,14 +224,6 @@
                 <td th:text="${por.nombre_proyecto}"></td>
                 <td th:if="${por.categoriaProyecto != null}" th:text="${por.categoriaProyecto.nom_categoria}"></td>
                 <td th:if="${por.categoriaProyecto == null}" th:text="${'SIN CATEGORIA'}"></td>
-
-                <td >
-                    <ul>
-                        <li th:each="e : ${por.estudiante}" th:text="${e.persona.nombres}"></li>
-                    </ul>
-                </td>
-                <td th:text="${por.docente.persona.nombres}"></td>
-
                 <td >
                     <ul>
                         <li th:each="e : ${por.jurado}" th:text="${e.persona.nombres}"></li>

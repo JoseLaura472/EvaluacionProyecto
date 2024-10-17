@@ -36,6 +36,12 @@ public interface IPuntajeDao extends CrudRepository<Puntaje, Long>{
     @Query("SELECT p FROM Puntaje p WHERE p.jurado.id_jurado = ?1 AND p.ponderacion.id_ponderacion = ?2")
     Puntaje puntajePonderacionJurado(Long idJurado, Long idPonderacion);
 
+    @Query("SELECT p FROM Puntaje p WHERE p.jurado.id_jurado = ?1 AND p.ponderacion.id_ponderacion = ?2 AND p.proyecto.id_proyecto = ?3")
+    Puntaje puntajePonderacionJuradoProyecto(Long idJurado, Long idPonderacion, Long idProyecto);
+
+    @Query("SELECT p FROM Puntaje p WHERE p.ponderacion.id_ponderacion = ?1 AND p.proyecto.id_proyecto = ?2")
+    List<Puntaje> puntajesPonderacionProyecto(Long idPonderacion, Long idProyecto);
+
     @Query("SELECT p FROM Puntaje p WHERE p.jurado.id_jurado = ?1 AND p.evaluaciones.id_evaluacion = ?2")
     List<Puntaje> puntajesEvaluacionJurado(Long idJurado, Long idEvaluacion);
 

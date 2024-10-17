@@ -56,5 +56,15 @@ public class PuntajeServiceImpl implements IPuntajeService{
     public Puntaje puntajePonderacionJurado(Long idJurado, Long idPonderacion) {
         return puntajeDao.puntajePonderacionJurado(idJurado, idPonderacion);
     }
+
+    @Override
+    public Puntaje puntajePonderacionJuradoProyecto(Long idJurado, Long idPonderacion, Long idProyecto) {
+        return puntajeDao.puntajePonderacionJuradoProyecto(idJurado, idPonderacion, idProyecto);
+    }
+
+    @Override
+    public List<Puntaje> puntajesPonderacionProyecto(Long idPonderacion, Long idProyecto) {
+        return puntajeDao.puntajesPonderacionProyecto(idPonderacion, idProyecto);
+    }
     
 }

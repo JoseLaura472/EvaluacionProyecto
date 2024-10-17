@@ -7,7 +7,7 @@
             <th>POSICION</th>
             <th>CARRERA</th>
             <th>PROYECTO</th>
-            <th>SEMESTRE</th>
+            <!-- <th>SEMESTRE</th> -->
             <th>NOTA FINAL</th>
             <th>DETALLE</th>
         </tr>
@@ -18,7 +18,7 @@
                 <td width="18%" th:if="${pro.programa != null}" th:text="${pro.programa.nombre_programa}"></td>
                 <td width="18%" th:if="${pro.programa == null}" th:text="${'SIN PROGRAMA'}"></td>
                 <td width="77%" th:text="${pro.nombre_proyecto}"></td>
-                <td width="18%" th:text="${pro.categoria_proyecto}"></td>
+                <!-- <td width="18%" th:text="${pro.categoria_proyecto}"></td> -->
                 <td width="5%" th:text="${pro.promedio_final}"></td>
                 <td>
                     <button class="btn btn-success" 

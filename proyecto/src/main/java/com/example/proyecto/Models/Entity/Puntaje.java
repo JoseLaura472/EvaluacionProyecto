@@ -40,4 +40,9 @@ public class Puntaje {
     @JoinColumn(name = "id_ponderacion")
     private Ponderacion ponderacion;
 
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_proyecto")
+    private Proyecto proyecto;
+    
 }

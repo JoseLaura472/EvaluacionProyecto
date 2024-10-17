@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import com.example.proyecto.Models.Entity.CategoriaCriterio;
 import com.example.proyecto.Models.Entity.Estudiante;
 import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Service.ICategoriaCriterioService;
@@ -21,6 +22,7 @@ import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
+import java.util.List;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -143,7 +145,10 @@ public class ReportesController {
         Proyecto proyecto = proyectoService.findOne(id_proyecto); 
         
         model.addAttribute("proyecto", proyecto);
-        model.addAttribute("categorias", categoriaCriterioService.obtenerCategoriaCriteriosPorTipoProyecto(proyecto.getTipoProyecto().getId_tipoProyecto()));
+
+        List<CategoriaCriterio> categorias = categoriaCriterioService.obtenerCategoriaCriteriosPorTipoProyecto(proyecto.getTipoProyecto().getId_tipoProyecto());
+
+        model.addAttribute("categorias", categorias);
         model.addAttribute("evaluaciones", evaluacionService.obtenerNotasFinales(id_proyecto));
 
         if (proyecto.getTipoProyecto().getId_tipoProyecto() == 1) {
@@ -158,6 +163,10 @@ public class ReportesController {
         }else if(proyecto.getTipoProyecto().getId_tipoProyecto() == 5){
             model.addAttribute("ponderaciones", ponderacionService.obtenerPonderacionesPorProyecto(id_proyecto));
             return "reportes/report_dinamico_feria_dicyt";
+        }else if(proyecto.getTipoProyecto().getId_tipoProyecto() == 6){
+
+            model.addAttribute("ponderaciones", ponderacionService.obtenerPonderacionesPorProyecto(id_proyecto));
+            return "reportes/report_dinamico_bandas_jeru_puji";
         }else{
             return "redirect:/FormReportes";
         }

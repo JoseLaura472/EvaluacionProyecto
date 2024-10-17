@@ -158,7 +158,7 @@
                                                                     <div class="input-group">
                                                                         <input type="hidden" name="id_ponderaciones"
                                                                             th:value="${pon.id_ponderacion}">
-                                                                        <th:block th:each="puntaje: ${pon.puntajes}">
+                                                                        <!-- <th:block th:each="puntaje: ${pon.puntajes}" th:if="${puntaje.evaluaciones != null}">
                                                                             <input type="number"
                                                                                 th:value="${puntaje.valor}"
                                                                                 th:if="${puntaje != null}"
@@ -166,13 +166,12 @@
                                                                                 th:max="${pon.num_ponderacion}"
                                                                                 class="form-control text-center"
                                                                                 th:data-blur="'guardarCalificacion(' + ${pon.id_ponderacion} + ', this.value)'">
-                                                                        </th:block>
-                                                                        <input type="number" value="0"
-                                                                            th:if="${pon.puntajes.size == 0}"
+                                                                        </th:block> -->
+                                                                        <input type="number" value="0" 
                                                                             name="calificaciones" min="0"
                                                                             th:max="${pon.num_ponderacion}"
                                                                             class="form-control text-center"
-                                                                            th:data-blur="'guardarCalificacion(' + ${pon.id_ponderacion} + ', this.value)'">
+                                                                            th:data-blur="'guardarCalificacion(' + ${pon.id_ponderacion} + ', this.value ,' + ${proyecto.id_proyecto} + ')'">
                                                                     </div>
                                                                 </td>
                                                             </th:block>
@@ -195,6 +194,7 @@
                                                     <td colspan="4"
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
                                                         <div id="resultado"></div>
+                                                        <input type="hidden" th:field="${evaluacion.puntaje_total}" id="inputResultado">
                                                     </td>
                                                 </tr>
 
@@ -326,7 +326,6 @@
         document.addEventListener('DOMContentLoaded', function () {
             const inputs = document.querySelectorAll('input[type="number"]');
             const resultadoDiv = document.getElementById('resultado');
-
             inputs.forEach(input => {
                 input.addEventListener('input', calcularSuma);
             });
@@ -347,6 +346,7 @@
                     }
                 });
                 resultadoDiv.textContent = suma;
+                $('#inputResultado').val(suma);
             }
 
             // Llamada inicial para mostrar la suma si hay valores predefinidos
@@ -365,11 +365,11 @@
         });
 
         // Define la función que se llamará
-        function guardarCalificacion(ponderacion, valor) {
+        function guardarCalificacion(ponderacion, valor, proyecto) {
             //console.log('ID:'+ id+ '  Valor:'+ valor);
             $.ajax({
                 type: 'POST',
-                url: "/GuardarPuntaje/" + ponderacion + "/" + valor,
+                url: "/GuardarPuntaje/" + ponderacion + "/" + valor+ "/" + proyecto,
                 success: function (response) {
                     $("#").html(response);
                 }

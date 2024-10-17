@@ -14,6 +14,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -45,4 +46,7 @@ public class Ponderacion {
     @JsonIgnore
     @ManyToMany(mappedBy = "ponderaciones")
     private Set<Evaluacion> evaluacion;
+
+    @Transient
+    private Integer puntuacion;
 }
