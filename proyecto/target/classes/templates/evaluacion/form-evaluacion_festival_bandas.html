@@ -169,12 +169,11 @@
                                                                                 class="form-control text-center"
                                                                                 th:data-blur="'guardarCalificacion(' + ${pon.id_ponderacion} + ', this.value)'">
                                                                         </th:block> -->
-                                                                        <input type="number" value="0"
+                                                                        <input type="number"
                                                                             name="calificaciones" min="0"
                                                                             th:max="${pon.num_ponderacion}"
                                                                             class="form-control text-center"
-                                                                            th:data-blur="'guardarCalificacion(' + ${pon.id_ponderacion} + ', this.value ,' + ${proyecto.id_proyecto} + ')'">
-                                                                        
+                                                                            th:data-blur="'guardarCalificacion(' + ${pon.id_ponderacion} + ', this.value ,' + ${proyecto.id_proyecto} + ')'" required>
                                                                     </div>
                                                                 </td>
                                                             </th:block>
@@ -207,7 +206,7 @@
                                             <div class="button-container text-center">
                                                 <div id="Dsubmit">
                                                     <button class="btn btn-primary" type="submit"
-                                                        th:text="${edit} ?'Actualizar' :'Enviar'"></button>
+                                                        th:text="${edit} ?'Actualizar' :'Finalizar'"></button>
                                                 </div>
                                             </div>
                                         </form>
@@ -271,62 +270,6 @@
         }
     </script>
     <script>
-        $(document).ready(function () {
-            var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            var groups = {};
-
-            checkboxes.forEach(function (checkbox) {
-                var group = checkbox.getAttribute('data-group');
-
-                if (group) {
-                    if (!groups[group]) {
-                        groups[group] = [];
-                    }
-                    groups[group].push(checkbox);
-                }
-
-                checkbox.addEventListener('change', function () {
-                    var groupCheckboxes = groups[group];
-
-                    groupCheckboxes.forEach(function (groupCheckbox) {
-                        if (groupCheckbox !== checkbox) {
-                            groupCheckbox.disabled = checkbox.checked;
-                        }
-                    });
-                });
-            });
-
-            $('#myForm').submit(function (event) {
-                var allCheckboxesSelected = true;
-
-                for (var group in groups) {
-                    var checkedGroupCheckboxes = groups[group].filter(function (groupCheckbox) {
-                        return groupCheckbox.checked;
-                    });
-
-                    if (checkedGroupCheckboxes.length !== 1) {
-                        allCheckboxesSelected = false;
-                        break;
-                    }
-                }
-
-                if (!allCheckboxesSelected) {
-                    event.preventDefault();
-                    Swal.fire({
-                        title: 'Debe seleccionar una Casilla en cada criterio',
-                        icon: 'warning',
-                        showCancelButton: true,
-                        showConfirmButton: false,
-                        cancelButtonText: "aceptar",
-                    }).then().done();
-                } else {
-                    $('#Dsubmit').html('<br><div class="spinner"></div>');
-                }
-            });
-        });
-    </script>
-
-    <script>
         document.addEventListener('DOMContentLoaded', function () {
             const inputs = document.querySelectorAll('input[type="number"]');
             const resultadoDiv = document.getElementById('resultado');
@@ -360,6 +303,26 @@
     </script>
     <script>
         $(document).ready(function () {
+
+            $('#myForm').on('submit', function(e) {
+                e.preventDefault(); // Evita el envío inmediato del formulario
+
+                Swal.fire({
+                    title: '¿Estás seguro?',
+                    text: '¿Desea finalizar esta evaluación?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, finalizar',
+                    cancelButtonText: 'Cancelar'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#Dsubmit').html('<br><div class="spinner"></div>');
+                        // Si el usuario confirma, envía el formulario
+                        this.submit();
+                    }
+                });
+            });
+
             $('input[name="calificaciones"]').on('blur', function () {
                 var funcion = $(this).data('blur');
                 if (typeof window[funcion.split('(')[0]] === 'function') {
