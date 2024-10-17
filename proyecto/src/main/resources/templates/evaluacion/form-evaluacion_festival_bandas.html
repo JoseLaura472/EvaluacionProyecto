@@ -126,7 +126,9 @@
                                                     <td colspan="5"
                                                         style="border-top: 1px solid black; text-align: center; background-color: #1B40A6; color: white; padding: 5px; font-family: Verdana, sans-serif;">
                                                         CRITERIOS
-                                                        DE EVALUACIÓN</td>
+                                                        DE EVALUACIÓN<div class="spinner-border" role="status">
+                                                            <span class="sr-only">Loading...</span>
+                                                        </div></td>
                                                 </tr>
                                                 <tr>
                                                     <td
@@ -167,11 +169,12 @@
                                                                                 class="form-control text-center"
                                                                                 th:data-blur="'guardarCalificacion(' + ${pon.id_ponderacion} + ', this.value)'">
                                                                         </th:block> -->
-                                                                        <input type="number" value="0" 
+                                                                        <input type="number" value="0"
                                                                             name="calificaciones" min="0"
                                                                             th:max="${pon.num_ponderacion}"
                                                                             class="form-control text-center"
                                                                             th:data-blur="'guardarCalificacion(' + ${pon.id_ponderacion} + ', this.value ,' + ${proyecto.id_proyecto} + ')'">
+                                                                        
                                                                     </div>
                                                                 </td>
                                                             </th:block>
@@ -194,7 +197,8 @@
                                                     <td colspan="4"
                                                         style="border: 1px solid black; text-align: center; padding: 5px;">
                                                         <div id="resultado"></div>
-                                                        <input type="hidden" th:field="${evaluacion.puntaje_total}" id="inputResultado">
+                                                        <input type="hidden" th:field="${evaluacion.puntaje_total}"
+                                                            id="inputResultado">
                                                     </td>
                                                 </tr>
 
@@ -369,7 +373,7 @@
             //console.log('ID:'+ id+ '  Valor:'+ valor);
             $.ajax({
                 type: 'POST',
-                url: "/GuardarPuntaje/" + ponderacion + "/" + valor+ "/" + proyecto,
+                url: "/GuardarPuntaje/" + ponderacion + "/" + valor + "/" + proyecto,
                 success: function (response) {
                     $("#").html(response);
                 }
