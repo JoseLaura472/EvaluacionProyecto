@@ -29,7 +29,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.proyecto.Models.Entity.ArchivoAdjunto;
 import com.example.proyecto.Models.Entity.Jurado;
 import com.example.proyecto.Models.Entity.Proyecto;
-import com.example.proyecto.Models.Entity.Puntaje;
 import com.example.proyecto.Models.Service.IArchivoAdjuntoService;
 import com.example.proyecto.Models.Service.ICategoriaProyectoService;
 import com.example.proyecto.Models.Service.IDocenteService;
@@ -223,6 +222,43 @@ public class ProyectoController {
         return ResponseEntity.ok("1");
     }
 
+    @RequestMapping(value = "/danza-entrada", method = RequestMethod.POST)
+    public ResponseEntity<String> DanzaEntrada(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
+            @RequestParam(name = "categoriaProyecto") Long id_categoriaProyecto,
+            @RequestParam(name = "id_tipoProyecto")Long id_tipoProyecto,
+            @RequestParam(name = "jurado") Long[] id_jurados) throws FileNotFoundException, IOException {
+
+        // MultipartFile multipartFile = proyecto.getFile();
+        // ArchivoAdjunto archivoAdjunto = new ArchivoAdjunto();
+        // AdjuntarArchivo adjuntarArchivo = new AdjuntarArchivo();
+
+        // Path rootPath = Paths.get("archivos/");
+        // Path rootAbsolutPath = rootPath.toAbsolutePath();
+        // String rutaDirectorio = rootAbsolutPath.toString();
+
+        // String rutaArchivo = adjuntarArchivo.crearSacDirectorio(rutaDirectorio);
+        // List<ArchivoAdjunto> listArchivos = archivoAdjuntoService.listarArchivoAdjunto();
+        // Integer ad = adjuntarArchivo.adjuntarArchivoProyecto(proyecto, rutaArchivo);
+        // proyecto.setNombreArchivo((listArchivos.size() + 1) + ".pdf");
+
+        // ArchivoAdjunto archivoAdjunt = new ArchivoAdjunto();
+        // archivoAdjunt.setNombre_archivo(proyecto.getNombreArchivo());
+        // archivoAdjunt.setRuta_archivo(rutaArchivo);
+        // archivoAdjunt.setEstado("A");
+        // archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt); 
+        // proyecto.setArchivoAdjunto(archivoAdjunt);
+
+        proyecto.setCategoriaProyecto(categoriaProyectoService.findOne(id_categoriaProyecto));
+        proyecto.setTipoProyecto(tipoProyectoService.findOne(id_tipoProyecto));
+        proyecto.setEstado("A");
+        proyectoService.save(proyecto);
+        redirectAttrs
+                .addFlashAttribute("mensaje", "Registro Exitoso del Documento")
+                .addFlashAttribute("clase", "success alert-dismissible fade show");
+
+        return ResponseEntity.ok("1");
+    }
+
     @RequestMapping(value = "/ProyectoFBanda", method = RequestMethod.POST)
     public ResponseEntity<String> ProyectoFBanda(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
             @RequestParam(name = "categoriaProyecto") Long id_categoriaProyecto,
@@ -254,46 +290,12 @@ public class ProyectoController {
         proyecto.setEstado("A");
         proyectoService.save(proyecto);
         
-
-        // for (Long idJurado : id_jurados) {
-        //     Puntaje puntaje = new Puntaje();
-        //     puntaje.setJurado(juradoService.findOne(idJurado));
-        //     puntaje.setValor(0);
-        //     puntaje.setPonderacion(null);
-        //     puntajeService.save(puntaje);
-
-        // }
-
-        // for (ArchivoAdjunto archivoAdjunto2 : proyecto.get) {
-            
-        // }
-        
         redirectAttrs
                 .addFlashAttribute("mensaje", "Registro Exitoso del Documento")
                 .addFlashAttribute("clase", "success alert-dismissible fade show");
 
         return ResponseEntity.ok("1");
     }
-
-    // Boton para Editar Documentos
-    // @RequestMapping(value = "/editar-proyecto/{id_proyecto}")
-    // public String editar_proyecto(@PathVariable("id_proyecto") Long id_proyecto,
-    // Model model) {
-
-    // Proyecto proyecto = proyectoService.findOne(id_proyecto);
-
-    // model.addAttribute("proyecto", proyecto);
-    // model.addAttribute("proyectos", proyectoService.findAll());
-    // model.addAttribute("estudiantes", estudianteService.findAll());
-    // model.addAttribute("docentes", docenteService.findAll());
-    // // model.addAttribute("programas", programaService.findAll());
-    // model.addAttribute("jurados", juradoService.findAll());
-    // model.addAttribute("tiposProyectos", tipoProyectoService.findAll());
-
-    // model.addAttribute("edit", "true");
-    // return "proyecto/gestionar-proyecto_escuela_tecnica";
-
-    // }
 
     @RequestMapping(value = "/editar_proyecto/{id_proyecto}/{id_tipoProyecto}")
     public String editar_proyecto(@PathVariable("id_proyecto") Long id_proyecto,

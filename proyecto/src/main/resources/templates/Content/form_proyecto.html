@@ -1,3 +1,101 @@
+<div th:fragment="card_body2" class="card-body">
+
+    <h3 class="mt-0 header-title" style="font-size: 30px;" th:text="${'FORMULARIO REGISTRO DE DANZA'}"></h3>
+
+    <form th:action="${edit} ?@{/ProyectoModF} :@{/danza-entrada}" id="form1" method="post"
+        enctype="multipart/form-data" th:object="${proyecto}">
+        <input type="hidden" th:field="${proyecto.id_proyecto}">
+        <input type="hidden" id="id_tipoProyecto" name="id_tipoProyecto" th:value="${id_tipoProyecto}">
+        <div class="row">
+
+            <div class="col-md-4">
+                <label class="col-form-label">NOMBRE DANZA:</label>
+                <input class="form-control" type="text"
+                    th:field="${proyecto.nombre_proyecto}" required>
+            </div>
+
+            <div class="col-md-4">
+                <label class="col-form-label">CATEGORIA:</label>
+                <select class="js-example-basic-single" style="width: 100%;" th:field="${proyecto.categoriaProyecto}" required>
+                    <option value=""></option>
+                    <option th:each="cat : ${categorias}" th:value="${cat.id_categoriaProyecto}" th:text="${cat.nom_categoria}">INGLES</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label class="col-form-label">JURADO: </label>
+                <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple" th:field="${proyecto.jurado}">
+                    <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                        th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
+                    </option>
+                </select>
+            </div>
+        </div>
+        <br>
+        <div class="text-center">
+            <div>
+                <button class="btn btn-primary" type="submit"
+                    th:text="${edit} ?'Actualizar' :'Registrar'">
+                </button>
+            </div>
+        </div>
+    </form>
+    <script>
+        $(document).ready(function(){
+            $('.js-example-basic-single').select2({
+                placeholder:"Seleccione..."
+            });
+            $('.js-example-basic-multiple').select2({
+                placeholder:"Seleccione..."
+            });
+
+            $('#form1').submit(function (event) {
+                event.preventDefault();
+
+                var id_tipoProyecto = document.getElementById("id_tipoProyecto").value;
+                var form = document.getElementById("form1");
+                var action = form.action;
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    type: 'POST',
+                    url: $(this).attr('action'),
+                    data: formData,
+                    contentType: 'application/x-www-form-urlencoded',
+                    success: function (response) {
+                        var mensaje = response;
+                        if (mensaje == "1") {
+                            Swal.fire({
+                                title: 'Registro Exitoso!',
+                                icon: "success",
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                        }
+                        else if(mensaje == "2"){
+                            Swal.fire({
+                                title: 'Actualización Exitosa!',
+                                icon: "success",
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+
+                        }
+                        nuevoRegistro(id_tipoProyecto);
+                        cargarTabla(id_tipoProyecto);
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error('Ha ocurrido un error. Por favor, intenta nuevamente.' + xhr, status, error);
+                        console.error(error);
+                        // Manejo de errores
+                    }
+                });
+
+            });
+        });
+    </script>
+</div>
+
 <div th:fragment="card_body3" class="card-body">
 
     <h3 class="mt-0 header-title" style="font-size: 30px;" th:text="${'FORMULARIO REGISTRO DE PROYECTO'}"></h3>
