@@ -347,6 +347,7 @@
             <tr>
                 <th>Titulo del Proyecto</th>
                 <th>Categoria</th>
+                <th>Carrera/Programa</th>
                 <th>Jurados</th>
                 <th>Acciones</th>
             </tr>
@@ -356,8 +357,8 @@
 
             <tr th:each="por,index : ${proyectos}" th:if="${por.estado != 'X'}">
                 <td th:text="${por.nombre_proyecto}"></td>
-                <td th:if="${por.categoriaProyecto != null}" th:text="${por.categoriaProyecto.nom_categoria}"></td>
-                <td th:if="${por.categoriaProyecto == null}" th:text="${'SIN CATEGORIA'}"></td>
+                <td th:text="${por.categoriaProyecto != null ? por.categoriaProyecto.nom_categoria : 'SIN CATEGORIA'}"></td>
+                <td th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN PROGRAMA'}"></td>
                 <td >
                     <ul>
                         <li th:each="e : ${por.jurado}" th:text="${e.persona.nombres}"></li>
