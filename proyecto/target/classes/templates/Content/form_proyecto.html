@@ -668,3 +668,153 @@
         });
     </script>
 </div>
+
+<div th:fragment="card_body7" class="card-body">
+
+    <h3 class="mt-0 header-title" style="font-size: 30px;" th:text="${'PROYECTO FEXPOACEF'}"></h3>
+
+    <form th:action="${edit} ?@{/ProyectoModF} :@{/ProyectoFBanda}" id="form1" method="post"
+        enctype="multipart/form-data" th:object="${proyecto}">
+        <input type="hidden" name="id_archivo_adjunto"
+            th:field="*{archivoAdjunto.id_archivo_adjunto}">
+        <input type="hidden" th:field="${proyecto.id_proyecto}">
+        <input type="hidden" id="id_tipoProyecto" name="id_tipoProyecto" th:value="${id_tipoProyecto}">
+        <div class="row">
+
+            <div class="col-md-4">
+                <label class="col-form-label">TITÚLO DEL PROYECTO :</label>
+                <input class="form-control" type="text"
+                    th:field="${proyecto.nombre_proyecto}" required onkeyup="javascript:this.value=this.value.toUpperCase();"
+                    style="text-transform:uppercase;">
+            </div>
+
+            <div class="col-md-4">
+                <label class="col-form-label">CATEGORIA: </label>
+                <select class="js-example-basic-single" style="width: 100%;" th:field="${proyecto.categoriaProyecto}" required>
+                    <option value=""></option>
+                    <option th:each="cat : ${categorias}" th:value="${cat.id_categoriaProyecto}" th:text="${cat.nom_categoria}">INGLES</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="col-form-label">CARRERA O PROGRAMA: </label>
+                <select class="js-example-basic-single" style="width: 100%;" th:field="${proyecto.programa}" required>
+                    <option value=""></option>
+                    <option th:each="ca : ${carreras}" th:value="${ca.id_programa}" th:text="${ca.nombre_programa}">INGLES</option>
+                </select>
+            </div>
+            <!-- 
+            <div class="col-md-4">
+                <label class="col-form-label">ASIGNATURA (S): </label>
+                <input class="form-control" type="text"
+                    th:field="${proyecto.nro_stand}" onkeyup="javascript:this.value=this.value.toUpperCase();" required>
+            </div>
+
+            <div class="col-md-4">
+                <label class="col-form-label">SEMESTRE : </label>
+                <input class="form-control" type="text"
+                    th:field="${proyecto.categoria_proyecto}" required>
+            </div> -->
+
+            <!-- <div class="col-md-4">
+                <label class="col-form-label">ESTUDIANTES : </label>
+                <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple" th:field="${proyecto.estudiante}">
+                    <option th:each="es : ${estudiantes}" th:value="${es.id_estudiante}" th:if="${es.estado != 'X'}"
+                        th:text="${es.persona.nombres}+' '+${es.persona.paterno}+' '+${es.persona.materno}">
+                    </option>
+                </select>
+
+            </div> -->
+            <div class="col-md-4">
+                <label class="col-form-label">JURADOS : </label>
+                <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple" th:field="${proyecto.jurado}">
+                    <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                        th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
+                    </option>
+                </select>
+
+            </div>
+            
+            <!-- <div class="col-md-4">
+                <label class="col-form-label">CAPACITADOR :</label>
+                <select class="js-example-basic-single" style="width: 100%;" th:field="${proyecto.docente}">
+                    <option value=""></option>
+                    <option th:each="doc : ${docentes}" th:value="${doc.id_docente}" th:if="${doc.estado != 'X'}"
+                        th:text="${doc.persona.nombres}+' '+${doc.persona.paterno}+' '+${doc.persona.materno}">
+                    </option>
+                </select>
+
+            </div> -->
+            <!-- <div class="col-md-4">
+                <label class="col-form-label" for="customFile">ADJUNTAR RESPALDO (OPCIONAL) :</label>
+                <input class="form-control" id="customFile" type="file" th:field="*{file}" accept="application/pdf" />
+            </div> -->
+        </div>
+        <br>
+        <div class="text-center">
+            <div>
+                <button class="btn btn-primary" type="submit"
+                    th:text="${edit} ?'Actualizar' :'Registrar'">
+                </button>
+
+                <button th:if="${proyecto.id_proyecto != null}" class="btn btn-danger" type="button"
+                th:attr="onclick='nuevoRegistro(\''+ ${id_tipoProyecto} + '\')'"
+                    th:text="${'Cancelar'}">
+                </button>
+            </div>
+        </div>
+    </form>
+    <script>
+        $(document).ready(function(){
+            $('.js-example-basic-single').select2({
+                placeholder:"Seleccione..."
+            });
+            $('.js-example-basic-multiple').select2({
+                placeholder:"Seleccione..."
+            });
+
+            $('#form1').submit(function (event) {
+                event.preventDefault();
+
+                var id_tipoProyecto = document.getElementById("id_tipoProyecto").value;
+                var form = document.getElementById("form1");
+                var action = form.action;
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    type: 'POST',
+                    url: $(this).attr('action'),
+                    data: formData,
+                    contentType: 'application/x-www-form-urlencoded',
+                    success: function (response) {
+                        var mensaje = response;
+                        if (mensaje == "1") {
+                            Swal.fire({
+                                title: 'Registro Exitoso!',
+                                icon: "success",
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+                        }
+                        else if(mensaje == "2"){
+                            Swal.fire({
+                                title: 'Actualización Exitosa!',
+                                icon: "success",
+                                showConfirmButton: false,
+                                timer: 1500
+                            })
+
+                        }
+                        nuevoRegistro(id_tipoProyecto);
+                        cargarTabla(id_tipoProyecto);
+                    },
+                    error: function (xhr, status, error) {
+                        toastr.error('Ha ocurrido un error. Por favor, intenta nuevamente.' + xhr, status, error);
+                        console.error(error);
+                        // Manejo de errores
+                    }
+                });
+
+            });
+        });
+    </script>
+</div>
