@@ -61,7 +61,7 @@
                                                         <option value="">Seleccione una Pregunta</option>
                                                         <option th:each="pre : ${preguntas}"
                                                             th:value="${pre.id_pregunta}" th:if="${pre.estado != 'X'}"
-                                                            th:text="${pre.nom_pregunta}">
+                                                            th:text="${pre.nom_pregunta}+' - '+${pre.categoriaCriterio.tipoProyecto.nom_tipoProyecto}">
                                                         </option>
                                                     </select>
                                                 </div>
