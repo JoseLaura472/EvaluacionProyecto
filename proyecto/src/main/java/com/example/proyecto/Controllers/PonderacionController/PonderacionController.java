@@ -1,5 +1,9 @@
 package com.example.proyecto.Controllers.PonderacionController;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +20,9 @@ import com.example.proyecto.Models.Entity.Ponderacion;
 import com.example.proyecto.Models.Entity.Pregunta;
 import com.example.proyecto.Models.Service.IPonderacionService;
 import com.example.proyecto.Models.Service.IPreguntaService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -69,6 +76,40 @@ public class PonderacionController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ponderacion no encontrada");
             }
         }
+    }
+
+    @PostMapping("/PonderacionF2")
+    public ResponseEntity<String> PonderacionF2(@RequestParam(name = "preguntas") Long id_pregunta,
+            @Validated Ponderacion pond, @RequestParam("valorPond") String valores)
+            throws JsonMappingException, JsonProcessingException {
+        Pregunta pregunta = preguntaService.findOne(id_pregunta);
+        if (pregunta == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Pregunta no encontrada");
+        }
+
+        // Convertir el String JSON a una lista de Mapas
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        // Deserializamos el JSON recibido en un List de Map (cada uno con un campo
+        // "value")
+        List<Object> parsedList = objectMapper.readValue(valores, List.class);
+
+        // Extraemos solo los valores de "value" usando stream
+        List<String> values = parsedList.stream()
+                .map(item -> (String) ((java.util.Map<?, ?>) item).get("value"))
+                .collect(Collectors.toList());
+
+        for (String string : values) {
+            System.out.println(string);
+            Ponderacion ponderacion = new Ponderacion();
+            ponderacion.setNum_ponderacion(Integer.parseInt(string));
+            ponderacion.setPreguntas(pond.getPreguntas());
+            ponderacion.setEstado("A");
+            ponderacion.setPreguntas(pregunta);
+            ponderacionService.save(ponderacion);
+        }
+
+        return ResponseEntity.ok("2");
     }
 
     @GetMapping("/editar_ponderacion/{id_ponderacion}")

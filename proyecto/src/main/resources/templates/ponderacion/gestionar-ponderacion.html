@@ -44,20 +44,23 @@
                                 <div class="card m-b-30">
                                     <div class="card-body">
 
-                                        <h1 class="mt-0 header-title" style="font-size: 30px;">Formulario de Registro Ponderacion</h1>
+                                        <h1 class="mt-0 header-title" style="font-size: 30px;">Formulario de Registro
+                                            Ponderacion</h1>
 
-                                        <form th:action="@{/PonderacionF}" id="form1" method="post">
+                                        <form th:action="${edit != null}? @{/PonderacionF} : @{/PonderacionF2}" id="form1" method="post">
                                             <input type="hidden" th:field="${pon.id_ponderacion}">
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <label class="col-form-label">Ponderacion</label>
-                                                    <input class="form-control" type="number" min="0" th:field="${pon.num_ponderacion}" required>
+                                                    <input class="form-control" type="number" min="0" th:field="${pon.num_ponderacion}" th:if="${edit != null}" required>
+                                                    <input class="form-control" type="text" min="0" name="valorPond" th:if="${edit == null}"
+                                                        required>
                                                 </div>
 
                                                 <div class="col-md-6">
                                                     <label class="col-form-label">Pregunta</label>
-                                                    <select class="form-control js-choice"
-                                                        th:field="*{pon.preguntas}"  th:required>
+                                                    <select class="form-control js-choice" th:field="*{pon.preguntas}"
+                                                        th:required>
                                                         <option value="">Seleccione una Pregunta</option>
                                                         <option th:each="pre : ${preguntas}"
                                                             th:value="${pre.id_pregunta}" th:if="${pre.estado != 'X'}"
@@ -103,20 +106,29 @@
 
                                                 <tr th:each="pre,index : ${preguntas}" th:if="${pre.estado != 'X'}">
                                                     <td th:text="${index.index + 1}"></td>
-                                                    <td th:text="${pre.nom_pregunta} +' - '+${pre.categoriaCriterio.tipoProyecto.nom_tipoProyecto}"></td>
+                                                    <td
+                                                        th:text="${pre.nom_pregunta} +' - '+${pre.categoriaCriterio.tipoProyecto.nom_tipoProyecto}">
+                                                    </td>
                                                     <td>
                                                         <ul>
-                                                            <li th:each="pon : ${pre.ponderaciones}" th:if="${pon.estado != 'X'}">
-                                                                <a th:href="@{/editar_ponderacion/{id_ponderacion}(id_ponderacion=${pon.id_ponderacion})}"> <span
-                                                                        class="badge badge-success" th:text="${pon.num_ponderacion}" style="font-size: 15px;"></span></a> 
-                                                                <a href="#" th:attr="onclick='confirmDelete(event, \'/eliminar_ponderacion/' + ${pon.id_ponderacion} + '\')'"> <span
-                                                                        class="badge badge-danger" style="font-size: 15px;">Eliminar</span></a>
+                                                            <li th:each="pon : ${pre.ponderaciones}"
+                                                                th:if="${pon.estado != 'X'}">
+                                                                <a
+                                                                    th:href="@{/editar_ponderacion/{id_ponderacion}(id_ponderacion=${pon.id_ponderacion})}">
+                                                                    <span class="badge badge-success"
+                                                                        th:text="${pon.num_ponderacion}"
+                                                                        style="font-size: 15px;"></span></a>
+                                                                <a href="#"
+                                                                    th:attr="onclick='confirmDelete(event, \'/eliminar_ponderacion/' + ${pon.id_ponderacion} + '\')'">
+                                                                    <span class="badge badge-danger"
+                                                                        style="font-size: 15px;">Eliminar</span></a>
                                                             </li>
-                                                            <li th:if="${pre.ponderaciones.size() == 0}" th:text="${'SIN PONDERACIONES ASIGNADAS'}">
+                                                            <li th:if="${pre.ponderaciones.size() == 0}"
+                                                                th:text="${'SIN PONDERACIONES ASIGNADAS'}">
                                                             </li>
                                                         </ul>
                                                     </td>
-                                                    
+
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -139,7 +151,14 @@
     <div th:insert="~{layout/script :: script}">
     </div>
     <script>
-        $(document).ready(function(){
+        $(document).ready(function () {
+
+            // The DOM element you wish to replace with Tagify
+            var input = document.querySelector('input[name=valorPond]');
+
+            // initialize Tagify on the above input node reference
+            new Tagify(input)
+
             $('#form1').submit(function (event) {
                 event.preventDefault();
 
@@ -161,10 +180,10 @@
                                 showConfirmButton: false,
                                 timer: 1500
                             })
-                            setTimeout(function() {
+                            setTimeout(function () {
                                 window.location.href = '/PonderacionR';
                             }, 1600);
-                        }else if (mensaje == "3") {
+                        } else if (mensaje == "3") {
                             Swal.fire({
                                 title: 'Error, Ya existe una persona con ese C.I.!',
                                 icon: "warning",
@@ -172,14 +191,14 @@
                                 timer: 2000
                             });
                         }
-                        else if(mensaje == "2"){
+                        else if (mensaje == "2") {
                             Swal.fire({
                                 title: 'Actualización Exitosa!',
                                 icon: "success",
                                 showConfirmButton: false,
                                 timer: 1500
                             })
-                            setTimeout(function() {
+                            setTimeout(function () {
                                 window.location.href = '/PonderacionR';
                             }, 1600);
                         }
@@ -193,14 +212,14 @@
 
             });
 
-           
+
         })
     </script>
 
     <script>
         function confirmDelete(event, url) {
             event.preventDefault(); // Prevenir la navegación por defecto
-         
+
             Swal.fire({
                 title: '¿Estás seguro?',
                 text: "¡No podrás revertir esto!",
@@ -223,7 +242,7 @@
                             console.log(error);
                         }
                     });
-                   
+
                 }
             });
         }
