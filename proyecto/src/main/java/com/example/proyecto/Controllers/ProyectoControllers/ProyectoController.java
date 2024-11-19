@@ -90,7 +90,7 @@ public class ProyectoController {
     public String ProyectoForm(Model model, @PathVariable(name = "id_tipoProyecto") Long id_tipoProyecto) {
 
         // Definir un array con los nombres de los fragmentos
-        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4", "card_body5", "card_body6", "card_body7" };
+        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4", "card_body5", "card_body6", "card_body7", "card_body8" };
 
         // Verificar si el id_tipoProyecto es válido
         if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
@@ -112,7 +112,7 @@ public class ProyectoController {
     @GetMapping("/lista_proyectos/{id_tipoProyecto}")
     public String lista_proyectos(@PathVariable(name = "id_tipoProyecto") Long id_tipoProyecto, Model model) {
         // Definir un array con los nombres de los fragmentos
-        String[] fragments = { "table1", "table2", "table3", "table4", "table5", "table6", "table7" };
+        String[] fragments = { "table1", "table2", "table3", "table4", "table5", "table6", "table7", "table8" };
 
         // Verificar si el id_tipoProyecto es válido
         if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
@@ -130,63 +130,12 @@ public class ProyectoController {
         }
     }
 
-    // Boton para Guardar Documento
-    // @RequestMapping(value = "/ProyectoF", method = RequestMethod.POST) // Enviar
-    // datos de Registro a Lista
-    // public ResponseEntity<String> ProyectoF(@Validated Proyecto proyecto,
-    // RedirectAttributes redirectAttrs,
-    // @RequestParam(value = "estudiante", required = false) Long[] id_estudiantes,
-    // @RequestParam(value = "jurado") Long[] id_jurados) throws
-    // FileNotFoundException, IOException {
-
-    // MultipartFile multipartFile = proyecto.getFile();
-    // ArchivoAdjunto archivoAdjunto = new ArchivoAdjunto();
-    // AdjuntarArchivo adjuntarArchivo = new AdjuntarArchivo();
-
-    // Path rootPath = Paths.get("archivos/");
-    // Path rootAbsolutPath = rootPath.toAbsolutePath();
-    // String rutaDirectorio = rootAbsolutPath + "";
-
-    // String rutaArchivo = adjuntarArchivo.crearSacDirectorio(rutaDirectorio);
-    // List<ArchivoAdjunto> listArchivos =
-    // archivoAdjuntoService.listarArchivoAdjunto();
-    // proyecto.setNombreArchivo((listArchivos.size() + 1) + ".pdf");
-    // Integer ad = adjuntarArchivo.adjuntarArchivoProyecto(proyecto, rutaArchivo);
-    // if (ad == 1) {
-    // ArchivoAdjunto barchivoAdjunto = archivoAdjuntoService
-    // .buscarArchivoAdjuntoPorProyecto(proyecto.getId_proyecto());
-    // if (barchivoAdjunto == null) {
-    // ArchivoAdjunto archivoAdjunt = new ArchivoAdjunto();
-    // archivoAdjunt.setNombre_archivo(proyecto.getNombreArchivo());
-    // archivoAdjunt.setRuta_archivo(rutaArchivo);
-    // archivoAdjunt.setEstado("A");
-    // archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt);
-    // proyecto.setArchivoAdjunto(archivoAdjunt);
-    // } else {
-    // barchivoAdjunto.setNombre_archivo(proyecto.getNombreArchivo());
-    // barchivoAdjunto.setRuta_archivo(rutaArchivo);
-    // archivoAdjuntoService.modificarArchivoAdjunto(barchivoAdjunto);
-    // }
-    // } else if (ad == 2) {
-    // // Opcional: Manejar el caso donde no se adjuntó ningún archivo, si es
-    // necesario
-    // System.out.println("No se adjuntó ningún archivo, pero el proyecto fue
-    // actualizado.");
-    // }
-    // proyecto.setEstado("A");
-    // proyectoService.save(proyecto);
-    // redirectAttrs
-    // .addFlashAttribute("mensaje", "Registro Exitoso del Documento")
-    // .addFlashAttribute("clase", "success alert-dismissible fade show");
-
-    // return ResponseEntity.ok("1");
-    // }
-
+    //PARA FEXCOIN, DICYT EMPRENDE, ACYT, FEXPOACEF O SIMILARES
     @RequestMapping(value = "/ProyectoF", method = RequestMethod.POST)
     public ResponseEntity<String> ProyectoF(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
-            @RequestParam(name = "estudiante") Long[] id_estudiantes,
-            @RequestParam(name = "docente") Long id_docente,
-            @RequestParam(name = "categoriaProyecto") Long id_categoriaProyecto,
+            @RequestParam(name = "estudiante", required = false) Long[] id_estudiantes,
+            @RequestParam(name = "docente", required = false) Long id_docente,
+            @RequestParam(name = "categoriaProyecto", required = false) Long id_categoriaProyecto,
             @RequestParam(name = "id_tipoProyecto")Long id_tipoProyecto,
             @RequestParam(name = "jurado") Long[] id_jurados) throws FileNotFoundException, IOException {
 
@@ -259,6 +208,7 @@ public class ProyectoController {
         return ResponseEntity.ok("1");
     }
 
+    //JERU PUJI
     @RequestMapping(value = "/ProyectoFBanda", method = RequestMethod.POST)
     public ResponseEntity<String> ProyectoFBanda(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
             @RequestParam(name = "categoriaProyecto") Long id_categoriaProyecto,
@@ -302,7 +252,7 @@ public class ProyectoController {
             @PathVariable(name = "id_tipoProyecto") Long id_tipoProyecto, Model model) {
 
         // Definir un array con los nombres de los fragmentos
-        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4", "card_body5"};
+        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4", "card_body5", "card_body6", "card_body7", "card_body8"};
 
         // Verificar si el id_tipoProyecto es válido
         if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
