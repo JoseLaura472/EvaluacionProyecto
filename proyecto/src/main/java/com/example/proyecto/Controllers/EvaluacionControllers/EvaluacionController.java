@@ -159,6 +159,8 @@ public class EvaluacionController {
                 return "evaluacion/form-evaluacion_dicyt_emprende";
             } else if (proyecto.getTipoProyecto().getId_tipoProyecto() == 6) {
                 return "evaluacion/form-evaluacion_festival_bandas";
+            } else if (proyecto.getTipoProyecto().getId_tipoProyecto() == 7) {
+                return "evaluacion/form-evaluacion_fexpo_acef";
             } else {
                 return "evaluacion/form-evaluacion";
             }
