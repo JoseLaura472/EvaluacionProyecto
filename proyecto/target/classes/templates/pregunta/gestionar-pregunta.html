@@ -61,7 +61,7 @@
                                                         <option value="">Seleccione una Categoria</option>
                                                         <option th:each="cat : ${categorias}"
                                                             th:value="${cat.id_categoria_criterio}" th:if="${cat.estado != 'X'}"
-                                                            th:text="${cat.nombre_cat_criterio}">
+                                                            th:text="${cat.nombre_cat_criterio}+' - '+${cat.tipoProyecto.nom_tipoProyecto}">
                                                         </option>
                                                     </select>
                                                 </div>
