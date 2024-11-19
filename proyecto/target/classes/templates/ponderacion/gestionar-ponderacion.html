@@ -103,7 +103,7 @@
 
                                                 <tr th:each="pre,index : ${preguntas}" th:if="${pre.estado != 'X'}">
                                                     <td th:text="${index.index + 1}"></td>
-                                                    <td th:text="${pre.nom_pregunta}"></td>
+                                                    <td th:text="${pre.nom_pregunta} +' - '+${pre.categoriaCriterio.tipoProyecto.nom_tipoProyecto}"></td>
                                                     <td>
                                                         <ul>
                                                             <li th:each="pon : ${pre.ponderaciones}" th:if="${pon.estado != 'X'}">

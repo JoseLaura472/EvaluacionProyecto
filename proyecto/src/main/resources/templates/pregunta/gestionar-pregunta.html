@@ -104,7 +104,7 @@
 
                                                 <tr th:each="cat,index : ${categorias}" th:if="${cat.estado != 'X'}">
                                                     <td th:text="${index.index + 1}"></td>
-                                                    <td th:text="${cat.nombre_cat_criterio}"></td>
+                                                    <td th:text="${cat.nombre_cat_criterio} +' - '+${cat.tipoProyecto.nom_tipoProyecto}"></td>
                                                     <td >
                                                         <ul>
                                                             <li th:each="pre : ${cat.preguntas}" th:if="${pre.estado != 'X'}">
