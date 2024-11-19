@@ -412,7 +412,7 @@
         <thead>
             <tr>
                 <th>Titulo del Proyecto</th>
-                <th>Estudiante</th>
+                <th>Estudiantes</th>
                 <th>Docente</th>
                 <!-- <th>Categoria</th> -->
                 <!-- <th>Carrera/Programa</th> -->
@@ -425,16 +425,22 @@
 
             <tr th:each="por,index : ${proyectos}" th:if="${por.estado != 'X'}">
                 <td th:text="${por.nombre_proyecto}"></td>
-                <td th:text="${por.categoriaProyecto != null ? por.categoriaProyecto.nom_categoria : 'SIN CATEGORIA'}"></td>
-                <td th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN PROGRAMA'}"></td>
                 <!-- <td th:text="${por.categoriaProyecto != null ? por.categoriaProyecto.nom_categoria : 'SIN CATEGORIA'}"></td> -->
-                <!-- <td th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN PROGRAMA'}"></td> -->
                 <td >
                     <ul>
-                        <li th:each="e : ${por.jurado}" th:text="${e.persona.nombres}"></li>
+                        
+                        <li th:each="e : ${por.estudiante}" th:text="${por.estudiante.size > 0}? ${e.persona.nombreCompleto} : 'Sin Estudiante'"></li>
                     </ul>
                 </td>
-                
+                <!-- <td th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN PROGRAMA'}"></td> -->
+                <!-- <td th:text="${por.categoriaProyecto != null ? por.categoriaProyecto.nom_categoria : 'SIN CATEGORIA'}"></td> -->
+                <!-- <td th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN PROGRAMA'}"></td> -->
+                <td th:text="${por.docente != null ? por.docente.persona.nombreCompleto : 'SIN DOCENTE'}"></td>
+                <td >
+                    <ul>
+                        <li th:each="e : ${por.jurado}" th:text="${e.persona.nombreCompleto}"></li>
+                    </ul>
+                </td>
                 <td>
                     <div style="display: flex; justify-content: center;align-items: center;">
 

@@ -59,6 +59,16 @@ public class Persona implements Serializable{
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "persona", fetch = FetchType.LAZY)
     private List<Estudiante> estudiantes;
 
+    public String getNombreCompleto() {
+        if (this.getMaterno() == null) {
+            return this.getNombres() + " " + this.getPaterno();
+        }
 
+        if (this.getPaterno() == null) {
+            return this.getNombres() + " " + this.getMaterno();
+        }
+
+        return this.getNombres() + " " + this.getPaterno() + " " + this.getMaterno();
+    }
     
 }
