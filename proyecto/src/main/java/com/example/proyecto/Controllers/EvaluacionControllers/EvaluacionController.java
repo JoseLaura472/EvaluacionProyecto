@@ -161,6 +161,14 @@ public class EvaluacionController {
                 return "evaluacion/form-evaluacion_festival_bandas";
             } else if (proyecto.getTipoProyecto().getId_tipoProyecto() == 7) {
                 return "evaluacion/form-evaluacion_fexpo_acef";
+            } else if (proyecto.getTipoProyecto().getId_tipoProyecto() == 8) {
+                return "evaluacion/form-evaluacion_fexcoin_emprendimiento";
+            } else if (proyecto.getTipoProyecto().getId_tipoProyecto() == 9) {
+                return "evaluacion/form-evaluacion_fexcoin_social";
+            } else if (proyecto.getTipoProyecto().getId_tipoProyecto() == 10) {
+                return "evaluacion/form-evaluacion_fexcoin_construccion";
+            } else if (proyecto.getTipoProyecto().getId_tipoProyecto() == 11) {
+                return "evaluacion/form-evaluacion_fexcoin_salud";
             } else {
                 return "evaluacion/form-evaluacion";
             }
@@ -456,7 +464,7 @@ public class EvaluacionController {
         puntajeService.save(puntaje);
 
         // System.out.println("guardado");
-        
+
         return ResponseEntity.ok("Guardado");
     }
 

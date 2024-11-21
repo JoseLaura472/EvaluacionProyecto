@@ -2,6 +2,8 @@ package com.example.proyecto.Models.Entity;
 
 import java.util.List;
 
+import org.springframework.data.annotation.Transient;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -40,5 +42,8 @@ public class CategoriaCriterio {
     @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "categoriaCriterio", fetch = FetchType.LAZY)
     private List<Pregunta> preguntas;
+
+    @Transient
+    Double puntajeCategoria;
     
 }
