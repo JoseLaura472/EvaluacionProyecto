@@ -14,7 +14,7 @@ public interface IJuradoDao  extends CrudRepository<Jurado, Long>{
     @Query(value = "Select * From jurado where id_persona = ?1", nativeQuery = true)
     public Jurado juradoPorIdPersona(Long id_persona);
 
-    @Query("SELECT j FROM Jurado j JOIN j.proyecto p WHERE p.id = :proyectoId")
+    @Query("SELECT j FROM Jurado j JOIN j.proyecto p WHERE p.id = :proyectoId and j.estado != 'X' ")
     List<Jurado> findByProyectoId(@Param("proyectoId") Long proyectoId);
 
 }
