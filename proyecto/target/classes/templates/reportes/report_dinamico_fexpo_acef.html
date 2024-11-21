@@ -74,7 +74,7 @@ h1,h2,h3,h4,h5,h6{
 	</table>
 	<table width="100%" class="table table-sm table-bordered border-dark" 
     style="max-width: 88%; margin-left: auto; margin-right: auto;font-family: Calibri, Arial, sans-serif;font-size: 12px;">
-		<tr><td colspan="2" style="text-align: center;"><strong style="font-size: 140%;">DETALLE POR PROYECTO</strong></td></tr>
+		<tr><td colspan="2" style="text-align: center;"><strong style="font-size: 140%;" th:text="'DETALLE POR PROYECTO '+${proyecto.tipoProyecto.nom_tipoProyecto}"></strong></td></tr>
         <tr>
 			<th width="28%" style="text-align: right;">PROGRAMA :</th>
 			<td th:text="${proyecto.programa.nombre_programa}" ></td>
