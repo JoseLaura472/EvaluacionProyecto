@@ -36,7 +36,7 @@ public class UsuarioController {
 
 			model.addAttribute("usuario", new Usuario());
 			model.addAttribute("usuarios", usuarioService.findAll());
-            model.addAttribute("personas", juradoService.findAll());
+            model.addAttribute("personas", personaService.findAll());
 
 			return "usuario/gestionar-usuario";
 		} else {
