@@ -252,7 +252,7 @@ public class ProyectoController {
             @PathVariable(name = "id_tipoProyecto") Long id_tipoProyecto, Model model) {
 
         // Definir un array con los nombres de los fragmentos
-        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4", "card_body5", "card_body6", "card_body7", "card_body8"};
+        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4", "card_body5", "card_body6", "card_body7", "card_body8", "card_body9", "card_body10", "card_body11" };
 
         // Verificar si el id_tipoProyecto es válido
         if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
@@ -290,7 +290,9 @@ public class ProyectoController {
         p.setNombre_proyecto(proyecto.getNombre_proyecto());
         p.setNro_stand(proyecto.getNro_stand());
         p.setCategoriaProyecto(categoriaProyectoService.findOne(id_categoriaProyecto));
-        p.setDocente(docenteService.findOne(id_docente));
+        if (id_docente != null) {
+            p.setDocente(docenteService.findOne(id_docente));   
+        }
         // Elimina todos los jurados actuales del proyecto
         p.getJurado().clear();
 
