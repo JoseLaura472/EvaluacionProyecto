@@ -78,6 +78,10 @@
             <td th:text="${proyecto.categoriaProyecto.nom_categoria}"></td>
         </tr>
         <tr>
+            <th width="28%" style="text-align: right;">CARRERA/PROGRANA :</th>
+            <td th:text="${proyecto.programa.nombre_programa}"></td>
+        </tr>
+        <tr>
             <th width="28%" style="text-align: right;">PARTICIPANTES :</th>
             <td style="vertical-align: middle;">
                 <div th:each="e:${proyecto.estudiante}">

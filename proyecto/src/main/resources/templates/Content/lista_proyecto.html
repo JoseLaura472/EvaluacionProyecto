@@ -416,7 +416,7 @@
                 <th>Estudiantes</th>
                 <th>Docente</th>
                 <!-- <th>Categoria</th> -->
-                <!-- <th>Carrera/Programa</th> -->
+                <th>Carrera/Programa</th>
                 <th>Jurados</th>
                 <th>Acciones</th>
             </tr>
@@ -437,6 +437,7 @@
                 <!-- <td th:text="${por.categoriaProyecto != null ? por.categoriaProyecto.nom_categoria : 'SIN CATEGORIA'}"></td> -->
                 <!-- <td th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN PROGRAMA'}"></td> -->
                 <td th:text="${por.docente != null ? por.docente.persona.nombreCompleto : 'SIN DOCENTE'}"></td>
+                <td th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN CARRERA/PROGRAMA'}"></td>
                 <td >
                     <ul>
                         <li th:each="e : ${por.jurado}" th:text="${e.persona.nombreCompleto}"></li>
@@ -491,7 +492,7 @@
                 <th>Estudiantes</th>
                 <th>Docente</th>
                 <!-- <th>Categoria</th> -->
-                <!-- <th>Carrera/Programa</th> -->
+                <th>Carrera/Programa</th>
                 <th>Jurados</th>
                 <th>Acciones</th>
             </tr>
@@ -512,6 +513,7 @@
                 <!-- <td th:text="${por.categoriaProyecto != null ? por.categoriaProyecto.nom_categoria : 'SIN CATEGORIA'}"></td> -->
                 <!-- <td th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN PROGRAMA'}"></td> -->
                 <td th:text="${por.docente != null ? por.docente.persona.nombreCompleto : 'SIN DOCENTE'}"></td>
+                <td th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN CARRERA/PROGRAMA'}"></td>
                 <td >
                     <ul>
                         <li th:each="e : ${por.jurado}" th:text="${e.persona.nombreCompleto}"></li>
@@ -566,7 +568,7 @@
                 <th>Estudiantes</th>
                 <th>Docente</th>
                 <!-- <th>Categoria</th> -->
-                <!-- <th>Carrera/Programa</th> -->
+                <th>Carrera/Programa</th>
                 <th>Jurados</th>
                 <th>Acciones</th>
             </tr>
@@ -587,6 +589,7 @@
                 <!-- <td th:text="${por.categoriaProyecto != null ? por.categoriaProyecto.nom_categoria : 'SIN CATEGORIA'}"></td> -->
                 <!-- <td th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN PROGRAMA'}"></td> -->
                 <td th:text="${por.docente != null ? por.docente.persona.nombreCompleto : 'SIN DOCENTE'}"></td>
+                <td th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN CARRERA/PROGRAMA'}"></td>
                 <td >
                     <ul>
                         <li th:each="e : ${por.jurado}" th:text="${e.persona.nombreCompleto}"></li>
@@ -641,7 +644,7 @@
                 <th>Estudiantes</th>
                 <th>Docente</th>
                 <!-- <th>Categoria</th> -->
-                <!-- <th>Carrera/Programa</th> -->
+                <th>Carrera/Programa</th>
                 <th>Jurados</th>
                 <th>Acciones</th>
             </tr>
@@ -662,6 +665,7 @@
                 <!-- <td th:text="${por.categoriaProyecto != null ? por.categoriaProyecto.nom_categoria : 'SIN CATEGORIA'}"></td> -->
                 <!-- <td th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN PROGRAMA'}"></td> -->
                 <td th:text="${por.docente != null ? por.docente.persona.nombreCompleto : 'SIN DOCENTE'}"></td>
+                <td th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN CARRERA/PROGRAMA'}"></td>
                 <td >
                     <ul>
                         <li th:each="e : ${por.jurado}" th:text="${e.persona.nombreCompleto}"></li>
