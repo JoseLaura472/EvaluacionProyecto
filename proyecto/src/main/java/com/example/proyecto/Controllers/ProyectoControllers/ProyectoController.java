@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.proyecto.Models.Entity.ArchivoAdjunto;
+import com.example.proyecto.Models.Entity.Estudiante;
 import com.example.proyecto.Models.Entity.Jurado;
 import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Service.IArchivoAdjuntoService;
@@ -90,7 +91,8 @@ public class ProyectoController {
     public String ProyectoForm(Model model, @PathVariable(name = "id_tipoProyecto") Long id_tipoProyecto) {
 
         // Definir un array con los nombres de los fragmentos
-        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4", "card_body5", "card_body6", "card_body7", "card_body8", "card_body9", "card_body10", "card_body11" };
+        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4", "card_body5", "card_body6",
+                "card_body7", "card_body8", "card_body9", "card_body10", "card_body11" };
 
         // Verificar si el id_tipoProyecto es válido
         if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
@@ -112,7 +114,8 @@ public class ProyectoController {
     @GetMapping("/lista_proyectos/{id_tipoProyecto}")
     public String lista_proyectos(@PathVariable(name = "id_tipoProyecto") Long id_tipoProyecto, Model model) {
         // Definir un array con los nombres de los fragmentos
-        String[] fragments = { "table1", "table2", "table3", "table4", "table5", "table6", "table7", "table8", "table9", "table10", "table11" };
+        String[] fragments = { "table1", "table2", "table3", "table4", "table5", "table6", "table7", "table8", "table9",
+                "table10", "table11" };
 
         // Verificar si el id_tipoProyecto es válido
         if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
@@ -130,13 +133,13 @@ public class ProyectoController {
         }
     }
 
-    //PARA FEXCOIN, DICYT EMPRENDE, ACYT, FEXPOACEF O SIMILARES
+    // PARA FEXCOIN, DICYT EMPRENDE, ACYT, FEXPOACEF O SIMILARES
     @RequestMapping(value = "/ProyectoF", method = RequestMethod.POST)
     public ResponseEntity<String> ProyectoF(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
             @RequestParam(name = "estudiante", required = false) Long[] id_estudiantes,
             @RequestParam(name = "docente", required = false) Long id_docente,
             @RequestParam(name = "categoriaProyecto", required = false) Long id_categoriaProyecto,
-            @RequestParam(name = "id_tipoProyecto")Long id_tipoProyecto,
+            @RequestParam(name = "id_tipoProyecto") Long id_tipoProyecto,
             @RequestParam(name = "jurado") Long[] id_jurados) throws FileNotFoundException, IOException {
 
         MultipartFile multipartFile = proyecto.getFile();
@@ -156,7 +159,7 @@ public class ProyectoController {
         archivoAdjunt.setNombre_archivo(proyecto.getNombreArchivo());
         archivoAdjunt.setRuta_archivo(rutaArchivo);
         archivoAdjunt.setEstado("A");
-        archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt); 
+        archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt);
         proyecto.setArchivoAdjunto(archivoAdjunt);
 
         proyecto.setDocente(docenteService.findOne(id_docente));
@@ -174,7 +177,7 @@ public class ProyectoController {
     @RequestMapping(value = "/danza-entrada", method = RequestMethod.POST)
     public ResponseEntity<String> DanzaEntrada(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
             @RequestParam(name = "categoriaProyecto") Long id_categoriaProyecto,
-            @RequestParam(name = "id_tipoProyecto")Long id_tipoProyecto,
+            @RequestParam(name = "id_tipoProyecto") Long id_tipoProyecto,
             @RequestParam(name = "jurado") Long[] id_jurados) throws FileNotFoundException, IOException {
 
         // MultipartFile multipartFile = proyecto.getFile();
@@ -186,7 +189,8 @@ public class ProyectoController {
         // String rutaDirectorio = rootAbsolutPath.toString();
 
         // String rutaArchivo = adjuntarArchivo.crearSacDirectorio(rutaDirectorio);
-        // List<ArchivoAdjunto> listArchivos = archivoAdjuntoService.listarArchivoAdjunto();
+        // List<ArchivoAdjunto> listArchivos =
+        // archivoAdjuntoService.listarArchivoAdjunto();
         // Integer ad = adjuntarArchivo.adjuntarArchivoProyecto(proyecto, rutaArchivo);
         // proyecto.setNombreArchivo((listArchivos.size() + 1) + ".pdf");
 
@@ -194,7 +198,7 @@ public class ProyectoController {
         // archivoAdjunt.setNombre_archivo(proyecto.getNombreArchivo());
         // archivoAdjunt.setRuta_archivo(rutaArchivo);
         // archivoAdjunt.setEstado("A");
-        // archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt); 
+        // archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt);
         // proyecto.setArchivoAdjunto(archivoAdjunt);
 
         proyecto.setCategoriaProyecto(categoriaProyectoService.findOne(id_categoriaProyecto));
@@ -208,11 +212,11 @@ public class ProyectoController {
         return ResponseEntity.ok("1");
     }
 
-    //JERU PUJI
+    // JERU PUJI
     @RequestMapping(value = "/ProyectoFBanda", method = RequestMethod.POST)
     public ResponseEntity<String> ProyectoFBanda(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
             @RequestParam(name = "categoriaProyecto") Long id_categoriaProyecto,
-            @RequestParam(name = "id_tipoProyecto")Long id_tipoProyecto,
+            @RequestParam(name = "id_tipoProyecto") Long id_tipoProyecto,
             @RequestParam(name = "jurado") Long[] id_jurados) throws FileNotFoundException, IOException {
 
         MultipartFile multipartFile = proyecto.getFile();
@@ -232,14 +236,14 @@ public class ProyectoController {
         archivoAdjunt.setNombre_archivo(proyecto.getNombreArchivo());
         archivoAdjunt.setRuta_archivo(rutaArchivo);
         archivoAdjunt.setEstado("A");
-        archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt); 
+        archivoAdjuntoService.registrarArchivoAdjunto(archivoAdjunt);
         proyecto.setArchivoAdjunto(archivoAdjunt);
 
         proyecto.setCategoriaProyecto(categoriaProyectoService.findOne(id_categoriaProyecto));
         proyecto.setTipoProyecto(tipoProyectoService.findOne(id_tipoProyecto));
         proyecto.setEstado("A");
         proyectoService.save(proyecto);
-        
+
         redirectAttrs
                 .addFlashAttribute("mensaje", "Registro Exitoso del Documento")
                 .addFlashAttribute("clase", "success alert-dismissible fade show");
@@ -252,7 +256,8 @@ public class ProyectoController {
             @PathVariable(name = "id_tipoProyecto") Long id_tipoProyecto, Model model) {
 
         // Definir un array con los nombres de los fragmentos
-        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4", "card_body5", "card_body6", "card_body7", "card_body8", "card_body9", "card_body10", "card_body11" };
+        String[] fragments = { "card_body1", "card_body2", "card_body3", "card_body4", "card_body5", "card_body6",
+                "card_body7", "card_body8", "card_body9", "card_body10", "card_body11" };
 
         // Verificar si el id_tipoProyecto es válido
         if (id_tipoProyecto >= 1 && id_tipoProyecto <= fragments.length) {
@@ -281,7 +286,7 @@ public class ProyectoController {
     public ResponseEntity<String> ProyectoModF(@Validated Proyecto proyecto, RedirectAttributes redirectAttrs,
             @RequestParam(name = "estudiante", required = false) Long[] id_estudiantes,
             @RequestParam(name = "categoriaProyecto", required = true) Long id_categoriaProyecto,
-            @RequestParam(name = "id_tipoProyecto")Long id_tipoProyecto,
+            @RequestParam(name = "id_tipoProyecto") Long id_tipoProyecto,
             @RequestParam(name = "docente", required = false) Long id_docente,
             @RequestParam(name = "jurado", required = true) Long[] id_jurados)
             throws FileNotFoundException, IOException {
@@ -291,7 +296,13 @@ public class ProyectoController {
         p.setNro_stand(proyecto.getNro_stand());
         p.setCategoriaProyecto(categoriaProyectoService.findOne(id_categoriaProyecto));
         if (id_docente != null) {
-            p.setDocente(docenteService.findOne(id_docente));   
+            p.setDocente(docenteService.findOne(id_docente));
+        }
+        p.getEstudiante().clear();
+
+        for (Long idEstudiante : id_estudiantes) {
+            Estudiante estudiante = estudianteService.findOne(idEstudiante);
+            p.getEstudiante().add(estudiante);
         }
         // Elimina todos los jurados actuales del proyecto
         p.getJurado().clear();
