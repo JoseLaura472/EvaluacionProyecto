@@ -1,0 +1,137 @@
+<!-- Header -->
+<div class="modal-header bg-light border-0">
+    <h5 class="modal-title m-0" th:text="${edit}? 'Modificar Jurado' : 'Registrar Jurado'"></h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+</div>
+
+<!-- Form -->
+<form id="formularioJurado" class="needs-validation" novalidate th:object="${jurado}"
+    th:action="${edit} ? @{/jurado/modificar-jurado} : @{/jurado/registrar-jurado}" method="post">
+
+    <input type="hidden" th:field="*{id_jurado}">
+    <input type="hidden" th:field="*{estado}">
+
+    <div class="modal-body">
+        <!-- Datos personales -->
+        <h6 class="text-uppercase text-muted mb-3">Datos personales</h6>
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Nombres <span class="text-danger">*</span></label>
+                <input class="form-control to-upper" type="text" th:field="*{persona.nombres}"
+                    placeholder="Ej.: MARÍA LUZ" required maxlength="80">
+                <div class="invalid-feedback">Ingresa el/los nombres.</div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Apellido paterno</label>
+                <input class="form-control to-upper" type="text" th:field="*{persona.paterno}" placeholder="Ej.: PÉREZ">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Apellido materno</label>
+                <input class="form-control to-upper" type="text" th:field="*{persona.materno}"
+                    placeholder="Ej.: FLORES">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Cédula</label>
+                <input class="form-control to-upper" type="text" th:field="*{persona.ci}" placeholder="Ej.: 123456 LP">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Sexo</label>
+                <select class="form-select" th:field="*{persona.tipoSexo}">
+                    <option value="">Seleccione…</option>
+                    <option value="Masculino">Masculino</option>
+                    <option value="Femenino">Femenino</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Fecha de nacimiento</label>
+                <input class="form-control" type="date" th:field="*{persona.fecNacimiento}" id="fecNacInput">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Correo <span class="text-danger">*</span></label>
+                <input class="form-control" type="email" th:field="*{persona.email}" placeholder="ejemplo@correo.com"
+                    required>
+                <div class="invalid-feedback">Correo inválido.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+   <div class="modal-footer">
+        <div class="row">
+            <div class="col-12">
+                <a type="submit" class="btn btn-secondary" style="color: white;" data-bs-dismiss="modal">Cancelar</a>
+                <input type="submit" class="btn btn-success" th:value="${edit}? 'Guardar Cambios': 'Guardar Registro'">
+
+            </div>
+        </div>
+    </div>
+
+</form>
+
+<style>
+    .modal-body h6 {
+        font-size: .85rem;
+        font-weight: 700;
+        color: #6c757d;
+        letter-spacing: .05em;
+    }
+
+    .to-upper {
+        text-transform: uppercase;
+    }
+</style>
+
+<script>
+    (function () {
+        const $form = $('#formularioJurado');
+        const $btn = $('#btnSubmitJurado');
+        const $spin = $btn.find('.spinner-border');
+        const modalEl = document.getElementById('modalFormularioJurado');
+
+        // Limitar fecha a hoy
+        const $fec = document.getElementById('fecNacInput');
+        if ($fec) $fec.max = new Date().toISOString().slice(0, 10);
+
+        // Valida bootstrap
+        function isValid() {
+            $form.addClass('was-validated');
+            return $form[0].checkValidity();
+        }
+
+        // Normaliza a mayúsculas antes de enviar
+        function normalizeUpper() {
+            $form.find('.to-upper').each(function () {
+                this.value = (this.value || '').toUpperCase();
+            });
+        }
+
+        // Submit
+        $form.on('submit', function (e) {
+            e.preventDefault();
+            normalizeUpper();
+            if (!isValid()) return;
+
+            $btn.attr('disabled', true);
+            $spin.removeClass('d-none');
+
+            $.ajax({
+                type: $form.attr('method'),
+                url: $form.attr('action'),
+                data: $form.serialize(),
+                success: function () {
+                    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    modal.hide();
+                    if (typeof cargarTabla === 'function') cargarTabla();
+                },
+                error: function (xhr) {
+                    console.error(xhr);
+                    alert('Error al guardar');
+                },
+                complete: function () {
+                    $btn.removeAttr('disabled');
+                    $spin.addClass('d-none');
+                }
+            });
+        });
+    })();
+</script>

@@ -19,4 +19,6 @@ public interface IJuradoService {
 
     public Jurado juradoPorIdPersona(Long id_persona);
     List<Jurado> findByProyectoId(@Param("proyectoId") Long proyectoId);
+
+    Jurado findByNombreCompleto(@Param("nombreCompleto") String nombreCompleto);
 }

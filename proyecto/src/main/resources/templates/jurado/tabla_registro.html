@@ -1,0 +1,68 @@
+<div class="card">
+    <div class="card-header d-flex justify-content-lg-between">
+        <h5>Registro Jurado</h5>
+        <button type="button" class="btn btn-primary" onclick="cargarFormulario()" data-bs-toggle="modal"
+            data-bs-target="#modalFormularioJurado">
+            <i class="fa-solid fa-user-plus"></i> Agregar Jurado
+        </button>
+
+    </div>
+    <div class="card-datatable table-responsive pt-0">
+        <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive"
+            style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Jurado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="jur, num : ${listaJurados}" th:if="${jur.estado != 'X'}">
+                    <td th:text="${num.index + 1}"></td>
+                    <td th:text="${jur.persona.nombres + ' ' + jur.persona.paterno + ' ' + jur.persona.materno}"></td>
+                    <td>
+                        <div class="d-flex justify-content-center align-items-center">
+                            <button class="btn btn-info me-2" style="font-size: 24px;"
+                                th:attr="onclick=|cargarFormularioEdit(${jur.id_jurado})|">
+                                <i class="mdi mdi-border-color"></i>
+                            </button>
+                            <button class="btn btn-danger" style="font-size: 24px;"
+                                th:attr="onclick=|eliminar('${jur.persona.nombres} ${jur.persona.paterno} ${jur.persona.materno}', ${jur.id_jurado})|">
+                                <i class="mdi mdi-close" style="color:#fff; pointer-events:none;"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $('#data-table').DataTable({
+        language: {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            }
+        }
+    });
+</script>

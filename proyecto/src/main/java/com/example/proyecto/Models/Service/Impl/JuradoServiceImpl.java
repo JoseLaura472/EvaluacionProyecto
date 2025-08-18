@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.proyecto.Models.Dao.IJuradoDao;
 import com.example.proyecto.Models.Entity.Jurado;
-
 import com.example.proyecto.Models.Service.IJuradoService;
 
 @Service
@@ -44,5 +43,10 @@ public class JuradoServiceImpl implements IJuradoService {
     @Override
     public List<Jurado> findByProyectoId(Long proyectoId) {
       return (List<Jurado>) juradoDao.findByProyectoId(proyectoId);
+    }
+
+    @Override
+    public Jurado findByNombreCompleto(String nombreCompleto) {
+        return juradoDao.findByNombreCompleto(nombreCompleto);
     }
 }

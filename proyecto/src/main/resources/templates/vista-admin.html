@@ -14,121 +14,122 @@
         <div class="content-page">
             <div class="content">
                 <div th:replace="~{layout/topbar :: topbar}"></div>
-                
-                <!-- INICIO CONTENIDO -->
-                <div class="page-content-wrapper ">
-                    <div class="container-fluid">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <div class="float-right page-breadcrumb">
-                                    <ol class="breadcrumb">
-                                        <li class="breadcrumb-item"><a href="#">Drixo</a></li>
-                                        <li class="breadcrumb-item active">Dashboard</li>
-                                    </ol>
-                                </div>
-                                <h5 class="page-title">Dashboard</h5>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xl-4 col-md-6" th:each="pr : ${PrimerL}">
-                                <div class="card mini-stat m-b-30">
-                                    <div class="p-3 text-white" style="background-color: #000000 !important">
-                                        <div class="mini-stat-icon">
-                                            <i class="float-right mb-0"><img src="../../../../assets/images/1mejor.png"
-                                                    height="100" alt="logo"></i>
-                                        </div>
-                                        <h6 class="text-uppercase mb-0">PRIMER LUGAR</h6>
+                <div class="container-xxl flex-grow-1 container-p-y" id="contenido">
+                    <!-- INICIO CONTENIDO -->
+                    <div class="page-content-wrapper ">
+                        <div class="container-fluid">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="float-right page-breadcrumb">
+                                        <ol class="breadcrumb">
+                                            <li class="breadcrumb-item"><a href="#">Drixo</a></li>
+                                            <li class="breadcrumb-item active">Dashboard</li>
+                                        </ol>
                                     </div>
-                                    <div class="card-body">
-                                        <div class="border-bottom pb-4">
-                                            <p class="m-0">PROYECTO :</p>
-                                            <h5 class="m-0" th:text="${pr.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
+                                    <h5 class="page-title">Dashboard</h5>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-xl-4 col-md-6" th:each="pr : ${PrimerL}">
+                                    <div class="card mini-stat m-b-30">
+                                        <div class="p-3 text-white" style="background-color: #000000 !important">
+                                            <div class="mini-stat-icon">
+                                                <i class="float-right mb-0"><img src="../../../../assets/images/1mejor.png"
+                                                        height="100" alt="logo"></i>
+                                            </div>
+                                            <h6 class="text-uppercase mb-0">PRIMER LUGAR</h6>
                                         </div>
-                                        <div class="mt-4 text-muted">
-                                            <div class="float-right">
-                                                <h5 class="m-0" th:text="${pr.promedio_final}">3567<i
+                                        <div class="card-body">
+                                            <div class="border-bottom pb-4">
+                                                <p class="m-0">PROYECTO :</p>
+                                                <h5 class="m-0" th:text="${pr.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
+                                            </div>
+                                            <div class="mt-4 text-muted">
+                                                <div class="float-right">
+                                                    <h5 class="m-0" th:text="${pr.promedio_final}">3567<i
+                                                            class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                                </div>
+                                                <h5 class="m-0" th:if="${pr.programa != null}"
+                                                    th:text="${pr.programa.nombre_programa}">1456<i
                                                         class="mdi mdi-arrow-up text-success ml-2"></i></h5>
                                             </div>
-                                            <h5 class="m-0" th:if="${pr.programa != null}"
-                                                th:text="${pr.programa.nombre_programa}">1456<i
-                                                    class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-xl-4 col-md-6" th:each="sg : ${SegundoL}">
+                                    <div class="card mini-stat m-b-30">
+                                        <div class="p-3 text-white" style="background-color: #000000 !important">
+                                            <div class="mini-stat-icon">
+                                                <i class="float-right mb-0"><img src="../../../../assets/images/2mejor.png"
+                                                        height="100" alt="logo"></i>
+                                            </div>
+                                            <h6 class="text-uppercase mb-0">SEGUNDO LUGAR</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="border-bottom pb-4">
+                                                <p class="m-0">PROYECTO :</p>
+                                                <h5 class="m-0" th:text="${sg.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
+                                            </div>
+                                            <div class="mt-4 text-muted">
+                                                <div class="float-right">
+                                                    <h5 class="m-0" th:text="${sg.promedio_final}">3567<i
+                                                            class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                                </div>
+                                                <h5 class="m-0" th:if="${sg.programa != null}"
+                                                    th:text="${sg.programa.nombre_programa}">1456<i
+                                                        class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-xl-4 col-md-6" th:each="ter : ${TercerL}">
+                                    <div class="card mini-stat m-b-30">
+                                        <div class="p-3 text-white" style="background-color: #000000 !important">
+                                            <div class="mini-stat-icon">
+                                                <i class="float-right mb-0"><img src="../../../../assets/images/3mejor.png"
+                                                        height="100" alt="logo"></i>
+                                            </div>
+                                            <h6 class="text-uppercase mb-0">TERCER LUGAR</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="border-bottom pb-4">
+                                                <p class="m-0">PROYECTO :</p>
+                                                <h5 class="m-0" th:text="${ter.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
+                                            </div>
+                                            <div class="mt-4 text-muted">
+                                                <div class="float-right">
+                                                    <h5 class="m-0" th:text="${ter.promedio_final}">3567<i
+                                                            class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                                </div>
+                                                <h5 class="m-0" th:if="${ter.programa != null}"
+                                                    th:text="${ter.programa.nombre_programa}">1456<i
+                                                        class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-xl-4 col-md-6" th:each="sg : ${SegundoL}">
-                                <div class="card mini-stat m-b-30">
-                                    <div class="p-3 text-white" style="background-color: #000000 !important">
-                                        <div class="mini-stat-icon">
-                                            <i class="float-right mb-0"><img src="../../../../assets/images/2mejor.png"
-                                                    height="100" alt="logo"></i>
-                                        </div>
-                                        <h6 class="text-uppercase mb-0">SEGUNDO LUGAR</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="border-bottom pb-4">
-                                            <p class="m-0">PROYECTO :</p>
-                                            <h5 class="m-0" th:text="${sg.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
-                                        </div>
-                                        <div class="mt-4 text-muted">
-                                            <div class="float-right">
-                                                <h5 class="m-0" th:text="${sg.promedio_final}">3567<i
-                                                        class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                            <!-- SOLO PARA ADMINISTRADOR -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="card m-b-30">
+                                        <div class="card-body">
+                                            <h1 style="text-align: center;">TABLA DE POSICIONES</h1>
+                                            <div class="col-md-5">
+                                                <label class="col-form-label">TIPO EVALUACIÓN </label>
+                                                <select onchange="cargarTabla(this.value)" class="form-control js-choice"
+                                                    id="formFiltroTurno__turno">
+                                                    <option th:each="tp : ${tiposProyectos}"
+                                                        th:value="${tp.id_tipoProyecto}" th:text="${tp.nom_tipoProyecto}">
+                                                    </option>
+                                                </select>
                                             </div>
-                                            <h5 class="m-0" th:if="${sg.programa != null}"
-                                                th:text="${sg.programa.nombre_programa}">1456<i
-                                                    class="mdi mdi-arrow-up text-success ml-2"></i></h5>
+                                            <p></p>
+                                            <div id="tablaRegistros"></div>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-xl-4 col-md-6" th:each="ter : ${TercerL}">
-                                <div class="card mini-stat m-b-30">
-                                    <div class="p-3 text-white" style="background-color: #000000 !important">
-                                        <div class="mini-stat-icon">
-                                            <i class="float-right mb-0"><img src="../../../../assets/images/3mejor.png"
-                                                    height="100" alt="logo"></i>
-                                        </div>
-                                        <h6 class="text-uppercase mb-0">TERCER LUGAR</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="border-bottom pb-4">
-                                            <p class="m-0">PROYECTO :</p>
-                                            <h5 class="m-0" th:text="${ter.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
-                                        </div>
-                                        <div class="mt-4 text-muted">
-                                            <div class="float-right">
-                                                <h5 class="m-0" th:text="${ter.promedio_final}">3567<i
-                                                        class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-                                            </div>
-                                            <h5 class="m-0" th:if="${ter.programa != null}"
-                                                th:text="${ter.programa.nombre_programa}">1456<i
-                                                    class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- SOLO PARA ADMINISTRADOR -->
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="card m-b-30">
-                                    <div class="card-body">
-                                        <h1 style="text-align: center;">TABLA DE POSICIONES</h1>
-                                        <div class="col-md-5">
-                                            <label class="col-form-label">TIPO EVALUACIÓN </label>
-                                            <select onchange="cargarTabla(this.value)" class="form-control js-choice"
-                                                id="formFiltroTurno__turno">
-                                                <option th:each="tp : ${tiposProyectos}"
-                                                    th:value="${tp.id_tipoProyecto}" th:text="${tp.nom_tipoProyecto}">
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <p></p>
-                                        <div id="tablaRegistros"></div>
                                     </div>
                                 </div>
                             </div>

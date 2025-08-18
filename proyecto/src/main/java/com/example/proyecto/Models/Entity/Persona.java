@@ -70,5 +70,4 @@ public class Persona implements Serializable{
 
         return this.getNombres() + " " + this.getPaterno() + " " + this.getMaterno();
     }
-    
 }

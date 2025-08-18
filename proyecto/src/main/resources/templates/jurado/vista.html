@@ -1,0 +1,70 @@
+<h4 class="py-3 mb-4"><span class="text-muted fw-light">Menú /</span> Jurado</h4>
+
+<div id="tablaRegistro"></div>
+
+<div class="modal fade" id="modalFormularioJurado" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content" id="contenidoModalJurado"></div>
+  </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        cargarTabla();
+
+    });
+
+    function cargarTabla() {
+        $.ajax({
+            type: 'POST',
+            url: "/jurado/tabla-registros",  // Ruta del metodo del contjuradoador en Spring Boot
+            success: function (response) {
+                $("#tablaRegistro").html(response);  // Actualiza el contenido del div con la respuesta del servidor
+            }
+        });
+    }
+
+    // ABRIR modal con formulario NUEVO (GET)
+    function cargarFormulario() {
+        $.ajax({
+            type: 'GET',
+            url: "/jurado/formulario",
+            success: function (html) {
+                $("#contenidoModalJurado").html(html);
+                const modal = new bootstrap.Modal(document.getElementById('modalFormularioJurado'));
+                modal.show();
+            },
+            error: function (xhr) { console.error(xhr); }
+        });
+    }
+
+    // ABRIR modal con formulario EDICIÓN (GET)
+    function cargarFormularioEdit(id) {
+        $.ajax({
+            type: 'GET',
+            url: "/jurado/formulario-edit/" + id,
+            success: function (html) {
+                $("#contenidoModalJurado").html(html);
+                const modal = new bootstrap.Modal(document.getElementById('modalFormularioJurado'));
+                modal.show();
+            },
+            error: function (xhr) { console.error(xhr); }
+        });
+    }
+
+    // ELIMINAR (POST) y refrescar tabla
+    function eliminar(nombre, id) {
+        if (!confirm(`¿Eliminar a ${nombre}?`)) return;
+        $.ajax({
+            type: 'POST',
+            url: "/jurado/eliminar/" + id,
+            success: function () { cargarTabla(); },
+            error: function (xhr) { console.error(xhr); }
+        });
+    }
+
+    $(document).ready(function () {
+        cargarTabla();
+    });
+
+</script>
