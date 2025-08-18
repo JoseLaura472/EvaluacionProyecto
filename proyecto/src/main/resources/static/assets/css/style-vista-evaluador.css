@@ -1,0 +1,73 @@
+ /* === Scoping: solo afecta esta vista === */
+        body.page-evaluacion .content-page{
+            margin-left: 0 !important;   /* anula el margen del sidebar oculto */
+            margin-right: 0 !important;
+            overflow: visible;            /* permite que el wrapper de DataTables se expanda */
+            min-height: auto;
+        }
+        body.page-evaluacion .content-page > .content{
+            margin-top: 70px;             /* respetamos tu header */
+            margin-bottom: 63px;
+            padding: 0 12px;              /* padding más amable en móvil */
+        }
+        body.page-evaluacion .page-content-wrapper{
+            margin: 0;                    /* sin márgenes negativos */
+        }
+
+          /* Sombra suave al hover */
+  .hover-shadow-sm:hover{ box-shadow: 0 6px 18px rgba(0,0,0,.08); }
+
+  /* Clamp para títulos largos en tarjetas */
+  .clamp-2{
+    display:-webkit-box; line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+  }
+
+        /* Limitar ancho en pantallas grandes y centrar */
+        .container-limit{
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        @media (min-width: 1200px){
+            .container-limit{ max-width: 1100px; }
+        }
+
+        /* Cards y títulos */
+        .card{ border: none; border-radius: .75rem; box-shadow: 0 4px 12px rgba(0,0,0,.08); }
+        .page-title{ font-size: 1.8rem; font-weight: 700; }
+
+        /* Tabla responsiva */
+        .table-responsive{ overflow-x: auto; }
+        table th, table td{ vertical-align: middle; text-align: center; }
+        /* Títulos largos más legibles */
+        td.text-start{ text-align: left !important; }
+
+        /* DataTables Buttons: que no se desborden en móvil */
+        #datatable-buttons_wrapper .dt-buttons{
+            display: flex; flex-wrap: wrap; gap: .5rem;
+        }
+        #datatable-buttons_wrapper .dt-buttons .btn{
+            margin: 0;                     /* quitar márgenes raros de algunos temas */
+        }
+        /* Reorganizar cabecera de DataTables en móvil: botones y filtro uno debajo del otro */
+        @media (max-width: 576px){
+            #datatable-buttons_wrapper .row > div{
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            #datatable-buttons_wrapper .dataTables_filter{
+                margin-top: .5rem;
+                text-align: left !important;
+            }
+        }
+
+        /* Botón Evaluar */
+        .btn-evaluar{ border-radius: 999px; padding: .35rem 1rem; }
+
+          /* Badges “subtle” si tu tema no los trae */
+  .bg-primary-subtle { background: rgba(13,110,253,.08)!important; }
+  .text-primary { color: #0d6efd!important; }
+  .bg-secondary-subtle { background: rgba(108,117,125,.12)!important; }
+  .text-secondary { color:#6c757d!important; }
+  .bg-info-subtle { background: rgba(13,202,240,.12)!important; }
+  .text-info { color:#0dcaf0!important; }

@@ -93,6 +93,4 @@ public class CategoriaCriterioController {
         categoriaCriterio.setEstado("X");
         categoriaCriterioService.save(categoriaCriterio);
     }
-    
-    
 }

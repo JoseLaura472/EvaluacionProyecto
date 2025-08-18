@@ -4,223 +4,143 @@
 <head th:replace="~{layout/head :: head}">
 </head>
 
+<body class="fixed-left page-evaluacion">
 
-<body class="fixed-left">
-
-    <!-- Loader -->
     <div id="preloader">
         <div id="status">
             <div class="spinner"></div>
         </div>
     </div>
-
-    <!-- Begin page -->
     <div id="wrapper">
-
-        <!-- ========== Left Sidebar Start ========== -->
-        <div th:replace="~{layout/sidebar :: sidebar}">
-        </div>
-        <!-- Left Sidebar End -->
-
-        <!-- Start right Content here -->
         <div class="content-page">
-            <!-- Start content -->
             <div class="content">
-
-                <!-- Top Bar Start -->
-                <div th:replace="~{layout/topbar :: topbar}">
-                </div>
-                <!-- Top Bar End -->
-
-                <!-- INICIO CONTENIDO -->
+                <div th:replace="~{layout/topbar :: topbar}"></div>
                 <div class="page-content-wrapper ">
-
-                    <div class="container-fluid">
-
+                    <div class="container-fluid container-limit">
                         <div class="row">
-                            <div class="col-sm-12">
-                                <div class="float-right page-breadcrumb">
-                                    <ol class="breadcrumb">
-                                        <li class="breadcrumb-item"><a href="#">Drixo</a></li>
-                                        <li class="breadcrumb-item active">Dashboard</li>
+                            <div class="col-sm-12 d-flex justify-content-between align-items-start flex-wrap">
+                                <div class="mb-2">
+                                    <h5 class="text-muted mb-1">SEMFA / Evaluación</h5>
+                                    <h1 class="page-title">UAP DIGITAL</h1>
+                                </div>
+                                <nav aria-label="breadcrumb" class="mb-2">
+                                    <ol class="breadcrumb mb-0">
+                                        <li class="breadcrumb-item"><a href="#">SEMFA</a></li>
+                                        <li class="breadcrumb-item active" aria-current="page">EVALUACIÓN</li>
                                     </ol>
-                                </div>
-                                <h5 class="page-title">Dashboard</h5>
+                                </nav>
                             </div>
                         </div>
-                        <!-- end row -->
-
-                        <div class="row" th:if="${usuario.estado == 'A'}">
-
-                            <div class="col-xl-4 col-md-6" th:each="pr : ${PrimerL}">
-                                <div class="card mini-stat m-b-30">
-                                    <div class="p-3 text-white" style="background-color: #000000 !important">
-                                        <div class="mini-stat-icon">
-                                            <i class="float-right mb-0"><img src="../../../../assets/images/1mejor.png"
-                                                    height="100" alt="logo"></i>
-                                        </div>
-                                        <h6 class="text-uppercase mb-0">PRIMER LUGAR</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="border-bottom pb-4">
-                                            <p class="m-0">PROYECTO :</p>
-                                            <h5 class="m-0" th:text="${pr.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
-                                        </div>
-                                        <div class="mt-4 text-muted">
-                                            <div class="float-right">
-                                                <h5 class="m-0" th:text="${pr.promedio_final}">3567<i
-                                                        class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-                                            </div>
-                                            <h5 class="m-0" th:if="${pr.programa != null}"
-                                                th:text="${pr.programa.nombre_programa}">1456<i
-                                                    class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-xl-4 col-md-6" th:each="sg : ${SegundoL}">
-                                <div class="card mini-stat m-b-30">
-                                    <div class="p-3 text-white" style="background-color: #000000 !important">
-                                        <div class="mini-stat-icon">
-                                            <i class="float-right mb-0"><img src="../../../../assets/images/2mejor.png"
-                                                    height="100" alt="logo"></i>
-                                        </div>
-                                        <h6 class="text-uppercase mb-0">SEGUNDO LUGAR</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="border-bottom pb-4">
-                                            <p class="m-0">PROYECTO :</p>
-                                            <h5 class="m-0" th:text="${sg.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
-                                        </div>
-                                        <div class="mt-4 text-muted">
-                                            <div class="float-right">
-                                                <h5 class="m-0" th:text="${sg.promedio_final}">3567<i
-                                                        class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-                                            </div>
-                                            <h5 class="m-0" th:if="${sg.programa != null}"
-                                                th:text="${sg.programa.nombre_programa}">1456<i
-                                                    class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-
-                            <div class="col-xl-4 col-md-6" th:each="ter : ${TercerL}">
-                                <div class="card mini-stat m-b-30">
-                                    <div class="p-3 text-white" style="background-color: #000000 !important">
-                                        <div class="mini-stat-icon">
-                                            <i class="float-right mb-0"><img src="../../../../assets/images/3mejor.png"
-                                                    height="100" alt="logo"></i>
-                                        </div>
-                                        <h6 class="text-uppercase mb-0">TERCER LUGAR</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="border-bottom pb-4">
-                                            <p class="m-0">PROYECTO :</p>
-                                            <h5 class="m-0" th:text="${ter.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
-                                        </div>
-                                        <div class="mt-4 text-muted">
-                                            <div class="float-right">
-                                                <h5 class="m-0" th:text="${ter.promedio_final}">3567<i
-                                                        class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-                                            </div>
-                                            <h5 class="m-0" th:if="${ter.programa != null}"
-                                                th:text="${ter.programa.nombre_programa}">1456<i
-                                                    class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-
-                        <div class="row" th:if="${usuario.estado == 'J'}">
-                            <div class="col-lg-12">
-                                <div class="card m-b-30">
-                                    <div class="card-body">
-
-                                        <h1 class="mt-0 header-title" style="font-size: 30px;"
-                                            th:text="${'BIENVENIDO (A) '+usuario.persona.nombres +' '+usuario.persona.paterno}">
-                                        </h1>
-
-
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card shadow-sm border-0 mb-4 bg-light">
+                                    <div class="card-body text-center">
+                                        <h2 class="fw-bold mb-1"
+                                            th:text="${'Bienvenido(a), ' + usuario.persona.nombres + ' ' + usuario.persona.paterno}">
+                                        </h2>
+                                        <p class="text-muted mb-0">Aquí encontrarás la lista de proyectos que tienes
+                                            asignados para evaluación.</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- end row -->
-                        <div class="row" th:if="${usuario.estado == 'A'}">
+                        <div class="row">
                             <div class="col-12">
                                 <div class="card m-b-30">
                                     <div class="card-body">
 
-                                        <h1 style="text-align: center;">TABLA DE POSICIONES</h1>
-
-                                        <div class="col-md-5">
-                                            <label class="col-form-label">TIPO EVALUACIÓN </label>
-                                            <select onchange="cargarTabla(this.value)" class="form-control js-choice"
-                                                id="formFiltroTurno__turno">
-                                                <option th:each="tp : ${tiposProyectos}"
-                                                    th:value="${tp.id_tipoProyecto}" th:text="${tp.nom_tipoProyecto}">
-                                                </option>
-                                            </select>
+                                        <div
+                                            class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-2 mb-3">
+                                            <h3 class="fw-bold m-0">Lista de proyectos a evaluar</h3>
+                                            <div class="input-group" style="max-width: 340px;">
+                                                <span class="input-group-text"><i class="ti ti-search"></i></span>
+                                                <input id="buscadorProyectos" type="text" class="form-control"
+                                                    placeholder="Buscar por título o programa…">
+                                            </div>
                                         </div>
-                                        <p></p>
-                                        <div id="tablaRegistros"></div>
-
+                                        <div class="text-center text-muted py-4" th:if="${#lists.isEmpty(proyectos)}">
+                                            <em>No tienes proyectos asignados por el momento.</em>
+                                        </div>
+                                        <div id="gridProyectos" class="row g-3" th:if="${!#lists.isEmpty(proyectos)}">
+                                            <div class="col-12 col-md-6 col-lg-4 col-xxl-3"
+                                                th:each="por, index : ${proyectos}" th:if="${por.estado != 'X'}"
+                                                th:attr="data-txt=${(por.programa != null ? por.programa.nombre_programa : 'SIN PROGRAMA') + ' ' + por.nombre_proyecto}">
+                                                <div class="card h-100 shadow-sm border-0 hover-shadow-sm">
+                                                    <div class="card-body d-flex flex-column">
+                                                        <div
+                                                            class="d-flex align-items-start justify-content-between mb-2">
+                                                            <span
+                                                                class="badge bg-primary-subtle text-primary fw-semibold">
+                                                                <span
+                                                                    th:text="${por.programa != null ? por.programa.nombre_programa : 'SIN PROGRAMA'}"></span>
+                                                            </span>
+                                                            <span
+                                                                class="badge bg-secondary-subtle text-secondary">#<span
+                                                                    th:text="${index.index + 1}"></span></span>
+                                                        </div>
+                                                        <h5 class="fw-bold lh-sm mb-2 clamp-2"
+                                                            th:text="${por.nombre_proyecto}">Título del Proyecto</h5>
+                                                        <div class="d-flex flex-wrap gap-2 mb-3">
+                                                            <span class="badge bg-info-subtle text-info">
+                                                                Stand: <span class="fw-semibold"
+                                                                    th:text="${por.nro_stand}"></span>
+                                                            </span>
+                                                        </div>
+                                                        <div class="flex-grow-1"></div>
+                                                        <div class="d-flex justify-content-end">
+                                                            <a th:href="${'../../../../form-evaluacion/' + por.id_proyecto}"
+                                                                class="btn btn-primary btn-sm rounded-pill px-3">
+                                                                Evaluar
+                                                            </a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div> <!-- end col -->
+                            </div>
                         </div>
-
-                    </div><!-- container fluid -->
-
+                    </div>
                 </div>
-                <!-- FIN INICIO CONTENIDO -->
-
             </div>
-            <!-- content -->
-
-            <footer th:replace="~{layout/footer :: footer}">
-            </footer>
-
+            <footer th:replace="~{layout/footer :: footer}"></footer>
         </div>
-        <!-- End Right content here -->
-
     </div>
-    <!-- END wrapper -->
-
     <div th:replace="~{layout/script :: script}"></div>
     <script>
-        cargarTabla($('#formFiltroTurno__turno').val());
-        console.log($('#formFiltroTurno__turno').val() + "aquii");
-
-
-        function cargarTabla(idTipoProyecto) {
-            $("#tablaRegistros").html(`
-                <div class="d-flex justify-content-center">
-                <div class="spinner-border m-5 text-secondary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-                `);
-            $.ajax({
-                type: 'POST',
-                url: "/tabla-ranking-tipo-proyecto/" + idTipoProyecto,  // Ruta del metodo del controlador en Spring Boot
-                success: function (response) {
-                    $("#tablaRegistros").html(response);  // Actualiza el contenido del div con la respuesta del servidor
-                }
-            });
-        }
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.jQuery && $.fn.DataTable) {
+                $('#datatable-buttons').DataTable({
+                    responsive: true,   // colapsa columnas inteligentemente
+                    scrollX: true,      // evita ruptura en móviles si hay muchas columnas
+                    autoWidth: false,
+                    lengthChange: false,
+                    pageLength: 10,
+                    dom: "<'row mb-2'<'col-12 col-md-6 dt-buttons-container'B><'col-12 col-md-6'f>>" +
+                        "<'row'<'col-12'tr>>" +
+                        "<'row mt-2'<'col-12 col-md-6'i><'col-12 col-md-6'p>>",
+                    buttons: ['copy', 'excel', 'pdf', 'colvis'],
+                    columnDefs: [{ targets: -1, orderable: false }]
+                });
+            }
+        });
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('buscadorProyectos');
+            const cards = document.querySelectorAll('#gridProyectos > [data-txt]');
+            if (!input || !cards.length) return;
 
+            input.addEventListener('input', function () {
+                const q = this.value.trim().toLowerCase();
+                cards.forEach(c => {
+                    const txt = (c.getAttribute('data-txt') || '').toLowerCase();
+                    c.style.display = txt.includes(q) ? '' : 'none';
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>

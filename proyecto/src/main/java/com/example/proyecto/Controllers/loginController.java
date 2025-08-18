@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,30 +47,71 @@ public class loginController {
     }
 
     // Funciòn de iniciar sesiòn administrador
-    @RequestMapping(value = "/LogearseF", method = RequestMethod.POST)
-    public String logearseF(@RequestParam(value = "usuario") String user,
-            @RequestParam(value = "contrasena") String contrasena, Model model, HttpServletRequest request,
-            RedirectAttributes flash) {
-        // los dos parametros de usuario, contraseña vienen del formulario html
+    @PostMapping("/LogearseF")
+    public String logearseF(@RequestParam("usuario") String user,
+                            @RequestParam("contrasena") String contrasena,
+                            HttpServletRequest request,
+                            RedirectAttributes flash) {
+
+        // TODO: en producción NO uses contraseña en texto plano. Usa BCrypt y Spring Security.
         Usuario usuario = usuarioService.getUsuarioContraseña(user, contrasena);
 
-        if (usuario != null) {
-            if (usuario.getEstado().equals("X")) {
-                return "redirect:/cerrar_sesionAdm";
-            }
-            HttpSession sessionAdministrador = request.getSession(true);
-
-            sessionAdministrador.setAttribute("usuario", usuario);
-            sessionAdministrador.setAttribute("persona", usuario.getPersona());
-
-            flash.addAttribute("success", usuario.getPersona().getNombres());
-
-            return "redirect:/AdmPG";
-
-        } else {
+        if (usuario == null) {
+            flash.addFlashAttribute("error", "Usuario o contraseña incorrectos");
             return "redirect:/LoginR";
         }
 
+        // Estados de ejemplo:
+        // A = Admin (redirigir a vista-admin)
+        // X = Bloqueado (cerrar sesión)
+        // U = Usuario normal (redirigir a dashboard)
+        String estado = usuario.getEstado() != null ? usuario.getEstado().trim().toUpperCase() : "";
+
+        if ("X".equals(estado)) {
+            // si está bloqueado, limpia por si acaso
+            request.getSession().invalidate();
+            flash.addFlashAttribute("warn", "Tu cuenta está bloqueada.");
+            return "redirect:/cerrar_sesionAdm";
+        }
+
+        // Crear/obtener sesión y setear atributos
+        HttpSession session = request.getSession(true);
+        session.setAttribute("usuario", usuario);
+        session.setAttribute("persona", usuario.getPersona());
+
+        flash.addFlashAttribute("success", usuario.getPersona() != null
+                ? usuario.getPersona().getNombres() : usuario.getUsuario_nom());
+
+        // Redirecciones por estado
+        switch (estado) {
+            case "J":
+                // Opción 1: redirigir a una ruta que renderiza vista-admin.html
+                return "redirect:/AdmPG";
+            case "A":
+            default:
+                return "redirect:/admin/inicio"; // tu ruta actual para usuarios no admin
+        }
+    }
+
+    @GetMapping("/admin/inicio")
+    public String adminInicio(HttpServletRequest request, Model model) {
+        // pequeña protección: si no hay usuario o no es A, enviar fuera
+        HttpSession session = request.getSession(false);
+        if (session == null) return "redirect:/LoginR";
+        Usuario u = (Usuario) session.getAttribute("usuario");
+        if (u == null || !"A".equalsIgnoreCase(u.getEstado())) return "redirect:/LoginR";
+
+        List<Proyecto> PrimerL = proyectoService.Primerlugar();
+            List<Proyecto> SegundoL = proyectoService.Segundolugar();
+            List<Proyecto> TercerL = proyectoService.Tercerlugar();
+            // List<Proyecto> Ranking = proyectoService.proyectosRanking();
+
+            model.addAttribute("tiposProyectos", tipoProyectoService.findAll());
+            model.addAttribute("PrimerL", PrimerL);
+			model.addAttribute("SegundoL", SegundoL);
+            model.addAttribute("TercerL", TercerL);
+
+        return "vista-admin"; // <- renderiza templates/vista-admin.html
     }
 
     // Funcion de visualizaciòn de la pagina principal

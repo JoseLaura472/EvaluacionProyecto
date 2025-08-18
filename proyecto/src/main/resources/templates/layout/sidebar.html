@@ -1,20 +1,17 @@
-<!-- ========== Left Sidebar Start ========== -->
 <div th:fragment="sidebar" class="left side-menu">
     <button type="button" class="button-menu-mobile button-menu-mobile-topbar open-left waves-effect">
         <i class="ion-close"></i>
     </button>
-
     <div class="left-side-logo d-block d-lg-none">
         <div class="text-center">
-            <a href="index.html" class="logo"><img src="../../../../assets/images/logo-dark.png" height="20" alt="logo"></a>
+            <a href="index.html" class="logo"><img src="../../../../assets/images/logo-dark.png" height="20"
+                    alt="logo"></a>
         </div>
     </div>
-
     <div class="sidebar-inner slimscrollleft">
 
         <div id="sidebar-menu">
             <ul>
-
                 <li class="has_sub" th:if="${session.usuario.estado == 'A'}">
                     <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-user-group"></i>
                         <span> Personas </span> <span class="menu-arrow float-right"><i
@@ -24,22 +21,14 @@
                         <li><a href="/DocenteR">Docentes</a></li>
                         <li><a href="/JuradoR">Jurados</a></li>
                         <li><a href="/EstudianteR">Estudiantes</a></li>
-
                     </ul>
                 </li>
-                
                 <li>
                     <a href="/UsuarioR" class="waves-effect" th:if="${session.usuario.estado == 'A'}">
                         <i class="dripicons-user-id"></i>
                         <span>Usuarios</span>
                     </a>
                 </li>
-                <!-- <li th:if="${session.usuario.estado == 'A'}">
-                    <a href="/CriterioR" class="waves-effect">
-                        <i class="dripicons-user"></i>
-                        <span>Criterios</span>
-                    </a>
-                </li> -->
                 <li class="has_sub" th:if="${session.usuario.estado == 'A'}">
                     <a href="javascript:void(0);" class="waves-effect"><i class="dripicons-view-list"></i>
                         <span> Criterios </span> <span class="menu-arrow float-right"><i
@@ -56,7 +45,6 @@
                                 class="mdi mdi-chevron-right"></i></span></a>
                     <ul class="list-unstyled">
                         <li><a href="/ProyectoR">Proyectos</a></li>
-                        <!-- <li><a href="/ProyectoR">Lista de Proyectos</a></li> -->
                         <li><a href="/ProyectoE">Proyectos Evaluados</a></li>
 
                     </ul>
@@ -83,9 +71,8 @@
                         <span>Reportes</span>
                     </a>
                 </li>
-
             </ul>
         </div>
         <div class="clearfix"></div>
-    </div> <!-- end sidebarinner -->
+    </div>
 </div>
