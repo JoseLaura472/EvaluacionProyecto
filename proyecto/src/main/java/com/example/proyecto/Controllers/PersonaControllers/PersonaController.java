@@ -1,96 +1,77 @@
 package com.example.proyecto.Controllers.PersonaControllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.example.proyecto.Models.Entity.Persona;
-import com.example.proyecto.Models.Entity.Usuario;
 import com.example.proyecto.Models.Service.IPersonaService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 
 @Controller
+@RequestMapping("/administracion/persona")
+@RequiredArgsConstructor
 public class PersonaController {
 
-    @Autowired
-    private IPersonaService personaService;
+    private final IPersonaService personaService;
 
-    // FUNCION PARA LISTAR LOS REGISTRO DE PERSONA
-    @RequestMapping(value = "/PersonasL", method = RequestMethod.GET) // Pagina principal
-    public String facultadL(Model model, HttpServletRequest request) {
-        if (request.getSession().getAttribute("usuario") != null) {
-            model.addAttribute("personas", personaService.findAll());
-            return "persona/gestionarPersona";
-        } else {
-            return "redirect:LoginR";
-        }
+    @GetMapping("/vista")
+    public String inicioPersona() {
+        return "vista/persona/vista";
     }
 
-    // FUNCION PARA LA VISUALIZACION DEL REGISTRO DE PERSONA
-    @RequestMapping(value = "/PersonaR", method = RequestMethod.GET) // Pagina principal
-    public String Persona(HttpServletRequest request, Model model) {
-        if (request.getSession().getAttribute("usuario") != null) {
-
-            model.addAttribute("persona", new Persona());
-            model.addAttribute("usuario", new Usuario());
-            model.addAttribute("personas", personaService.findAll());
-  
-
-            return "persona/formPersona";
-        } else {
-            return "redirect:LoginR";
-        }
+    @PostMapping("/tabla-registros")
+    public String tablaRegistrosPersona(Model model) throws Exception {
+        List<Persona> lista = personaService.findAll();
+        List<String> encryptedIds = new ArrayList<>();
+        model.addAttribute("listasPersonas", lista);
+        model.addAttribute("id_encryptado", encryptedIds);
+        return "vista/persona/tabla";
     }
 
-    @RequestMapping(value = "/PersonaF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
-    public String PersonaF(@Validated Persona persona, Model model) {
-
-        persona.setEstado("A");
-
-        personaService.save(persona);
-
-        return "redirect:/PersonasL";
+    @PostMapping("/formulario")
+    public String formularioPersona(Model model, Persona persona) {
+        // si quieres precargar algo, setéalo en model
+        return "persona/formulario";
     }
 
-    // FUNCION PARA EDITAR EL REGISTRO DE PERSONA
-    @RequestMapping(value = "/editar-persona/{id_persona}")
-    public String editar_p(@PathVariable("id_persona") Long id_persona, Model model) {
-
-        Persona persona = personaService.findOne(id_persona);
-
-        model.addAttribute("persona", persona);
-        model.addAttribute("personas", personaService.findAll());
-
+    @PostMapping("/formulario-edit/{id_persona}")
+    public String formularioEditPersona(Model model, @PathVariable("id_persona") Long idPersona) throws Exception {
+        model.addAttribute("persona", personaService.findOne(idPersona));
         model.addAttribute("edit", "true");
-
-        return "persona/formPersona";
-
+        return "vista/persona/formulario";
     }
 
-    @RequestMapping(value = "/PersonaModF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
-    public String PersonaMod(@Validated Persona persona, Model model) {
-
+    @PostMapping("/registrar-persona")
+    public ResponseEntity<String> registrarPersona(HttpServletRequest request, @ModelAttribute Persona persona) {
+        // Valida unicidad si quieres (por CI)
         persona.setEstado("A");
         personaService.save(persona);
-
-        return "redirect:/PersonasL";
+        return ResponseEntity.ok("Se realizó el registro correctamente");
     }
 
-    // FUNCION PARA ELIMINAR EL REGISTRO DE PERSONA
-    @RequestMapping(value = "/eliminar-persona/{id_persona}")
-    public String eliminar_p(@PathVariable("id_persona") Long id_persona) {
-
-        Persona persona = personaService.findOne(id_persona);
-
-        persona.setEstado("X");
-
+    @PostMapping("/modificar-persona")
+    public ResponseEntity<String> modificarPersona(HttpServletRequest request, @ModelAttribute Persona persona) {
+        persona.setEstado("A");
         personaService.save(persona);
-        return "redirect:/PersonasL";
+        return ResponseEntity.ok("Se realizó el registro correctamente");
+    }
 
+    @PostMapping("/eliminar/{id_persona}")
+    public ResponseEntity<String> eliminarPersona(Model model, @PathVariable("id_persona") Long idPersona) throws Exception {
+        Persona p = personaService.findOne(idPersona);
+        p.setEstado("X"); // ó "ELIMINADO"
+        personaService.save(p);
+        return ResponseEntity.ok("Registro Eliminado");
     }
 }

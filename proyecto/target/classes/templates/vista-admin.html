@@ -2,20 +2,17 @@
 <html lang="en">
 <head th:replace="~{layout/head :: head}"></head>
 <body class="fixed-left">
-
     <div id="preloader">
         <div id="status">
             <div class="spinner"></div>
         </div>
     </div>
-
     <div id="wrapper">
         <div th:replace="~{layout/sidebar :: sidebar}"></div>
         <div class="content-page">
             <div class="content">
                 <div th:replace="~{layout/topbar :: topbar}"></div>
                 <div class="container-xxl flex-grow-1 container-p-y" id="contenido">
-                    <!-- INICIO CONTENIDO -->
                     <div class="page-content-wrapper ">
                         <div class="container-fluid">
                             <div class="row">
@@ -56,7 +53,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="col-xl-4 col-md-6" th:each="sg : ${SegundoL}">
                                     <div class="card mini-stat m-b-30">
                                         <div class="p-3 text-white" style="background-color: #000000 !important">
@@ -140,14 +136,10 @@
             <footer th:replace="~{layout/footer :: footer}"></footer>
         </div>
     </div>
-
     <div th:replace="~{layout/script :: script}"></div>
-
     <script>
         cargarTabla($('#formFiltroTurno__turno').val());
-        
         console.log($('#formFiltroTurno__turno').val() + "aquii");
-
         function cargarTabla(idTipoProyecto) {
             $("#tablaRegistros").html(`
                 <div class="d-flex justify-content-center">
@@ -160,12 +152,10 @@
                 type: 'POST',
                 url: "/tabla-ranking-tipo-proyecto/" + idTipoProyecto,
                 success: function (response) {
-                    $("#tablaRegistros").html(response);  // Actualiza el contenido del div con la respuesta del servidor
+                    $("#tablaRegistros").html(response);
                 }
             });
         }
     </script>
-
 </body>
-
 </html>

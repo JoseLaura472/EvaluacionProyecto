@@ -1,0 +1,56 @@
+<div class="modal-header">
+    <h4 class="modal-title" th:text="${edit}? 'Modificar Persona' : 'Registrar Persona'"></h4>
+    <a type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></a>
+</div>
+
+<form id="formularioPersona" method="post"
+    th:action="${edit} ? @{/administracion/persona/modificar-persona} : @{/administracion/persona/registrar-persona}"
+    th:object="${persona}" novalidate>
+    <input type="hidden" th:if="${edit}" th:field="*{idPersona}" />
+
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-12 col-md-4 mb-2">
+                <label class="form-label">CI</label>
+                <input type="text" th:field="*{ci}" class="form-control" placeholder="..." required />
+                <div class="valid-feedback">Correcto!</div>
+                <div class="invalid-feedback">Por favor introduzca un dato válido.</div>
+            </div>
+
+            <div class="col-12 col-md-4 mb-2">
+                <label class="form-label">Nombres</label>
+                <input type="text" th:field="*{nombres}" class="form-control" placeholder="..." required />
+                <div class="valid-feedback">Correcto!</div>
+                <div class="invalid-feedback">Por favor introduzca un dato válido.</div>
+            </div>
+
+            <div class="col-12 col-md-4 mb-2">
+                <label class="form-label">Paterno</label>
+                <input type="text" th:field="*{paterno}" class="form-control" placeholder="..." />
+            </div>
+
+            <div class="col-12 col-md-4 mb-2">
+                <label class="form-label">Materno</label>
+                <input type="text" th:field="*{materno}" class="form-control" placeholder="..." />
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <div class="row">
+            <div class="col-12">
+                <a type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</a>
+                <input type="submit" class="btn btn-success" th:value="${edit}? 'Guardar Cambios' : 'Guardar Registro'">
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    // Usa tu helper genérico para validar/enviar y dar feedback:
+    manejarEnvioFormulario('#formularioPersona', /* opcional callback */ function ok() {
+        // Cuando el backend responda 200 OK:
+        $('#modalFormularioPersona').modal('hide');
+        cargarTablaPersona(); // refresca la tabla
+    });
+</script>

@@ -66,65 +66,148 @@
     <script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify@4.6.0/dist/tagify.min.js"></script>
 
     <script>
+
+        if (typeof showGlobalLoader !== 'function') {
+            window.showGlobalLoader = function () { /* no-op */ };
+        }
+        if (typeof hideGlobalLoader !== 'function') {
+            window.hideGlobalLoader = function () { /* no-op */ };
+        }
+        if (typeof cargarFormularioAlert !== 'function') {
+            window.cargarFormularioAlert = function (url, contenedorModal, selectorForm) {
+                $.post(url).done(html => {
+                    $(contenedorModal).html(html);
+                    $('#modalFormularioPersona').modal('show');
+                }).fail(() => Swal.fire('Error', 'No se pudo cargar el formulario.', 'error'));
+            };
+        }
+        if (typeof cargarFormularioEditAlert !== 'function') {
+            window.cargarFormularioEditAlert = function (idEnc, baseUrl, contenedorModal, selectorForm) {
+                $.post(`${baseUrl}/${idEnc}`).done(html => {
+                    $(contenedorModal).html(html);
+                    $('#modalFormularioPersona').modal('show');
+                }).fail(() => Swal.fire('Error', 'No se pudo cargar el formulario de edición.', 'error'));
+            };
+        }
+        if (typeof eliminarRegistroAlert !== 'function') {
+            window.eliminarRegistroAlert = function (nombre, idEnc, baseUrl, onOk) {
+                Swal.fire({
+                    title: 'Eliminar registro',
+                    text: `¿Deseas eliminar ${nombre}?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then(res => {
+                    if (!res.isConfirmed) return;
+                    $.post(`${baseUrl}/${idEnc}`)
+                        .done(() => { if (typeof onOk === 'function') onOk(); })
+                        .fail(() => Swal.fire('Error', 'No se pudo eliminar.', 'error'));
+                });
+            };
+        }
+
         (function () {
             let $contenido = $("#contenido");
             let $currentActive = null;
 
-            // Click delegado para cualquier item con menu-ajax
-            $(document).on('click', 'a.menu-ajax', function (e) {
-                e.preventDefault();
+            // ===== CONFIG opcional: endpoint de "pre-carga" al estilo de tu primer ejemplo =====
+            const USE_PREFETCH = false; // cambia a false si no lo necesitas
+            const PREFETCH_URL = "/adm/cargar-datos";
 
-                const url = $(this).data('url');
-                if (!url) return;
+            // ===== CARGA ASÍNCRONA DEL CONTENIDO =====
+            function cargarContenido(url, pushHistory = true) {
+                if (!$contenido.length) return;
 
-                // Activo visual: sobre el <li> contenedor
-                if ($currentActive) $currentActive.removeClass('active');
-                $currentActive = $(this).closest('li');
-                $currentActive.addClass('active');
-
-                cargarContenido(url);
-            });
-
-            // Opción: cargar por defecto algo al entrar, si lo deseas
-            $(document).ready(function () {
-                // ejemplo: al iniciar sesión y solo si hay contenedor
-                if (document.body.dataset.ctx === "A" && $contenido.length) {
-                    // cargarContenido("/vista-administrador"); // tu lógica anterior
-                }
-            });
-
-            function cargarContenido(url) {
                 // Spinner
-                $("#contenido").html(
+                $contenido.html(
                     '<div class="d-flex justify-content-center">' +
-                    '<div class="spinner-border m-5 text-secondary" role="status">' +
-                    '<span class="visually-hidden">Loading...</span>' +
-                    '</div>' +
+                    '  <div class="spinner-border m-5" role="status">' +
+                    '    <span class="visually-hidden">Cargando...</span>' +
+                    '  </div>' +
                     '</div>'
                 );
 
-                // Carga real del fragmento
-                $.ajax({
-                    url: url,
-                    method: "GET",
-                    success: function (data) {
-                        $("#contenido").html(data);
-                    },
-                    error: function (xhr) {
-                        if (xhr.status === 401) {
-                            Swal.fire({
-                                title: 'Sesión expirada',
-                                text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
-                                icon: 'warning',
-                                confirmButtonText: 'Ir al login'
-                            }).then(() => window.location.href = '/');
-                            return;
+                const doLoad = () => {
+                    $.ajax({
+                        url,
+                        method: "GET",
+                        success: function (html) {
+                            $contenido.html(html);
+                            const hrefToPush = $(`a.menu-ajax[data-url="${url}"]`).data('href') || url;
+                            if (pushHistory && window.history && window.history.pushState) {
+                                window.history.pushState({ url: hrefToPush }, "", hrefToPush);
+                            }
+                        },
+                        error: function (xhr) {
+                            if (xhr.status === 401) {
+                                Swal.fire({
+                                    title: 'Sesión expirada',
+                                    text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
+                                    icon: 'warning',
+                                    confirmButtonText: 'Ir al login'
+                                }).then(() => window.location.href = '/');
+                                return;
+                            }
+                            console.error('Error al cargar la vista:', xhr);
+                            $contenido.html('<div class="alert alert-danger m-3">Error al cargar la vista.</div>');
                         }
-                        console.error('Error en la solicitud:', xhr);
-                        $("#contenido").html('<div class="alert alert-danger m-3">Error al cargar la vista.</div>');
-                    }
-                });
+                    });
+                };
+
+                if (USE_PREFETCH) {
+                    // Igual que tu ejemplo: primero golpe corto para refrescar datos/estado
+                    $.get(PREFETCH_URL).always(doLoad);
+                } else {
+                    doLoad();
+                }
             }
+
+            // ===== MARCAR ACTIVO EN EL SIDEBAR =====
+            function setActive($a) {
+                if ($currentActive) $currentActive.removeClass('active');
+
+                // Activa el <li> contenedor del enlace
+                $currentActive = $a.closest('li');
+                $currentActive.addClass('active');
+
+                // Abre padres si tu plantilla colapsa submenús
+                $currentActive.parents('li.has_sub').addClass('active opened');
+            }
+
+            // ===== CLICK DELEGADO PARA ENLACES ASÍNCRONOS =====
+            $(document).on('click', 'a.menu-ajax', function (e) {
+                e.preventDefault();
+                const $a = $(this);
+                const url = $a.data('url');
+                if (!url) return;
+
+                setActive($a);
+                cargarContenido(url, true);
+
+                // Si estás en móvil y deseas cerrar el menú lateral al click:
+                $('.button-menu-mobile.open-left').trigger('click');
+            });
+
+            // ===== SOPORTE PARA BOTÓN ATRÁS/DELANTE DEL NAVEGADOR =====
+            window.addEventListener('popstate', function (ev) {
+                const state = ev.state || {};
+                if (state.url) {
+                    cargarContenido(state.url, false);
+                }
+            });
+
+            // ===== CARGA POR DEFECTO (al entrar) =====
+            $(document).ready(function () {
+                if (document.body.dataset.ctx === "A" && $contenido.length) {
+                    // Busca un enlace marcado como data-default="true"
+                    const $default = $('a.menu-ajax[data-default="true"]').first();
+                    if ($default.length) {
+                        setActive($default);
+                        cargarContenido($default.data('url'), true);
+                    }
+                }
+            });
         })();
     </script>
 </div>

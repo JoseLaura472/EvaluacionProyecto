@@ -1,0 +1,76 @@
+<h4 class="py-3 mb-4"><span class="text-muted fw-light">Menú /</span> Persona</h4>
+
+<div id="tablaRegistro"></div>
+
+<!-- Modal global para Form -->
+<div class="modal fade" id="modalFormularioPersona" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="contenidoModalPersona"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        cargarTablaPersona();
+    });
+
+    function cargarTablaPersona() {
+        showGlobalLoader({ imgUrl: '/assets/img/logo/activofijos.png', axis: 'y', speed: 1.2, texto: 'Cargando...' });
+        $.ajax({
+            type: 'POST',
+            url: "/administracion/persona/tabla-registros",
+            success: function (html) {
+                $("#tablaRegistro").html(html);
+            },
+            error: function () {
+                $("#tablaRegistro").html(`
+          <div class="alert alert-danger m-3">
+            Ocurrió un error al cargar la tabla.
+            <button class="btn btn-sm btn-outline-light ms-2" onclick="cargarTablaPersona()">Reintentar</button>
+          </div>
+        `);
+            },
+            complete: function () {
+                hideGlobalLoader();
+            }
+        });
+    }
+
+    function cargarFormularioPersona() {
+        cargarFormularioAlert(
+            "/administracion/persona/formulario",
+            "#contenidoModalPersona",
+            "#formularioPersona"
+        );
+    }
+
+    // EDITAR (abre modal)
+    $(document).on('click', '.btn-editar-persona', function () {
+        const id = $(this).data('id');
+        $.post(`/administracion/persona/formulario-edit/${id}`)
+            .done(html => {
+                $("#contenidoModalPersona").html(html);
+                $("#modalFormularioPersona").modal("show");
+            })
+            .fail(() => Swal.fire('Error', 'No se pudo cargar el formulario de edición.', 'error'));
+    });
+
+    // ELIMINAR (confirma y elimina)
+    $(document).on('click', '.btn-eliminar-persona', function () {
+        const id = $(this).data('id');
+        const nombre = $(this).data('nombre'); // viene del data-nombre
+        Swal.fire({
+            title: 'Eliminar registro',
+            text: `¿Deseas eliminar ${nombre}?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then(res => {
+            if (!res.isConfirmed) return;
+            $.post(`/administracion/persona/eliminar/${id}`)
+                .done(() => cargarTablaPersona())
+                .fail(() => Swal.fire('Error', 'No se pudo eliminar.', 'error'));
+        });
+    });
+</script>
