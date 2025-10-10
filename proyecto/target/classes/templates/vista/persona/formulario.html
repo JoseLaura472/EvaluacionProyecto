@@ -1,10 +1,10 @@
 <div class="modal-header">
     <h4 class="modal-title" th:text="${edit}? 'Modificar Persona' : 'Registrar Persona'"></h4>
-    <a type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></a>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 
 <form id="formularioPersona" method="post"
-    th:action="${edit} ? @{/administracion/persona/modificar-persona} : @{/administracion/persona/registrar-persona}"
+    th:action="${edit} ? @{/persona/modificar-persona} : @{/persona/registrar-persona}"
     th:object="${persona}" novalidate>
     <input type="hidden" th:if="${edit}" th:field="*{idPersona}" />
 
@@ -39,18 +39,14 @@
     <div class="modal-footer">
         <div class="row">
             <div class="col-12">
-                <a type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</a>
-                <input type="submit" class="btn btn-success" th:value="${edit}? 'Guardar Cambios' : 'Guardar Registro'">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-success"
+                    th:text="${edit}? 'Guardar Cambios' : 'Guardar Registro'"></button>
             </div>
         </div>
     </div>
 </form>
 
 <script>
-    // Usa tu helper genérico para validar/enviar y dar feedback:
-    manejarEnvioFormulario('#formularioPersona', /* opcional callback */ function ok() {
-        // Cuando el backend responda 200 OK:
-        $('#modalFormularioPersona').modal('hide');
-        cargarTablaPersona(); // refresca la tabla
-    });
+    manejarEnvioFormulario('#formularioPersona');
 </script>

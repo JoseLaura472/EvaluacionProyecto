@@ -1,37 +1,31 @@
 package com.example.proyecto.Controllers.ReporteController;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.example.proyecto.Models.Dto.ResumenPuntaje;
 import com.example.proyecto.Models.Entity.CategoriaCriterio;
 import com.example.proyecto.Models.Entity.Estudiante;
-import com.example.proyecto.Models.Entity.Evaluacion;
-import com.example.proyecto.Models.Entity.Ponderacion;
-import com.example.proyecto.Models.Entity.Pregunta;
 import com.example.proyecto.Models.Entity.Proyecto;
-import com.example.proyecto.Models.Service.ICategoriaCriterioService;
-import com.example.proyecto.Models.Service.ICategoriaProyectoService;
-import com.example.proyecto.Models.Service.IEvaluacionService;
-import com.example.proyecto.Models.Service.IPonderacionService;
-import com.example.proyecto.Models.Service.IProyectoService;
-import com.example.proyecto.Models.Service.IPuntajeService;
-import com.example.proyecto.Models.Service.ITipoProyectoService;
+import com.example.proyecto.Models.IService.ICategoriaCriterioService;
+import com.example.proyecto.Models.IService.ICategoriaProyectoService;
+import com.example.proyecto.Models.IService.IEvaluacionService;
+import com.example.proyecto.Models.IService.IPonderacionService;
+import com.example.proyecto.Models.IService.IProyectoService;
+import com.example.proyecto.Models.IService.IPuntajeService;
+import com.example.proyecto.Models.IService.ITipoProyectoService;
 import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Chunk;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
 import com.itextpdf.text.Font;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 import com.itextpdf.text.Paragraph;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
@@ -169,7 +163,7 @@ public class ReportesController {
                 .obtenerCategoriaCriteriosPorTipoProyecto(proyecto.getTipoProyecto().getId_tipoProyecto());
 
         model.addAttribute("categorias", categorias);
-        model.addAttribute("evaluaciones", evaluacionService.obtenerNotasFinales(id_proyecto));
+        // model.addAttribute("evaluaciones", evaluacionService.obtenerNotasFinales(id_proyecto));
 
         if (proyecto.getTipoProyecto().getId_tipoProyecto() == 1) {
             model.addAttribute("ponderaciones", ponderacionService.obtenerPonderacionesPorProyecto(id_proyecto));

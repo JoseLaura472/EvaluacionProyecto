@@ -1,0 +1,56 @@
+<div class="card">
+    <div class="card-header d-flex justify-content-lg-between">
+        <h5>Registro participante</h5>
+        <button type="button" class="btn btn-primary btn-registrar-participante">
+            <i class="fa-solid fa-user-plus"></i> Agregar nuevo
+        </button>
+    </div>
+
+    <div class="card-datatable table-responsive pt-0">
+        <table class="table table-hover" id="data-table-participante">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nombre</th>
+                    <th>institucion/origen</th>
+                    <th>Tipo participante</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+            <tbody class="animate__animated animate__bounceInDown">
+                <tr th:each="participantes, idx : ${listarParticipantes}" th:if="${participantes.estado != 'X'}">
+                    <td th:text="${idx.index + 1}"></td>
+                    <td th:text="${participantes.nombre}"></td>
+                    <td th:text="${participantes.institucion}"></td>
+                    <td th:text="${participantes.tipoParticipante.nombre}"></td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-primary btn-editar-participante"
+                            th:attr="data-id=${participantes.idParticipante}">
+                            <i class="fa-solid fa-pen-to-square"></i> Editar
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger btn-eliminar-participante"
+                            th:attr="data-id=${participantes.idParticipante}, data-nombre=${participantes.nombre}">
+                            <i class="fa-solid fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $('#data-table-participante').DataTable({
+        language: {
+            sProcessing: "Procesando...",
+            sLengthMenu: "Mostrar _MENU_ registros",
+            sZeroRecords: "No se encontraron resultados",
+            sInfo: "Mostrando _START_ a _END_ de _TOTAL_",
+            sInfoEmpty: "Mostrando 0 a 0 de 0",
+            sInfoFiltered: "(filtrado de _MAX_ registros)",
+            sSearch: "Buscar:",
+            oPaginate: { sFirst: "Primero", sLast: "Último", sNext: "Siguiente", sPrevious: "Anterior" },
+            oAria: { sSortAscending: ": Orden ascendente", sSortDescending: ": Orden descendente" }
+        }
+    });
+</script>

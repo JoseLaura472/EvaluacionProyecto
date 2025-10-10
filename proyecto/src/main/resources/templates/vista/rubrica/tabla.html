@@ -1,0 +1,56 @@
+<div class="card">
+    <div class="card-header d-flex justify-content-lg-between">
+        <h5>Registro rubrica</h5>
+        <button type="button" class="btn btn-primary btn-registrar-rubrica">
+            <i class="fa-solid fa-user-plus"></i> Agregar nuevo
+        </button>
+    </div>
+
+    <div class="card-datatable table-responsive pt-0">
+        <table class="table table-hover" id="data-table-rubrica">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Actividad</th>
+                    <th>Nombre</th>
+                    <th>version</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+            <tbody class="animate__animated animate__bounceInDown">
+                <tr th:each="rub, idx : ${listarRubricas}" th:if="${rub.estado != 'X'}">
+                    <td th:text="${idx.index + 1}"></td>
+                    <td th:text="${rub.actividad.nombre}"></td>
+                    <td th:text="${rub.nombre}"></td>
+                    <td th:text="${rub.version}"></td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-primary btn-editar-rubrica"
+                            th:attr="data-id=${rub.idRubrica}">
+                            <i class="fa-solid fa-pen-to-square"></i> Editar
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger btn-eliminar-rubrica"
+                            th:attr="data-id=${rub.idRubrica}, data-nombre=${rub.nombre}">
+                            <i class="fa-solid fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $('#data-table-rubrica').DataTable({
+        language: {
+            sProcessing: "Procesando...",
+            sLengthMenu: "Mostrar _MENU_ registros",
+            sZeroRecords: "No se encontraron resultados",
+            sInfo: "Mostrando _START_ a _END_ de _TOTAL_",
+            sInfoEmpty: "Mostrando 0 a 0 de 0",
+            sInfoFiltered: "(filtrado de _MAX_ registros)",
+            sSearch: "Buscar:",
+            oPaginate: { sFirst: "Primero", sLast: "Último", sNext: "Siguiente", sPrevious: "Anterior" },
+            oAria: { sSortAscending: ": Orden ascendente", sSortDescending: ": Orden descendente" }
+        }
+    });
+</script>

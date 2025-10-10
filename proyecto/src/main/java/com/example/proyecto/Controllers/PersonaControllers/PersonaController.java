@@ -13,13 +13,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.proyecto.Models.Entity.Persona;
-import com.example.proyecto.Models.Service.IPersonaService;
+import com.example.proyecto.Models.IService.IPersonaService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Controller
-@RequestMapping("/administracion/persona")
+@RequestMapping("/persona")
 @RequiredArgsConstructor
 public class PersonaController {
 
@@ -42,7 +42,7 @@ public class PersonaController {
     @PostMapping("/formulario")
     public String formularioPersona(Model model, Persona persona) {
         // si quieres precargar algo, setéalo en model
-        return "persona/formulario";
+        return "vista/persona/formulario";
     }
 
     @PostMapping("/formulario-edit/{id_persona}")
@@ -64,7 +64,7 @@ public class PersonaController {
     public ResponseEntity<String> modificarPersona(HttpServletRequest request, @ModelAttribute Persona persona) {
         persona.setEstado("A");
         personaService.save(persona);
-        return ResponseEntity.ok("Se realizó el registro correctamente");
+        return ResponseEntity.ok("Se realizó la modificación correctamente");
     }
 
     @PostMapping("/eliminar/{id_persona}")

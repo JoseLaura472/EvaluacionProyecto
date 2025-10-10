@@ -18,41 +18,93 @@
                         <span> Administración </span>
                         <span class="menu-arrow float-right"><i class="mdi mdi-chevron-right"></i></span>
                     </a>
-
                     <ul class="list-unstyled">
-                        <!-- Persona (asíncrono y por defecto al entrar) -->
                         <li>
-                            <a href="#" class="menu-ajax" data-url="/administracion/persona/vista"
-                                data-href="/administracion/persona" data-default="true">
+                            <a href="#" class="menu-ajax" data-url="/persona/vista"
+                                data-href="/admin/inicio" data-default="true">
                                 <i class="ti ti-id me-2"></i><span>Persona</span>
                             </a>
-
                         </li>
-
-                        <!-- Docentes (asíncrono) -->
+                        <li>
+                            <a href="#" class="menu-ajax" data-url="/jurado/vista"
+                                data-href="/admin/inicio" data-default="true">
+                                <i class="ti ti-id me-2"></i><span>Jurado</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="menu-ajax" data-url="/jurado-asignacion/vista"
+                                data-href="/admin/inicio" data-default="true">
+                                <i class="ti ti-id me-2"></i><span>Jurado asignacion</span>
+                            </a>
+                        </li>
                         <li>
                             <a href="#" class="menu-ajax" data-url="/DocenteR">
                                 <span>Docentes</span>
                             </a>
                         </li>
+                    </ul>
+                </li>
 
-                        <!-- Jurados (asíncrono) -->
-                        <li id="opcion_jurado_li">
-                            <a href="#" class="menu-ajax" data-url="/jurados/vista">
-                                <span>Jurados</span>
+                <li class="has_sub" id="opcion_admin">
+                    <a href="#" class="waves-effect">
+                        <i class="dripicons-user-group"></i>
+                        <span> Complementos </span>
+                        <span class="menu-arrow float-right"><i class="mdi mdi-chevron-right"></i></span>
+                    </a>
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="#" class="menu-ajax" data-url="/actividad/vista"
+                                data-href="/admin/inicio" data-default="true">
+                                <i class="ti ti-id me-2"></i><span>Actividad</span>
                             </a>
                         </li>
-
-                        <!-- Estudiantes (asíncrono) -->
                         <li>
-                            <a href="#" class="menu-ajax" data-url="/EstudianteR">
-                                <span>Estudiantes</span>
+                            <a href="#" class="menu-ajax" data-url="/participante/vista"
+                                data-href="/admin/inicio" data-default="true">
+                                <i class="ti ti-id me-2"></i><span>Participante</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="menu-ajax" data-url="/tipo-participante/vista"
+                                data-href="/admin/inicio" data-default="true">
+                                <i class="ti ti-id me-2"></i><span>Tipo participante</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="menu-ajax" data-url="/categoria-actividad/vista"
+                                data-href="/admin/inicio" data-default="true">
+                                <i class="ti ti-id me-2"></i><span>Categoria Actividad</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="menu-ajax" data-url="/inscripcion/vista"
+                                data-href="/admin/inicio" data-default="true">
+                                <i class="ti ti-id me-2"></i><span>Inscripciones</span>
                             </a>
                         </li>
                     </ul>
                 </li>
-
-                <!-- Puedes agregar más módulos repitiendo el patrón -->
+                <li class="has_sub" id="opcion_admin">
+                    <a href="#" class="waves-effect">
+                        <i class="dripicons-user-group"></i>
+                        <span> Evaluacion </span>
+                        <span class="menu-arrow float-right"><i class="mdi mdi-chevron-right"></i></span>
+                    </a>
+                    <ul class="list-unstyled">
+                        <li>
+                            <a href="#" class="menu-ajax" data-url="/rubrica/vista"
+                                data-href="/admin/inicio" data-default="true">
+                                <i class="ti ti-id me-2"></i><span>Rubrica</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="menu-ajax" data-url="/rubrica-criterio/vista"
+                                data-href="/admin/inicio" data-default="true">
+                                <i class="ti ti-id me-2"></i><span>Rubrica criterio</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
         </div>
     </div>

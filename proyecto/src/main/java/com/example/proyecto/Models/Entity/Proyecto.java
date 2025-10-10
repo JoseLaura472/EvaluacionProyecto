@@ -3,6 +3,11 @@ package com.example.proyecto.Models.Entity;
 import java.io.Serializable;
 import java.util.Set;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -14,13 +19,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-
-import org.springframework.web.multipart.MultipartFile;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -71,10 +69,6 @@ public class Proyecto implements Serializable{
   @ManyToMany(fetch = FetchType.LAZY)
   @JoinTable(name = "jurado_proyecto", joinColumns = @JoinColumn(name = "id_proyecto"), inverseJoinColumns = @JoinColumn(name = "id_jurado"))
   private Set<Jurado> jurado;
-
-  @JsonIgnore
-  @ManyToMany(mappedBy = "proyectos")
-  private Set<Evaluacion> evaluacion;
 
   @Transient
   private MultipartFile file; 

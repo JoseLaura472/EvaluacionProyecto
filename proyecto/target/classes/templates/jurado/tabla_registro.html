@@ -24,11 +24,11 @@
                     <td>
                         <div class="d-flex justify-content-center align-items-center">
                             <button class="btn btn-info me-2" style="font-size: 24px;"
-                                th:attr="onclick=|cargarFormularioEdit(${jur.id_jurado})|">
+                                th:attr="onclick=|cargarFormularioEdit(${jur.idJurado})|">
                                 <i class="mdi mdi-border-color"></i>
                             </button>
                             <button class="btn btn-danger" style="font-size: 24px;"
-                                th:attr="onclick=|eliminar('${jur.persona.nombres} ${jur.persona.paterno} ${jur.persona.materno}', ${jur.id_jurado})|">
+                                th:attr="onclick=|eliminar('${jur.persona.nombres} ${jur.persona.paterno} ${jur.persona.materno}', ${jur.idJurado})|">
                                 <i class="mdi mdi-close" style="color:#fff; pointer-events:none;"></i>
                             </button>
                         </div>

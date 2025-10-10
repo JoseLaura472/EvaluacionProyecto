@@ -1,6 +1,5 @@
 package com.example.proyecto.Controllers.PonderacionController;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,8 +17,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.proyecto.Models.Entity.Ponderacion;
 import com.example.proyecto.Models.Entity.Pregunta;
-import com.example.proyecto.Models.Service.IPonderacionService;
-import com.example.proyecto.Models.Service.IPreguntaService;
+import com.example.proyecto.Models.IService.IPonderacionService;
+import com.example.proyecto.Models.IService.IPreguntaService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

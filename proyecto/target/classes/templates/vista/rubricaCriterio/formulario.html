@@ -1,0 +1,76 @@
+<style>
+  /* Altura tipo "lg" de Bootstrap */
+  .select2-container .select2-selection--single {
+    height: calc(2.5rem + 2px);
+  }
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: calc(2.5rem);
+  }
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: calc(2.5rem);
+  }
+  /* Ancho completo siempre */
+  .select2-container { width: 100% !important; }
+</style>
+
+<div class="modal-header">
+    <h4 class="modal-title" th:text="${edit}? 'Modificar rubrica-criterio' : 'Registrar rubrica-criterio'"></h4>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<form id="formularioRubricaCriterio" method="post"
+    th:action="${edit} ? @{/rubrica-criterio/modificar-rubricaCriterio} : @{/rubrica-criterio/registrar-rubricaCriterio}"
+    th:object="${rubricaCriterio}" novalidate>
+    <input type="hidden" th:if="${edit}" th:field="*{idRubricaCriterio}" />
+
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <label class="form-label">Rubrica</label>
+                <select class="select2" th:field="*{rubrica.idRubrica}" required>
+                    <option value="">Seleccione…</option>
+                    <option th:each="rubri : ${listarRubricas}" th:value="${rubri.idRubrica}"
+                        th:text="${rubri.nombre}">
+                    </option>
+                </select>
+
+                <div class="valid-feedback">Correcto!</div>
+                <div class="invalid-feedback">Debe seleccionar a una tipoParticipante.</div>
+            </div>
+            <div class="col-12 col-md-4 mb-2">
+                <label class="form-label">Nombre</label>
+                <input type="text" th:field="*{nombre}" class="form-control" placeholder="Escriba un nombre" required />
+                <div class="valid-feedback">Correcto!</div>
+                <div class="invalid-feedback">Por favor introduzca un dato válido.</div>
+            </div>
+            <div class="col-12 col-md-4 mb-2">
+                <label class="form-label">Porcentaje</label>
+                <input type="number" th:field="*{porcentaje}" class="form-control" placeholder="Añade un porcentaje" required />
+                <div class="valid-feedback">Correcto!</div>
+                <div class="invalid-feedback">Por favor introduzca un dato válido.</div>
+            </div>
+            <div class="col-12 col-md-4 mb-2">
+                <label class="form-label">Descripcion</label>
+                <input type="text" th:field="*{descripcion}" class="form-control" placeholder="Escriba un descripcion" required />
+                <div class="valid-feedback">Correcto!</div>
+                <div class="invalid-feedback">Por favor introduzca un dato válido.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <div class="row">
+            <div class="col-12">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-success"
+                    th:text="${edit}? 'Guardar Cambios' : 'Guardar Registro'"></button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    manejarEnvioFormulario('#formularioRubricaCriterio');
+</script>

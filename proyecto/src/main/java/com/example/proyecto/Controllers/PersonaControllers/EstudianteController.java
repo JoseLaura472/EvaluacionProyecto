@@ -14,8 +14,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.proyecto.Models.Entity.Estudiante;
 import com.example.proyecto.Models.Entity.Persona;
-import com.example.proyecto.Models.Service.IEstudianteService;
-import com.example.proyecto.Models.Service.IPersonaService;
+import com.example.proyecto.Models.IService.IEstudianteService;
+import com.example.proyecto.Models.IService.IPersonaService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -44,7 +44,7 @@ public class EstudianteController {
 	@RequestMapping(value = "/EstudianteF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
 	public ResponseEntity<String> EstudianteF(@Validated Estudiante estudiante,@Validated Persona persona, RedirectAttributes redirectAttrs) { // validar los datos capturados (1)
 		
-		if (estudiante.getId_estudiante() == null && persona.getId_persona() == null) {
+		if (estudiante.getId_estudiante() == null && persona.getIdPersona() == null) {
 			persona.setEstado("E");
 			personaService.save(persona);
 			estudiante.setPersona(persona);

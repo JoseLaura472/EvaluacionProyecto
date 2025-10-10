@@ -1,0 +1,81 @@
+<h4 class="py-3 mb-4"><span class="text-muted fw-light">Menú /</span> Participante</h4>
+
+<div id="tablaRegistro"></div>
+
+<div class="modal fade" id="formularioParticipante" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="contenidoModalParticipante"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        cargarTabla();
+
+        // Limpia contenido al cerrar (evita duplicar scripts/ids)
+        $('#formularioParticipante').on('hidden.bs.modal', function () {
+            $('#contenidoModalParticipante').empty();
+        });
+    });
+
+    function cargarTabla() {
+        $.ajax({
+            type: 'POST',
+            url: "/participante/tabla-registros",
+            success: function (html) { $("#tablaRegistro").html(html); },
+            error: function () {
+                $("#tablaRegistro").html(`
+            <div class="alert alert-danger m-3">
+                Ocurrió un error al cargar la tabla.
+                <button class="btn btn-sm btn-outline-light ms-2" onclick="cargarTabla()">Reintentar</button>
+            </div>
+            `);
+            }
+        });
+    }
+
+    // Registrar
+    $(document).on('click', '.btn-registrar-participante', function () {
+        $('#formularioParticipante').modal('show');
+        cargarFormularioAlert(
+            "/participante/formulario",
+            "#contenidoModalParticipante",
+            "#formularioParticipante",
+            function onLoaded() {
+                manejarEnvioFormulario('#formularioParticipante', {
+                    modalSelector: '#formularioParticipante',
+                    recargarTablaFn: cargarTabla
+                });
+            }
+        );
+    });
+
+    // Editar
+    $(document).on('click', '.btn-editar-participante', function () {
+        const id = $(this).data('id');
+        if (!id) return Swal.fire('Error', 'ID no válido.', 'error');
+
+        $('#formularioParticipante').modal('show');
+        cargarFormularioEditAlert(
+            id,
+            "/participante/formulario-edit",
+            "#contenidoModalParticipante",
+            "#formularioParticipante",
+            function onLoaded() {
+                manejarEnvioFormulario('#formularioParticipante', {
+                    modalSelector: '#formularioParticipante',
+                    recargarTablaFn: cargarTabla
+                });
+            }
+        );
+    });
+
+    // Eliminar
+    $(document).on('click', '.btn-eliminar-participante', function () {
+        const id = $(this).data('id');
+        const nombre = $(this).data('nombre') || 'el registro';
+        if (!id) return Swal.fire('Error', 'ID no válido.', 'error');
+
+        eliminarRegistroAlert(nombre, id, "/participante/eliminar", cargarTabla);
+    });
+</script>

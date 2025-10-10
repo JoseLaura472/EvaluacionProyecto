@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head th:replace="~{layout/head :: head}"></head>
+
 <body class="fixed-left">
     <div id="preloader">
         <div id="status">
@@ -13,124 +15,100 @@
             <div class="content">
                 <div th:replace="~{layout/topbar :: topbar}"></div>
                 <div class="container-xxl flex-grow-1 container-p-y" id="contenido">
-                    <div class="page-content-wrapper ">
-                        <div class="container-fluid">
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <div class="float-right page-breadcrumb">
-                                        <ol class="breadcrumb">
-                                            <li class="breadcrumb-item"><a href="#">Drixo</a></li>
-                                            <li class="breadcrumb-item active">Dashboard</li>
-                                        </ol>
-                                    </div>
-                                    <h5 class="page-title">Dashboard</h5>
+                    <div id="concurso-dashboard" class="py-2">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <h5 class="mb-0">Progreso del Concurso</h5>
+
+                                <select id="sel-actividad" class="form-select form-select-sm" style="min-width:260px">
+                                    <option value="">Seleccione una actividad…</option>
+                                </select>
+
+                                <!-- <<< agrega esto -->
+                                <span class="small text-muted">Actividad: <strong id="act-nombre">—</strong></span>
+                                <!-- >>> -->
+                            </div>
+                            <div class="d-flex gap-2 align-items-center">
+                                <span class="badge text-bg-light">Actualiza: <span id="last-update">—</span></span>
+                                <button id="btn-refrescar" class="btn btn-sm btn-outline-primary"
+                                    disabled>Refrescar</button>
+                            </div>
+                        </div>
+
+                        <div id="sin-actividad" class="alert alert-secondary py-2" role="alert" style="display:none;">
+                            Seleccione una actividad para ver el progreso.
+                        </div>
+
+
+                        <!-- Chips categorías -->
+                        <div class="mb-3" id="categorias-wrap" style="display:none;">
+                            <div id="categorias-chips" class="d-inline-flex overflow-auto"
+                                style="white-space:nowrap;gap:.5rem;max-width:100%"></div>
+                        </div>
+
+                        <!-- Barra de progreso global -->
+                        <div class="mb-3" id="resumen-wrap" style="display:none;">
+                            <div class="d-flex justify-content-between small">
+                                <div>Total evaluaciones</div>
+                                <div><span id="rg-completadas">0</span> /
+                                    <span id="rg-total">0</span>
+                                    (<span id="rg-porcentaje">0.0</span>%)
                                 </div>
                             </div>
-                            <div class="row">
-                                <div class="col-xl-4 col-md-6" th:each="pr : ${PrimerL}">
-                                    <div class="card mini-stat m-b-30">
-                                        <div class="p-3 text-white" style="background-color: #000000 !important">
-                                            <div class="mini-stat-icon">
-                                                <i class="float-right mb-0"><img src="../../../../assets/images/1mejor.png"
-                                                        height="100" alt="logo"></i>
-                                            </div>
-                                            <h6 class="text-uppercase mb-0">PRIMER LUGAR</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="border-bottom pb-4">
-                                                <p class="m-0">PROYECTO :</p>
-                                                <h5 class="m-0" th:text="${pr.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
-                                            </div>
-                                            <div class="mt-4 text-muted">
-                                                <div class="float-right">
-                                                    <h5 class="m-0" th:text="${pr.promedio_final}">3567<i
-                                                            class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-                                                </div>
-                                                <h5 class="m-0" th:if="${pr.programa != null}"
-                                                    th:text="${pr.programa.nombre_programa}">1456<i
-                                                        class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-xl-4 col-md-6" th:each="sg : ${SegundoL}">
-                                    <div class="card mini-stat m-b-30">
-                                        <div class="p-3 text-white" style="background-color: #000000 !important">
-                                            <div class="mini-stat-icon">
-                                                <i class="float-right mb-0"><img src="../../../../assets/images/2mejor.png"
-                                                        height="100" alt="logo"></i>
-                                            </div>
-                                            <h6 class="text-uppercase mb-0">SEGUNDO LUGAR</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="border-bottom pb-4">
-                                                <p class="m-0">PROYECTO :</p>
-                                                <h5 class="m-0" th:text="${sg.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
-                                            </div>
-                                            <div class="mt-4 text-muted">
-                                                <div class="float-right">
-                                                    <h5 class="m-0" th:text="${sg.promedio_final}">3567<i
-                                                            class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-                                                </div>
-                                                <h5 class="m-0" th:if="${sg.programa != null}"
-                                                    th:text="${sg.programa.nombre_programa}">1456<i
-                                                        class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-xl-4 col-md-6" th:each="ter : ${TercerL}">
-                                    <div class="card mini-stat m-b-30">
-                                        <div class="p-3 text-white" style="background-color: #000000 !important">
-                                            <div class="mini-stat-icon">
-                                                <i class="float-right mb-0"><img src="../../../../assets/images/3mejor.png"
-                                                        height="100" alt="logo"></i>
-                                            </div>
-                                            <h6 class="text-uppercase mb-0">TERCER LUGAR</h6>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="border-bottom pb-4">
-                                                <p class="m-0">PROYECTO :</p>
-                                                <h5 class="m-0" th:text="${ter.nombre_proyecto}">SISISDSDSDSDSDSDS</h5>
-                                            </div>
-                                            <div class="mt-4 text-muted">
-                                                <div class="float-right">
-                                                    <h5 class="m-0" th:text="${ter.promedio_final}">3567<i
-                                                            class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-                                                </div>
-                                                <h5 class="m-0" th:if="${ter.programa != null}"
-                                                    th:text="${ter.programa.nombre_programa}">1456<i
-                                                        class="mdi mdi-arrow-up text-success ml-2"></i></h5>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                            <div class="progress">
+                                <div id="rg-bar" class="progress-bar" role="progressbar" style="width:0%"></div>
                             </div>
+                        </div>
 
-                            <!-- SOLO PARA ADMINISTRADOR -->
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="card m-b-30">
-                                        <div class="card-body">
-                                            <h1 style="text-align: center;">TABLA DE POSICIONES</h1>
-                                            <div class="col-md-5">
-                                                <label class="col-form-label">TIPO EVALUACIÓN </label>
-                                                <select onchange="cargarTabla(this.value)" class="form-control js-choice"
-                                                    id="formFiltroTurno__turno">
-                                                    <option th:each="tp : ${tiposProyectos}"
-                                                        th:value="${tp.id_tipoProyecto}" th:text="${tp.nom_tipoProyecto}">
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <p></p>
-                                            <div id="tablaRegistros"></div>
-                                        </div>
-                                    </div>
+                        <!-- Tabla por categoría -->
+                        <div class="card">
+                            <div class="card-body p-2 p-sm-3">
+                                <div class="table-responsive">
+                                    <table class="table table-sm align-middle" id="tabla">
+                                        <thead>
+                                            <tr id="thead-row">
+                                                <th style="min-width:220px">Participante</th>
+                                                <!-- columnas de jurados se insertan aquí -->
+                                                <th class="text-end" style="min-width:120px">Promedio</th>
+                                                <th class="text-center">Estado</th>
+                                                <th class="text-center" style="min-width:110px">Reporte</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tbody-rows">
+                                            <tr id="fila-empty" style="display:none;">
+                                                <td colspan="999" class="text-center text-muted py-4">
+                                                    No hay registros para esta categoría.
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
+                                <!-- Paginación si la necesitas después -->
                             </div>
                         </div>
                     </div>
+
+                    <!-- Template para chip de categoría -->
+                    <template id="tpl-chip">
+                        <button class="btn btn-sm">
+                            <span class="chip-nombre"></span>
+                            <span class="badge bg-white text-primary ms-1 chip-progreso"></span>
+                        </button>
+                    </template>
+
+                    <!-- Template para una fila -->
+                    <template id="tpl-row">
+                        <tr>
+                            <td>
+                                <div class="fw-semibold row-participante"></div>
+                                <div class="small text-muted row-institucion"></div>
+                            </td>
+                            <!-- celdas por jurado se agregan dinámicamente -->
+                            <td class="text-end"><span class="fw-bold row-promedio"></span></td>
+                            <td class="text-center"><span class="badge row-estado"></span></td>
+                        </tr>
+                    </template>
+
                 </div>
             </div>
             <footer th:replace="~{layout/footer :: footer}"></footer>
@@ -138,24 +116,258 @@
     </div>
     <div th:replace="~{layout/script :: script}"></div>
     <script>
-        cargarTabla($('#formFiltroTurno__turno').val());
-        console.log($('#formFiltroTurno__turno').val() + "aquii");
-        function cargarTabla(idTipoProyecto) {
-            $("#tablaRegistros").html(`
-                <div class="d-flex justify-content-center">
-                <div class="spinner-border m-5 text-secondary" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-            </div>
-                `);
-            $.ajax({
-                type: 'POST',
-                url: "/tabla-ranking-tipo-proyecto/" + idTipoProyecto,
-                success: function (response) {
-                    $("#tablaRegistros").html(response);
+        (function () {
+            const root = document.getElementById('concurso-dashboard');
+            if (!root) return;
+
+            // Estado
+            let actividadId = null;
+            let categoriaId = null;
+            let jurados = [];
+            let filasFull = [];
+            let sse = null, polling = null;
+
+            // DOM
+            const selAct = document.getElementById('sel-actividad');
+            const sinActividad = document.getElementById('sin-actividad');
+            const elActNombre = document.getElementById('act-nombre');
+            const elLastUpdate = document.getElementById('last-update');
+            const elBtnRefrescar = document.getElementById('btn-refrescar');
+
+            const wrapCategorias = document.getElementById('categorias-wrap');
+            const contChips = document.getElementById('categorias-chips');
+
+            const wrapResumen = document.getElementById('resumen-wrap');
+            const elRgComp = document.getElementById('rg-completadas');
+            const elRgTotal = document.getElementById('rg-total');
+            const elRgPct = document.getElementById('rg-porcentaje');
+            const elRgBar = document.getElementById('rg-bar');
+
+            const theadRow = document.getElementById('thead-row');
+            const tbodyRows = document.getElementById('tbody-rows');
+            const filaEmpty = document.getElementById('fila-empty');
+
+            const tplChip = document.getElementById('tpl-chip');
+            const tplRow = document.getElementById('tpl-row');
+
+            // Init: primero cargamos actividades
+            cargarActividades();
+
+            // Eventos
+            selAct.addEventListener('change', onActividadChange);
+            elBtnRefrescar.addEventListener('click', () => cargarSnapshot(false));
+            window.addEventListener('beforeunload', () => { if (polling) clearInterval(polling); if (sse) sse.close(); });
+
+            async function cargarActividades() {
+                try {
+                    const r = await fetch('/api/admin/actividades');
+                    if (r.status === 401) { window.location.href = '/LoginR'; return; }
+                    const list = await r.json();
+
+                    // Poblar select
+                    selAct.innerHTML = '<option value="">Seleccione una actividad…</option>';
+                    for (const a of list) {
+                        const opt = document.createElement('option');
+                        opt.value = a.id;
+                        const fecha = a.fecha ? new Date(a.fecha).toLocaleDateString() : '';
+                        opt.textContent = `${a.nombre}${fecha ? ' — ' + fecha : ''}`;
+                        selAct.appendChild(opt);
+                    }
+
+                    // Autoselección: última usada (localStorage) o la primera
+                    const last = localStorage.getItem('dash.actId');
+                    if (last && list.some(a => String(a.id) === last)) {
+                        selAct.value = last;
+                    } else if (list.length === 1) {
+                        selAct.value = list[0].id;
+                    }
+
+                    if (selAct.value) {
+                        onActividadChange(); // dispara carga/sse
+                    } else {
+                        sinActividad.style.display = '';
+                        elBtnRefrescar.disabled = true;
+                    }
+
+                } catch (e) { console.error(e); }
+            }
+
+            function onActividadChange() {
+                actividadId = selAct.value ? Number(selAct.value) : null;
+                localStorage.setItem('dash.actId', actividadId ? String(actividadId) : '');
+                categoriaId = null; // reset filtro
+                if (!actividadId) {
+                    sinActividad.style.display = '';
+                    elBtnRefrescar.disabled = true;
+                    stopLive();
+                    clearDashboard();
+                    return;
                 }
-            });
-        }
+                sinActividad.style.display = 'none';
+                elBtnRefrescar.disabled = false;
+                stopLive();
+                cargarSnapshot(false);
+                startLive(); // SSE + polling
+            }
+
+            async function cargarSnapshot(silencioso) {
+                if (!actividadId) return;
+                try {
+                    const url = `/api/admin/concurso/${actividadId}/snapshot` + (categoriaId ? `?categoriaId=${categoriaId}` : '');
+                    const r = await fetch(url);
+                    if (r.status === 401) { window.location.href = '/LoginR'; return; }
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    const data = await r.json();
+                    renderSnapshot(data);
+                    if (!silencioso) marcarActualizado();
+                } catch (e) { console.error(e); }
+            }
+
+            function renderSnapshot(data) {
+                if (elActNombre) elActNombre.textContent = data.actividad?.nombre ?? '—';
+
+                const jNew = JSON.stringify(data.jurados || []);
+                const jOld = JSON.stringify(jurados);
+                const juradosChanged = (jNew !== jOld);
+                jurados = data.jurados || [];
+                if (juradosChanged) renderThead();
+
+                renderCategorias(data.categorias || []);
+                renderResumen(data.resumenGlobal || null);
+
+                filasFull = data.filas || [];
+                renderTbody();
+            }
+
+            function renderThead() {
+                while (theadRow.children.length > 4) { // ahora hay columna "Reporte" extra
+                    theadRow.removeChild(theadRow.children[1]);
+                }
+                const idxProm = theadRow.children.length - 3; // antes de Promedio
+                jurados.forEach(j => {
+                    const th = document.createElement('th');
+                    th.className = 'text-center';
+                    th.innerHTML = `<div class="small text-muted">Jurado</div><div class="fw-semibold">${j.nombre}</div>`;
+                    theadRow.insertBefore(th, theadRow.children[idxProm]);
+                });
+            }
+
+            function renderCategorias(categorias) {
+                contChips.innerHTML = '';
+                if (!categorias.length) { wrapCategorias.style.display = 'none'; return; }
+                wrapCategorias.style.display = '';
+                categorias.forEach(c => {
+                    const chip = tplChip.content.firstElementChild.cloneNode(true);
+                    chip.className = 'btn btn-sm ' + (categoriaId === c.id ? 'btn-primary' : 'btn-outline-primary');
+                    chip.querySelector('.chip-nombre').textContent = c.nombre;
+                    const prog = c.progreso || { total: 0, completadas: 0 };
+                    chip.querySelector('.chip-progreso').textContent = `${prog.completadas}/${prog.total}`;
+                    chip.addEventListener('click', () => { categoriaId = c.id; cargarSnapshot(true); renderCategorias(categorias); });
+                    contChips.appendChild(chip);
+                });
+            }
+
+            function renderResumen(rg) {
+                if (!rg) { wrapResumen.style.display = 'none'; return; }
+                wrapResumen.style.display = '';
+                elRgComp.textContent = rg.completadas ?? 0;
+                elRgTotal.textContent = rg.total ?? 0;
+                elRgPct.textContent = (rg.porcentaje ?? 0).toFixed(1);
+                elRgBar.style.width = `${rg.porcentaje ?? 0}%`;
+            }
+
+            function renderTbody() {
+                tbodyRows.querySelectorAll('tr:not(#fila-empty)').forEach(tr => tr.remove());
+                const filtered = categoriaId ? filasFull.filter(f => f.categoriaId === categoriaId) : filasFull;
+                if (!filtered.length) { filaEmpty.style.display = ''; return; }
+                filaEmpty.style.display = 'none';
+
+                const frag = document.createDocumentFragment();
+                filtered.forEach(f => {
+                    const tr = tplRow.content.firstElementChild.cloneNode(true);
+                    tr.querySelector('.row-participante').textContent = f.participante ?? '—';
+                    tr.querySelector('.row-institucion').textContent = f.institucion ?? '—';
+
+                    const promCell = tr.children[1];
+                    const estadoCell = tr.children[2];
+                    tr.removeChild(promCell);
+                    tr.removeChild(estadoCell);
+
+                    jurados.forEach(j => {
+                        const td = document.createElement('td');
+                        td.className = 'text-center';
+                        const score = f.scores && f.scores[j.id] !== undefined ? Number(f.scores[j.id]).toFixed(2) : '—';
+                        td.innerHTML = score === '—' ? '<span class="text-muted">—</span>' : `<span class="fw-semibold">${score}</span>`;
+                        tr.appendChild(td);
+                    });
+
+                    const tdProm = document.createElement('td');
+                    tdProm.className = 'text-end';
+                    tdProm.innerHTML = `<span class="fw-bold">${(f.promedio ?? 0).toFixed(2)}</span>`;
+                    tr.appendChild(tdProm);
+
+                    const tdEstado = document.createElement('td');
+                    tdEstado.className = 'text-center';
+                    tdEstado.innerHTML = `<span class="badge ${f.completado ? 'text-bg-success' : 'text-bg-secondary'}">
+                              ${f.completado ? 'Completo' : 'Pendiente'}
+                            </span>`;
+                    tr.appendChild(tdEstado);
+
+                    const tdPdf = document.createElement('td');
+                    tdPdf.className = 'text-center';
+                    tdPdf.innerHTML = `
+        <a class="btn btn-sm btn-outline-secondary"
+           href="/api/admin/concurso/${actividadId}/reporte/inscripcion/${f.inscripcionId}.pdf"
+           target="_blank" rel="noopener">
+           <i class="bi bi-file-earmark-pdf"></i> PDF
+        </a>`;
+                    tr.appendChild(tdPdf);
+
+                    frag.appendChild(tr);
+                });
+                tbodyRows.appendChild(frag);
+            }
+
+            function marcarActualizado() {
+                elLastUpdate.textContent = new Date().toLocaleTimeString();
+            }
+
+            function startLive() {
+                stopLive();
+                if (!actividadId) return;
+                try {
+                    sse = new EventSource(`/api/admin/concurso/${actividadId}/stream`);
+                    sse.onmessage = (ev) => {
+                        try {
+                            const p = JSON.parse(ev.data);
+                            if (p.filas) { filasFull = p.filas; renderTbody(); }
+                            if (p.categorias) { renderCategorias(p.categorias); }
+                            if (p.resumenGlobal) { renderResumen(p.resumenGlobal); }
+                            marcarActualizado();
+                        } catch (e) { console.error(e); }
+                    };
+                    sse.onerror = () => { /* silencioso */ };
+                } catch (e) { console.warn('SSE no disponible'); }
+                polling = setInterval(() => cargarSnapshot(true), 15000);
+            }
+
+            function stopLive() {
+                if (sse) { try { sse.close(); } catch (e) { } sse = null; }
+                if (polling) { clearInterval(polling); polling = null; }
+            }
+
+            function clearDashboard() {
+                elActNombre.textContent = '—';
+                contChips.innerHTML = ''; wrapCategorias.style.display = 'none';
+                renderResumen(null);
+                jurados = []; renderThead();
+                filasFull = []; tbodyRows.querySelectorAll('tr:not(#fila-empty)').forEach(tr => tr.remove());
+                filaEmpty.style.display = '';
+                elLastUpdate.textContent = '—';
+            }
+        })();
     </script>
+
 </body>
+
 </html>

@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="utf-8">
+    <title>Panel de Jurado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Si usas CSRF, destapa estas metas -->
+    <!-- <meta name="_csrf" th:content="${_csrf.token}"> -->
+    <!-- <meta name="_csrf_header" th:content="${_csrf.headerName}"> -->
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        /* Chips horizontales (categorías) */
+        .chip-scroll {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .chip {
+            display: inline-block;
+            padding: .4rem .8rem;
+            border-radius: 999px;
+            border: 1px solid var(--bs-border-color);
+            margin-right: .5rem;
+            cursor: pointer;
+        }
+
+        .chip.active {
+            background: var(--bs-primary);
+            color: #fff;
+            border-color: var(--bs-primary);
+        }
+
+        .pointer {
+            cursor: pointer;
+        }
+
+        .card-hover:hover {
+            box-shadow: 0 6px 24px rgba(0, 0, 0, .08);
+            transform: translateY(-1px);
+            transition: .2s;
+        }
+
+        .sticky-top-sm {
+            position: sticky;
+            top: .5rem;
+            z-index: 1030;
+        }
+    </style>
+</head>
+
+<body class="bg-light" x-data="panelJurado()" x-init="init()">
+    <nav class="navbar navbar-expand-md bg-white border-bottom shadow-sm">
+        <div class="container-fluid">
+
+            <!-- Marca / título -->
+            <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+                <i class="bi bi-music-note-beamed"></i>
+                <span class="fw-semibold">Panel de Jurado</span>
+            </a>
+
+            <!-- Botón offcanvas en móviles -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#juradoNavbar"
+                aria-controls="juradoNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Contenido colapsable -->
+            <div class="collapse navbar-collapse" id="juradoNavbar">
+
+                <!-- Izquierda: selector de actividad -->
+                <div class="me-auto d-flex align-items-center flex-wrap gap-2 mt-2 mt-md-0">
+
+                    <div class="small text-muted d-none d-md-block">Actividad:</div>
+
+                    <form id="form-actividad" class="d-flex align-items-center">
+                        <select id="sel-actividad" name="actId" class="form-select form-select-sm"
+                            style="min-width:260px" th:disabled="${#lists.size(actividades) <= 1}">
+                            <option th:if="${#lists.isEmpty(actividades)}" value="">Sin actividades asignadas</option>
+                            <option th:each="a: ${actividades}" th:value="${a.idActividad}"
+                                th:selected="${actividadId != null and a.idActividad == actividadId}"
+                                th:text="${a.nombre}">Actividad</option>
+                        </select>
+                    </form>
+
+                    <!-- En móviles mostramos el nombre actual -->
+                    <div class="d-md-none small">
+                        <span th:text="${actividadActual != null} ? ${actividadActual.nombre} : '—'">—</span>
+                    </div>
+                </div>
+
+                <!-- Derecha: chip de usuario -->
+                <div class="d-flex align-items-center gap-3 mt-2 mt-md-0">
+                    <div class="text-end d-none d-sm-block">
+                        <div class="fw-semibold" th:text="${personaNom} + ' ' + (${personaApe} ?: '')">Nombre</div>
+                        <div class="small text-muted">JURADO · <span th:text="${usuarioNom}">usuario</span></div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Avatar con iniciales -->
+                        <div id="avatar"
+                            class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                            style="width:38px;height:38px;font-weight:600;">
+                            <!-- iniciales por JS -->
+                        </div>
+                        <a href="/cerrar_sesionAdm" class="btn btn-outline-secondary btn-sm">Salir</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+
+    <main class="container py-3">
+        <div class="row mb-3">
+            <div class="col-12">
+                <h5 class="mb-1" x-text="actividadActual?.nombre ?? '—'"></h5>
+                <div class="text-muted small" x-text="actividadActual?.descripcion"></div>
+            </div>
+        </div>
+        <div class="row g-2 align-items-center">
+            <div class="col-12">
+                <div class="chip-scroll py-1">
+                    <span class="chip" :class="{'active': !categoriaId}" @click="setCategoria(null)">Todas</span>
+                    <template x-for="c in categorias" :key="c.id">
+                        <span class="chip" :class="{'active': categoriaId===c.id}" @click="setCategoria(c.id)"
+                            x-text="c.nombre"></span>
+                    </template>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="input-group">
+                    <span class="input-group-text">Buscar</span>
+                    <input type="text" class="form-control" placeholder="Participante/Institución"
+                        x-model.debounce.300ms="q" @input="filtrar()">
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <h6 class="mb-2">Pendientes por evaluar</h6>
+                <div class="small text-muted" x-show="cargandoLista">Cargando…</div>
+            </div>
+
+            <template x-if="listaFiltrada.length===0 && !cargandoLista">
+                <div class="col-12">
+                    <div class="alert alert-info mb-0">No hay participantes pendientes en esta categoría.</div>
+                </div>
+            </template>
+
+            <template x-for="i in listaFiltrada" :key="i.id">
+                <div class="col-12 col-md-6 col-lg-4">
+                    <div class="card card-hover mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between">
+                                <div class="small text-uppercase text-muted" x-text="i.categoriaNombre"></div>
+                                <span class="badge bg-secondary">#<span x-text="i.orden ?? '-'"></span></span>
+                            </div>
+                            <h6 class="mt-1 mb-1" x-text="i.participanteNombre"></h6>
+                            <div class="text-muted small" x-text="i.institucion ?? '—'"></div>
+
+                            <div class="mt-3 d-flex justify-content-between align-items-center">
+                                <button class="btn btn-sm btn-primary" @click="abrirEvaluacion(i)">
+                                    Evaluar
+                                </button>
+                                <span class="small text-muted">ID: <span x-text="i.id"></span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </main>
+
+    <div class="modal fade" id="modalEvaluacion" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content" x-data x-on:shown.bs.modal.window="document.getElementById('puntaje0')?.focus()">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        Evaluar — <span x-text="inscripcionActual?.participanteNombre ?? ''"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row g-2 mb-2">
+                        <div class="col-12 col-md-6">
+                            <div class="small text-muted">Categoría</div>
+                            <div class="fw-semibold" x-text="inscripcionActual?.categoriaNombre ?? '—'"></div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="small text-muted">Rúbrica</div>
+                            <div class="fw-semibold" x-text="rubrica?.nombre ?? '—'"></div>
+                            <div class="small text-muted" x-text="'Versión ' + (rubrica?.version ?? '-')"></div>
+                        </div>
+                    </div>
+
+                    <hr class="my-2">
+
+                    <div class="row g-3">
+                        <template x-for="(c,idx) in criterios" :key="c.id">
+                            <div class="col-12">
+                                <div class="border rounded p-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="fw-semibold" x-text="c.nombre"></div>
+                                            <div class="text-muted small" x-text="c.descripcion ?? ''"></div>
+                                        </div>
+                                        <span class="badge text-bg-light">Peso: <span
+                                                x-text="c.porcentaje"></span>%</span>
+                                    </div>
+
+                                    <div class="mt-3">
+                                        <div class="row g-2 align-items-center">
+                                            <div class="col-4 col-sm-3 col-md-2">
+                                                <input :id="'puntaje'+idx" type="number" min="0" max="100" step="0.5"
+                                                    class="form-control" x-model.number="puntajes[c.id]"
+                                                    @input="recalcular()">
+                                            </div>
+                                            <div class="col-8 col-sm-9 col-md-7">
+                                                <input type="range" min="0" max="100" step="1" class="form-range"
+                                                    x-model.number="puntajes[c.id]" @input="recalcular()">
+                                            </div>
+                                            <div class="col-12 col-md-3 text-end">
+                                                <div class="small text-muted">Puntaje ponderado</div>
+                                                <div class="fw-semibold">
+                                                    <span x-text="ponderado(c).toFixed(2)"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                    <div>
+                        <div class="small text-muted">Total ponderado</div>
+                        <div class="fs-5 fw-bold">
+                            <span x-text="totalPonderado.toFixed(2)"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-success" :disabled="guardando || !formValido"
+                            @click="guardarEvaluacion()">
+                            <span x-show="!guardando">Guardar</span>
+                            <span x-show="guardando">Guardando…</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:1080">
+        <div id="toastOk" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive"
+            aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">Evaluación guardada correctamente.</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+        <div id="toastErr" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive"
+            aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">No se pudo guardar. Intenta nuevamente.</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // avatar con iniciales
+        const avatar = document.getElementById('avatar');
+        const nom = /*[[${personaNom}]]*/ '' + ' ' + /*[[${personaApe}]]*/ '';
+        const iniciales = nom.trim().split(/\s+/).slice(0, 2).map(s => s[0]?.toUpperCase() || '').join('');
+        avatar.textContent = iniciales || 'J';
+
+        // cambiar actividad: recargar la misma página con ?actId=...
+        const sel = document.getElementById('sel-actividad');
+        if (sel) {
+            sel.addEventListener('change', () => {
+                const actId = sel.value;
+                const url = new URL(window.location.href);
+                if (actId) url.searchParams.set('actId', actId);
+                else url.searchParams.delete('actId');
+                window.location.href = url.toString();
+            });
+        }
+
+        async function fetchJson(url, opts = {}) {
+            const r = await fetch(url, opts);
+            if (r.status === 401) { window.location.href = '/LoginR'; return Promise.reject('401'); }
+            if (r.status === 403) { alert('No autorizado para esta operación'); return Promise.reject('403'); }
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        }
+
+        function panelJurado() {
+            return {
+                // Estado
+                actividades: [], actividadId: null, actividadActual: null,
+                categorias: [], categoriaId: null,
+                listaPendientes: [], listaFiltrada: [],
+                q: '', cargandoLista: false,
+
+                // Rúbrica y evaluación
+                rubrica: null, criterios: [],
+                puntajes: {}, totalPonderado: 0,
+                inscripcionActual: null,
+                formValido: false, guardando: false,
+
+                // CSRF (si lo usas)
+                get csrfToken() { return document.querySelector('meta[name="_csrf"]')?.content; },
+                get csrfHeader() { return document.querySelector('meta[name="_csrf_header"]')?.content; },
+
+                // Endpoints esperados (ajusta si deseas)
+                api: {
+                    actividades: '/api/jurado/actividades', // GET -> [{id,nombre,descripcion}]
+                    categorias: (actId) => `/api/jurado/${actId}/categorias`, // GET -> [{id,nombre}]
+                    pendientes: (actId, catId) => `/api/jurado/${actId}/inscripciones-pendientes${catId ? ('?categoriaId=' + catId) : ''}`,
+                    rubrica: (actId) => `/api/jurado/${actId}/rubrica`, // GET -> {id,nombre,version,criterios:[{id,nombre,porcentaje,descripcion}]}
+                    guardar: '/api/jurado/evaluar' // POST JSON
+                },
+
+                // Init
+                async init() {
+                    await this.cargarActividades();
+                    if (this.actividades.length) {
+                        this.actividadId = this.actividades[0].id;
+                        this.actividadActual = this.actividades[0];
+                        await this.onActividadChange();
+                    }
+                    // Inicia Bootstrap Modal/Toast
+                    this.bsModal = new bootstrap.Modal(document.getElementById('modalEvaluacion'));
+                    this.toastOk = new bootstrap.Toast(document.getElementById('toastOk'));
+                    this.toastErr = new bootstrap.Toast(document.getElementById('toastErr'));
+                },
+
+                // Cargas
+                async cargarActividades() {
+                    const r = await fetch(this.api.actividades);
+                    this.actividades = await r.json(); // [{id,nombre,descripcion}]
+                },
+                async onActividadChange() {
+                    this.actividadActual = this.actividades.find(a => a.id == this.actividadId) || null;
+                    this.categorias = [];
+                    this.categoriaId = null;
+                    this.listaPendientes = [];
+                    this.listaFiltrada = [];
+                    this.rubrica = null; this.criterios = []; this.puntajes = {};
+                    if (!this.actividadId) return;
+                    const [cats, rub] = await Promise.all([
+                        fetch(this.api.categorias(this.actividadId)).then(r => r.json()),
+                        fetch(this.api.rubrica(this.actividadId)).then(r => r.json())
+                    ]);
+                    this.categorias = cats; // [{id,nombre}]
+                    this.rubrica = rub; this.criterios = rub.criterios || [];
+                    // Carga lista pendientes
+                    await this.cargarPendientes();
+                },
+                async cargarPendientes() {
+                    if (!this.actividadId) return;
+                    this.cargandoLista = true;
+                    try {
+                        const url = this.api.pendientes(this.actividadId, this.categoriaId);
+                        const r = await fetch(url);
+                        // Esperado: [{id, participanteNombre, institucion, categoriaId, categoriaNombre, orden}]
+                        this.listaPendientes = await r.json();
+                        this.filtrar();
+                    } finally {
+                        this.cargandoLista = false;
+                    }
+                },
+
+                // Filtros
+                setCategoria(id) { this.categoriaId = id; this.cargarPendientes(); },
+                filtrar() {
+                    const q = (this.q || '').toLowerCase();
+                    this.listaFiltrada = this.listaPendientes.filter(i => {
+                        const okCat = !this.categoriaId || i.categoriaId === this.categoriaId;
+                        const okQ = !q || (i.participanteNombre?.toLowerCase().includes(q) || i.institucion?.toLowerCase().includes(q));
+                        return okCat && okQ;
+                    });
+                },
+
+                // Evaluación
+                abrirEvaluacion(insc) {
+                    this.inscripcionActual = insc;
+                    // Prepara puntajes en 0 si no hay
+                    this.puntajes = {};
+                    for (const c of this.criterios) { this.puntajes[c.id] = 0; }
+                    this.recalcular();
+                    this.bsModal.show();
+                },
+                ponderado(c) {
+                    const p = Number(this.puntajes[c.id] || 0);
+                    return p * (Number(c.porcentaje || 0) / 100.0);
+                },
+                recalcular() {
+                    let total = 0, completos = true;
+                    for (const c of this.criterios) {
+                        const v = Number(this.puntajes[c.id]);
+                        if (isNaN(v) || v < 0 || v > 100) completos = false;
+                        total += this.ponderado(c);
+                    }
+                    this.totalPonderado = total;
+                    this.formValido = completos && this.criterios.length > 0;
+                },
+
+                // Guardar
+                async guardarEvaluacion() {
+                    if (!this.formValido || !this.inscripcionActual || !this.rubrica) return;
+                    this.guardando = true;
+                    try {
+                        const payload = {
+                            actividadId: this.actividadId,
+                            inscripcionId: this.inscripcionActual.id,
+                            rubricaId: this.rubrica.id,
+                            detalles: this.criterios.map(c => ({
+                                criterioId: c.id,
+                                puntaje: Number(this.puntajes[c.id] || 0),
+                                porcentaje: c.porcentaje
+                            })),
+                            total: Number(this.totalPonderado.toFixed(2))
+                        };
+
+                        const headers = { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
+                        if (this.csrfToken && this.csrfHeader) headers[this.csrfHeader] = this.csrfToken;
+
+                        const r = await fetch(this.api.guardar, {
+                            method: 'POST',
+                            headers,
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!r.ok) throw new Error('HTTP ' + r.status);
+                        const resp = await r.json(); // {ok:true}
+                        if (!resp.ok) throw new Error(resp.msg || 'Error lógico');
+
+                        // Quita el inscrito de la lista
+                        this.listaPendientes = this.listaPendientes.filter(x => x.id !== this.inscripcionActual.id);
+                        this.filtrar();
+                        this.bsModal.hide();
+                        this.toastOk.show();
+                    } catch (e) {
+                        console.error(e);
+                        this.toastErr.show();
+                    } finally {
+                        this.guardando = false;
+                    }
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,81 @@
+<h4 class="py-3 mb-4"><span class="text-muted fw-light">Menú /</span> Rubrica criterio</h4>
+
+<div id="tablaRegistro"></div>
+
+<div class="modal fade" id="formularioRubricaCriterio" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="contenidoModalRubricaCriterio"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        cargarTabla();
+
+        // Limpia contenido al cerrar (evita duplicar scripts/ids)
+        $('#formularioRubricaCriterio').on('hidden.bs.modal', function () {
+            $('#contenidoModalRubricaCriterio').empty();
+        });
+    });
+
+    function cargarTabla() {
+        $.ajax({
+            type: 'POST',
+            url: "/rubrica-criterio/tabla-registros",
+            success: function (html) { $("#tablaRegistro").html(html); },
+            error: function () {
+                $("#tablaRegistro").html(`
+            <div class="alert alert-danger m-3">
+                Ocurrió un error al cargar la tabla.
+                <button class="btn btn-sm btn-outline-light ms-2" onclick="cargarTabla()">Reintentar</button>
+            </div>
+            `);
+            }
+        });
+    }
+
+    // Registrar
+    $(document).on('click', '.btn-registrar-rubrica-criterio', function () {
+        $('#formularioRubricaCriterio').modal('show');
+        cargarFormularioAlert(
+            "/rubrica-criterio/formulario",
+            "#contenidoModalRubricaCriterio",
+            "#formularioRubricaCriterio",
+            function onLoaded() {
+                manejarEnvioFormulario('#formularioRubricaCriterio', {
+                    modalSelector: '#formularioRubricaCriterio',
+                    recargarTablaFn: cargarTabla
+                });
+            }
+        );
+    });
+
+    // Editar
+    $(document).on('click', '.btn-editar-rubrica-criterio', function () {
+        const id = $(this).data('id');
+        if (!id) return Swal.fire('Error', 'ID no válido.', 'error');
+
+        $('#formularioRubricaCriterio').modal('show');
+        cargarFormularioEditAlert(
+            id,
+            "/rubrica-criterio/formulario-edit",
+            "#contenidoModalRubricaCriterio",
+            "#formularioRubricaCriterio",
+            function onLoaded() {
+                manejarEnvioFormulario('#formularioRubricaCriterio', {
+                    modalSelector: '#formularioRubricaCriterio',
+                    recargarTablaFn: cargarTabla
+                });
+            }
+        );
+    });
+
+    // Eliminar
+    $(document).on('click', '.btn-eliminar-rubrica-criterio', function () {
+        const id = $(this).data('id');
+        const nombre = $(this).data('nombre') || 'el registro';
+        if (!id) return Swal.fire('Error', 'ID no válido.', 'error');
+
+        eliminarRegistroAlert(nombre, id, "/rubrica-criterio/eliminar", cargarTabla);
+    });
+</script>

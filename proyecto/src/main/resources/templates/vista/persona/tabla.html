@@ -1,8 +1,7 @@
 <div class="card">
     <div class="card-header d-flex justify-content-lg-between">
         <h5>Registro Persona</h5>
-        <button type="button" class="btn btn-primary" onclick="cargarFormularioPersona()" data-bs-toggle="modal"
-            data-bs-target="#modalFormularioPersona">
+        <button type="button" class="btn btn-primary btn-registrar-persona">
             <i class="fa-solid fa-user-plus"></i> Agregar Persona
         </button>
     </div>
@@ -25,14 +24,13 @@
                     <td>
                         <!-- EDITAR -->
                         <button type="button" class="btn btn-sm btn-primary btn-editar-persona"
-                            th:attr="data-id=${per.id_persona}" data-bs-toggle="modal"
-                            data-bs-target="#modalFormularioPersona">
+                            th:attr="data-id=${per.idPersona}">
                             <i class="fa-solid fa-pen-to-square"></i> Editar
                         </button>
 
                         <!-- ELIMINAR -->
                         <button type="button" class="btn btn-sm btn-danger btn-eliminar-persona"
-                            th:attr="data-id=${per.id_persona}, data-nombre=${per.nombres + ' ' + per.paterno}">
+                            th:attr="data-id=${per.idPersona}, data-nombre=${per.nombres + ' ' + per.paterno}">
                             <i class="fa-solid fa-trash"></i> Eliminar
                         </button>
                     </td>

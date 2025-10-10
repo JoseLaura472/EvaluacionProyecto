@@ -1,0 +1,81 @@
+<h4 class="py-3 mb-4"><span class="text-muted fw-light">Menú /</span> juradoAsignacion</h4>
+
+<div id="tablaRegistro"></div>
+
+<div class="modal fade" id="formularioJuradoAsignacion" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="contenidoModalJuradoAsignacion"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        cargarTabla();
+
+        // Limpia contenido al cerrar (evita duplicar scripts/ids)
+        $('#formularioJuradoAsignacion').on('hidden.bs.modal', function () {
+            $('#contenidoModalJuradoAsignacion').empty();
+        });
+    });
+
+    function cargarTabla() {
+        $.ajax({
+            type: 'POST',
+            url: "/jurado-asignacion/tabla-registros",
+            success: function (html) { $("#tablaRegistro").html(html); },
+            error: function () {
+                $("#tablaRegistro").html(`
+            <div class="alert alert-danger m-3">
+                Ocurrió un error al cargar la tabla.
+                <button class="btn btn-sm btn-outline-light ms-2" onclick="cargarTabla()">Reintentar</button>
+            </div>
+            `);
+            }
+        });
+    }
+
+    // Registrar
+    $(document).on('click', '.btn-registrar-juradoAsignacion', function () {
+        $('#formularioJuradoAsignacion').modal('show');
+        cargarFormularioAlert(
+            "/jurado-asignacion/formulario",
+            "#contenidoModalJuradoAsignacion",
+            "#formularioJuradoAsignacion",
+            function onLoaded() {
+                manejarEnvioFormulario('#formularioJuradoAsignacion', {
+                    modalSelector: '#formularioJuradoAsignacion',
+                    recargarTablaFn: cargarTabla
+                });
+            }
+        );
+    });
+
+    // Editar
+    $(document).on('click', '.btn-editar-juradoAsignacion', function () {
+        const id = $(this).data('id');
+        if (!id) return Swal.fire('Error', 'ID no válido.', 'error');
+
+        $('#formularioJuradoAsignacion').modal('show');
+        cargarFormularioEditAlert(
+            id,
+            "/jurado-asignacion/formulario-edit",
+            "#contenidoModalJuradoAsignacion",
+            "#formularioJuradoAsignacion",
+            function onLoaded() {
+                manejarEnvioFormulario('#formularioJuradoAsignacion', {
+                    modalSelector: '#formularioJuradoAsignacion',
+                    recargarTablaFn: cargarTabla
+                });
+            }
+        );
+    });
+
+    // Eliminar
+    $(document).on('click', '.btn-eliminar-juradoAsignacion', function () {
+        const id = $(this).data('id');
+        const nombre = $(this).data('nombre') || 'el registro';
+        if (!id) return Swal.fire('Error', 'ID no válido.', 'error');
+
+        eliminarRegistroAlert(nombre, id, "/jurado-asignacion/eliminar", cargarTabla);
+    });
+</script>

@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.proyecto.Models.Entity.Usuario;
-import com.example.proyecto.Models.Service.IJuradoService;
-import com.example.proyecto.Models.Service.IPersonaService;
-import com.example.proyecto.Models.Service.IUsuarioService;
+import com.example.proyecto.Models.IService.IJuradoService;
+import com.example.proyecto.Models.IService.IPersonaService;
+import com.example.proyecto.Models.IService.IUsuarioService;
 
 import jakarta.servlet.http.HttpServletRequest;
 

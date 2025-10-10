@@ -71,7 +71,7 @@
                                                     th:field="${usuario.persona}" 
                                                     name="persona">
                                                     <option value="">Seleccione una persona</option>
-                                                    <option th:each="per : ${personas}" th:value="${per.id_persona}"
+                                                    <option th:each="per : ${personas}" th:value="${per.idPersona}"
                                                         th:if="${per.estado != 'X'}" th:text="${per.nombreCompleto}">
                                                     </option>
                                                 </select>

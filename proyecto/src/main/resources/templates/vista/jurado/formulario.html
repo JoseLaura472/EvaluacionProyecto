@@ -1,0 +1,78 @@
+<style>
+    /* Altura tipo "lg" de Bootstrap */
+    .select2-container .select2-selection--single {
+        height: calc(2.5rem + 2px);
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: calc(2.5rem);
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: calc(2.5rem);
+    }
+
+    /* Ancho completo siempre */
+    .select2-container {
+        width: 100% !important;
+    }
+</style>
+
+
+<div class="modal-header">
+    <h4 class="modal-title" th:text="${edit}? 'Modificar Jurado' : 'Registrar Jurado'"></h4>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<form id="formularioJurado" method="post"
+    th:action="${edit} ? @{/jurado/modificar-jurado} : @{/jurado/registrar-jurado}" th:object="${jurado}" novalidate>
+
+    <input type="hidden" th:if="${edit}" th:field="*{id_jurado}" />
+
+    <div class="modal-body">
+        <div class="row g-3">
+            <div class="col-12 col-md-6">
+                <label class="form-label">Persona</label>
+                <select class="select2 form-select" th:field="*{persona.idPersona}" required>
+                    <option value="">Seleccione…</option>
+                    <option th:each="p : ${listaPersonas}" th:value="${p.idPersona}"
+                        th:text="${p.nombreCompleto + ' - ' + p.ci}">
+                    </option>
+                </select>
+                <div class="valid-feedback">Correcto!</div>
+                <div class="invalid-feedback">Debe seleccionar a una persona.</div>
+            </div>
+
+            <!-- NUEVOS CAMPOS -->
+            <div class="col-12 col-md-6">
+                <label class="form-label">Usuario</label>
+                <input type="text" name="usuarioNom" class="form-control"
+                    placeholder="usuario (opcional: si vacía, se sugiere por CI)">
+            </div>
+
+            <div class="col-12 col-md-6">
+                <label class="form-label">Contraseña</label>
+                <input type="password" name="contrasenaPlano" class="form-control" minlength="6" required
+                    placeholder="defina la contraseña del jurado">
+                <div class="invalid-feedback">Defina una contraseña (mín. 6 caracteres).</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <div class="row">
+            <div class="col-12">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-success"
+                    th:text="${edit}? 'Guardar Cambios' : 'Guardar Registro'"></button>
+            </div>
+        </div>
+    </div>
+</form>
+
+
+<script>
+    manejarEnvioFormulario('#formularioJurado');
+</script>

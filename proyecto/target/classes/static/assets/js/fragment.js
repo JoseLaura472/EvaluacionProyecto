@@ -1,236 +1,146 @@
-// Función para cargar un formulario dentro de un modal con verificación de sesión
-function cargarFormularioAlert(urlFormulario, idContenedorModal, idFormulario) {
-    // Verifica si la sesión está activa antes de cargar el formulario
+function _withSession(ok) {
     $.ajax({
-        url: "/adm/cargar-datos", // URL para verificar la sesión
+        url: "/adm/cargar-datos",
         method: "GET",
-        success: function () {
-            // Si la sesión es válida, procede a cargar el formulario
+        success: function () { if (typeof ok === 'function') ok(); },
+        error: function (xhr) {
+            if (xhr.status === 401) {
+                Swal.fire({
+                    title: 'Sesión expirada',
+                    text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
+                    icon: 'warning',
+                    confirmButtonText: 'Ir al login'
+                }).then((r) => { if (r.isConfirmed) window.location.href = '/form-login'; });
+            }
+        }
+    });
+}
+
+// --- Cargar formulario (Registrar)
+function cargarFormularioAlert(urlFormulario, idContenedorModal, idFormulario, onLoaded) {
+    _withSession(function () {
+        $.ajax({
+            type: 'POST',
+            url: urlFormulario,
+            success: function (html) {
+                $(idContenedorModal).html(html);
+
+                // Inicializa select2 apuntando al formulario inyectado
+                try {
+                    $('.select2').select2({ dropdownParent: $(idFormulario) });
+                } catch (e) { /* select2 opcional */ }
+
+                // Permite que cada formulario se auto-inicialice si quiere
+                if (typeof onLoaded === 'function') onLoaded();
+
+            },
+            error: function (xhr) {
+                console.error('Error al cargar formulario:', xhr);
+                Swal.fire('Error', 'No se pudo cargar el formulario.', 'error');
+            }
+        });
+    });
+}
+
+// --- Cargar formulario (Editar)
+function cargarFormularioEditAlert(id, urlFormularioBase, idContenedorModal, idFormulario, onLoaded) {
+    _withSession(function () {
+        $.ajax({
+            type: 'POST',
+            url: urlFormularioBase + "/" + id,
+            success: function (html) {
+                $(idContenedorModal).html(html);
+
+                try {
+                    $('.select2').select2({ dropdownParent: $(idFormulario) });
+                } catch (e) { }
+
+                if (typeof onLoaded === 'function') onLoaded();
+            },
+            error: function (xhr) {
+                console.error('Error al cargar formulario (edit):', xhr);
+                Swal.fire('Error', 'No se pudo cargar el formulario para edición.', 'error');
+            }
+        });
+    });
+}
+
+// --- Eliminar con confirmación
+function eliminarRegistroAlert(nombre, id, urlEliminar, recargarTablaFn, metodoHttp = 'POST') {
+    _withSession(function () {
+        Swal.fire({
+            title: 'Eliminar Registro',
+            text: '¿Estás seguro de eliminar a ' + nombre + '?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then((result) => {
+            if (!result.isConfirmed) return;
+
             $.ajax({
-                type: 'POST',
-                url: urlFormulario,  // Ruta del método del controlador en Spring Boot para cargar el formulario
+                url: urlEliminar + "/" + id,
+                type: metodoHttp,
                 success: function (response) {
-                    $(idContenedorModal).html(response);  // Actualiza el contenido del modal con la respuesta del servidor
-
-                    // Inicializa select2 en los elementos con la clase .select2 dentro del formulario
-                    $('.select2').select2({
-                        dropdownParent: $(idFormulario)  // Especificar el parent para el dropdown
-                    });
+                    if (typeof recargarTablaFn === 'function') recargarTablaFn();
+                    Swal.fire('Eliminado', (response || 'Registro eliminado.'), 'success');
                 },
-                error: function (xhr) {
-                    console.error('Error en la solicitud del formulario:', xhr);
-                }
-            });
-        },
-        error: function (xhr) {
-            if (xhr.status === 401) {
-                // Si la sesión ha expirado, muestra una alerta con SweetAlert2
-                Swal.fire({
-                    title: 'Sesión expirada',
-                    text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
-                    icon: 'warning',
-                    confirmButtonText: 'Ir al login'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/form-login'; // Redirige a la página de login
-                    }
-                });
-            }
-        }
-    });
-}
-
-// Función para cargar un formulario de edición con un ID específico dentro de un modal
-function cargarFormularioEditAlert(id, urlFormulario, idContenedorModal, idFormulario) {
-    // Verifica si la sesión está activa antes de cargar el formulario
-    $.ajax({
-        url: "/adm/cargar-datos", // URL para verificar la sesión
-        method: "GET",
-        success: function () {
-            // Si la sesión es válida, procede a cargar el formulario
-            $.ajax({
-                type: 'POST',
-                url: urlFormulario + "/" + id,  // Agrega el ID a la URL del formulario
-                success: function (response) {
-                    $(idContenedorModal).html(response);  // Actualiza el contenido del modal con la respuesta del servidor
-
-                    // Inicializa select2 en los elementos con la clase .select2 dentro del formulario
-                    $('.select2').select2({
-                        dropdownParent: $(idFormulario)  // Especificar el parent para el dropdown
-                    });
-                },
-                error: function (xhr) {
-                    console.error('Error en la solicitud del formulario:', xhr);
-                }
-            });
-        },
-        error: function (xhr) {
-            if (xhr.status === 401) {
-                // Si la sesión ha expirado, muestra una alerta con SweetAlert2
-                Swal.fire({
-                    title: 'Sesión expirada',
-                    text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
-                    icon: 'warning',
-                    confirmButtonText: 'Ir al login'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/form-login'; // Redirige a la página de login
-                    }
-                });
-            }
-        }
-    });
-}
-
-
-// Función para eliminar un registro después de verificar la sesión
-function eliminarRegistroAlert(nombre, id, urlEliminar, cargarTablaFuncion) {
-    // Verifica si la sesión está activa antes de intentar eliminar
-    $.ajax({
-        url: "/adm/cargar-datos",  // URL para verificar la sesión
-        method: "GET",
-        success: function () {
-            // Si la sesión es válida, procede con la eliminación
-            Swal.fire({
-                title: 'Eliminar Registro',
-                text: '¿Estás seguro de eliminar a ' + nombre + '?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Si el usuario confirma, realizar la llamada AJAX para eliminar
-                    $.ajax({
-                        url: urlEliminar + "/" + id,  // URL para eliminar el registro con el ID
-                        type: 'POST',
-                        success: function (response) {
-                            cargarTablaFuncion();  // Recargar la tabla (función pasada como parámetro)
-                            Swal.fire(
-                                'Eliminado!',
-                                response,
-                                'success'
-                            );
-                        },
-                        error: function (xhr, status, error) {
-                            Swal.fire(
-                                'Error',
-                                'Hubo un problema al eliminar el registro. Por favor, inténtalo de nuevo.',
-                                'error'
-                            );
-                        }
-                    });
-                }
-            });
-        },
-        error: function (xhr) {
-            if (xhr.status === 401) {
-                // Si la sesión ha expirado, muestra una alerta con SweetAlert2
-                Swal.fire({
-                    title: 'Sesión expirada',
-                    text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
-                    icon: 'warning',
-                    confirmButtonText: 'Ir al login'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '/form-login';  // Redirige a la página de login
-                    }
-                });
-            }
-        }
-    });
-}
-
-// Función para manejar el envio de formulario de registro
-function manejarEnvioFormulario(selectorFormulario) {
-    $(document).ready(function () {
-        $(selectorFormulario).submit(function (event) {
-            event.preventDefault();
-
-            if (this.checkValidity() === false) {
-                $(this).addClass('was-validated');
-                return;
-            }
-
-            // Verifica si la sesión está activa antes de enviar el formulario
-            $.ajax({
-                url: "/adm/cargar-datos",
-                method: "GET",
-                success: function () {
-                    // Si la sesión es válida, continúa con el envío del formulario
-                    var form = $(selectorFormulario)[0];
-                    var formData = new FormData(form);
-
-                    $.ajax({
-                        type: 'POST',
-                        url: $(selectorFormulario).attr('action'),
-                        data: formData,
-                        contentType: false,  // No establecer el tipo de contenido aquí
-                        processData: false,  // No procesar los datos
-                        success: function (response) {
-                            if (response === 'Se realizó el registro correctamente') {
-                                cargarTabla();
-                                $('.modal').modal('hide');
-                                //cargarFormulario();
-                                Swal.fire(
-                                    'Registrado!',
-                                    response + '.',
-                                    'success'
-                                );
-                            } else if (response === 'Se realizó la modificación correctamente' ){
-                                cargarTabla();
-                                $('.modal').modal('hide');
-                                //cargarFormulario();
-                                Swal.fire(
-                                    'Modificado!',
-                                    response + '.',
-                                    'success'
-                                );
-                            } else if (response === 'Odontólogo reactivado y modificado correctamente.' ){
-                                cargarTabla();
-                                $('.modal').modal('hide');
-                                //cargarFormulario();
-                                Swal.fire(
-                                    'Reactivado!',
-                                    response + '.',
-                                    'success'
-                                );
-                            } else {
-                                Swal.fire(
-                                    'Imposible Registrar!',
-                                    response + '.',
-                                    'error'
-                                );
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            Swal.fire(
-                                'Imposible Registrar!',
-                                'Ha ocurrido un error. Por favor, intenta nuevamente.' + xhr, status, error,
-                                'error'
-                            );
-                            console.error(error);
-                        }
-                    });
-                },
-                error: function (xhr) {
-                    if (xhr.status === 401) {
-                        // Si la sesión ha expirado, muestra una alerta con SweetAlert2
-                        Swal.fire({
-                            title: 'Sesión expirada',
-                            text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
-                            icon: 'warning',
-                            confirmButtonText: 'Ir al login'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = '/form-login'; // Redirige a la página de login
-                            }
-                        });
-                    }
+                error: function () {
+                    Swal.fire('Error', 'Hubo un problema al eliminar el registro.', 'error');
                 }
             });
         });
     });
 }
 
+/**
+ * Maneja el envío de un formulario inyectado por AJAX.
+ * @param {string} selectorFormulario  - Ej: '#formularioTipoParticipante'
+ * @param {object} opts                - { modalSelector, recargarTablaFn, onSuccess, onError }
+ */
+function manejarEnvioFormulario(selectorFormulario, opts = {}) {
+    const modalSelector = opts.modalSelector || null;
+    const recargarTablaFn = typeof opts.recargarTablaFn === 'function' ? opts.recargarTablaFn : null;
+    const onSuccess = typeof opts.onSuccess === 'function' ? opts.onSuccess : null;
+    const onError = typeof opts.onError === 'function' ? opts.onError : null;
+
+    // Binding delegado para formularios inyectados
+    $(document).off('submit', selectorFormulario).on('submit', selectorFormulario, function (event) {
+        event.preventDefault();
+
+        const formEl = this;
+        if (formEl.checkValidity() === false) {
+            $(formEl).addClass('was-validated');
+            return;
+        }
+
+        _withSession(function () {
+            const formData = new FormData(formEl);
+            $.ajax({
+                type: 'POST',
+                url: $(formEl).attr('action'),
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    // Cierra modal específico si se indicó
+                    if (modalSelector) { $(modalSelector).modal('hide'); }
+
+                    // Refresca tabla si se indicó
+                    if (recargarTablaFn) { recargarTablaFn(); }
+
+                    // Mensaje ok
+                    Swal.fire('Operación exitosa', (response || 'Completado correctamente.'), 'success');
+
+                    if (onSuccess) onSuccess(response);
+                },
+                error: function (xhr) {
+                    const msg = xhr?.responseText || 'Ha ocurrido un error. Por favor, intenta nuevamente.';
+                    Swal.fire('Error', msg, 'error');
+                    if (onError) onError(xhr);
+                }
+            });
+        });
+    });
+}

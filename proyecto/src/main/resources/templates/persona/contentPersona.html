@@ -1,6 +1,6 @@
 <div th:fragment="Docente">
     <form th:action="${edit} ?@{/DocenteModF} :@{/DocenteF}" id="form1" method="post" enctype="multipart/form-data">
-        <input type="hidden" th:field="${persona.id_persona}">
+        <input type="hidden" th:field="${persona.idPersona}">
         <input type="hidden" th:field="${persona.estado}">
         <input type="hidden" th:field="${docente.id_docente}">
         <input type="hidden" th:field="${docente.estado}">
@@ -183,9 +183,9 @@
 
 <div th:fragment="Jurado">
     <form th:action="${edit} ?@{/JuradoModF} :@{/JuradoF}" id="form1" method="post" enctype="multipart/form-data">
-        <input type="hidden" th:field="${persona.id_persona}">
+        <input type="hidden" th:field="${persona.idPersona}">
         <input type="hidden" th:field="${persona.estado}">
-        <input type="hidden" th:field="${jurado.id_jurado}">
+        <input type="hidden" th:field="${jurado.idJurado}">
         <input type="hidden" th:field="${jurado.estado}">
         <div class="row">
             <div class="col-md-3">
@@ -340,11 +340,11 @@
                                                 <td>
                                                     <div style="display: flex; justify-content: center;align-items: center;">
                                                         <button class="btn btn-info" style="font-size: 24px; margin-right: 5px;"
-                                                            th:attr="onclick='EditarRegistro(\'' + ${jur.id_jurado} + '\')'">
+                                                            th:attr="onclick='EditarRegistro(\'' + ${jur.idJurado} + '\')'">
                                                             <i class="mdi mdi-border-color"></i>
                                                         </button>
                                                         <button class="btn btn-danger" style="font-size: 24px; margin-right: 5px;"
-                                                            th:attr="onclick='EliminarRegistro(\'' + ${jur.id_jurado} + '\' , \'' + ${jur.persona.nombres}+' '+ ${jur.persona.paterno} +' '+${jur.persona.materno} + '\')'">
+                                                            th:attr="onclick='EliminarRegistro(\'' + ${jur.idJurado} + '\' , \'' + ${jur.persona.nombres}+' '+ ${jur.persona.paterno} +' '+${jur.persona.materno} + '\')'">
                                                             <i class="mdi mdi-close" style="color: rgb(255, 255, 255); pointer-events: none;"></i>
                                                         </button>
                                                     </div>
@@ -368,7 +368,7 @@
 
 <div th:fragment="Estudiante">
     <form th:action="${edit} ?@{/EstudianteModF} :@{/EstudianteF}" id="form1" method="post" enctype="multipart/form-data">
-        <input type="hidden" th:field="${persona.id_persona}">
+        <input type="hidden" th:field="${persona.idPersona}">
         <input type="hidden" th:field="${persona.estado}">
         <input type="hidden" th:field="${estudiante.id_estudiante}">
         <input type="hidden" th:field="${estudiante.estado}">

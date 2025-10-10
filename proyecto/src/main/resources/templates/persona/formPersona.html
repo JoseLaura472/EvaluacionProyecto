@@ -42,7 +42,7 @@
                                             <h2 class="mt-0 header-title" style="font-size: 30px;">Formulario de Registro de Personas</h2>
                                             <form th:action="${edit} ?@{/PersonaModF} :@{/PersonaF}" method="post"
                                             enctype="multipart/form-data">
-                                            <input type="hidden" th:field="${persona.id_persona}">
+                                            <input type="hidden" th:field="${persona.idPersona}">
                                             <div class="row">
                                                 <div class="col-md-3">
                                                     <label class="col-form-label">Nombres</label>

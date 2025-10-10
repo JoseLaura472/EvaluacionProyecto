@@ -108,8 +108,8 @@
                                                     <label class="col-form-label">Jurados </label>
                                                     <select class="form-control js-choice" multiple="multiple" size="3"
                                                         data-options='{"removeItemButton":true,"placeholder":true}'
-                                                        th:field="${proyecto.jurado}" name="id_jurado" id="id_jurado">
-                                                        <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}"
+                                                        th:field="${proyecto.jurado}" name="idJurado" id="idJurado">
+                                                        <option th:each="jur : ${jurados}" th:value="${jur.idJurado}"
                                                             th:if="${jur.estado != 'X'}"
                                                             th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
                                                         </option>

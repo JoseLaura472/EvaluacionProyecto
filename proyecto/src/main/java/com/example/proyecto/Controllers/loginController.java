@@ -2,7 +2,6 @@ package com.example.proyecto.Controllers;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,24 +14,23 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Entity.Usuario;
-import com.example.proyecto.Models.Service.IProyectoService;
-import com.example.proyecto.Models.Service.ITipoProyectoService;
-import com.example.proyecto.Models.Service.IUsuarioService;
+import com.example.proyecto.Models.IService.IProyectoService;
+import com.example.proyecto.Models.IService.ITipoProyectoService;
+import com.example.proyecto.Models.IService.IUsuarioService;
+import com.example.proyecto.Models.Service.AuthService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 
 @Controller
+@RequiredArgsConstructor
 public class loginController {
 
-    @Autowired
-    private IUsuarioService usuarioService;
-
-    @Autowired
-    private IProyectoService proyectoService;
-
-    @Autowired
-    private ITipoProyectoService tipoProyectoService;
+    private final IUsuarioService usuarioService;
+    private final IProyectoService proyectoService;
+    private final ITipoProyectoService tipoProyectoService;
+    private final AuthService authService;
 
     // Funcion de visualizacion de iniciar sesiòn administrador
     @RequestMapping(value = "/LoginR", method = RequestMethod.GET)
@@ -53,43 +51,38 @@ public class loginController {
                             HttpServletRequest request,
                             RedirectAttributes flash) {
 
-        // TODO: en producción NO uses contraseña en texto plano. Usa BCrypt y Spring Security.
-        Usuario usuario = usuarioService.getUsuarioContraseña(user, contrasena);
+        Usuario usuario = authService.autenticar(user, contrasena);
 
         if (usuario == null) {
             flash.addFlashAttribute("error", "Usuario o contraseña incorrectos");
             return "redirect:/LoginR";
         }
 
-        // Estados de ejemplo:
-        // A = Admin (redirigir a vista-admin)
-        // X = Bloqueado (cerrar sesión)
-        // U = Usuario normal (redirigir a dashboard)
         String estado = usuario.getEstado() != null ? usuario.getEstado().trim().toUpperCase() : "";
 
         if ("X".equals(estado)) {
-            // si está bloqueado, limpia por si acaso
             request.getSession().invalidate();
             flash.addFlashAttribute("warn", "Tu cuenta está bloqueada.");
             return "redirect:/cerrar_sesionAdm";
         }
 
-        // Crear/obtener sesión y setear atributos
+        if (usuario.getPersona() == null || usuario.getPersona().getIdPersona() == null) {
+            usuario = usuarioService.findByUsuario(usuario.getUsuario())
+                        .orElse(usuario);
+        }
+
         HttpSession session = request.getSession(true);
         session.setAttribute("usuario", usuario);
         session.setAttribute("persona", usuario.getPersona());
-
         flash.addFlashAttribute("success", usuario.getPersona() != null
-                ? usuario.getPersona().getNombres() : usuario.getUsuario_nom());
+                ? usuario.getPersona().getNombres() : usuario.getUsuario());
 
-        // Redirecciones por estado
         switch (estado) {
             case "J":
-                // Opción 1: redirigir a una ruta que renderiza vista-admin.html
-                return "redirect:/AdmPG";
+                return "redirect:/jurado/panel";
             case "A":
             default:
-                return "redirect:/admin/inicio"; // tu ruta actual para usuarios no admin
+                return "redirect:/admin/inicio";
         }
     }
 
@@ -101,17 +94,7 @@ public class loginController {
         Usuario u = (Usuario) session.getAttribute("usuario");
         if (u == null || !"A".equalsIgnoreCase(u.getEstado())) return "redirect:/LoginR";
 
-        List<Proyecto> PrimerL = proyectoService.Primerlugar();
-            List<Proyecto> SegundoL = proyectoService.Segundolugar();
-            List<Proyecto> TercerL = proyectoService.Tercerlugar();
-            // List<Proyecto> Ranking = proyectoService.proyectosRanking();
-
-            model.addAttribute("tiposProyectos", tipoProyectoService.findAll());
-            model.addAttribute("PrimerL", PrimerL);
-			model.addAttribute("SegundoL", SegundoL);
-            model.addAttribute("TercerL", TercerL);
-
-        return "vista-admin"; // <- renderiza templates/vista-admin.html
+        return "vista-admin";
     }
 
     // Funcion de visualizaciòn de la pagina principal

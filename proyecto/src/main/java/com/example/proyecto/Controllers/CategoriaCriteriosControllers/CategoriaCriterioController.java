@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.proyecto.Models.Entity.CategoriaCriterio;
 import com.example.proyecto.Models.Entity.TipoProyecto;
-import com.example.proyecto.Models.Service.ICategoriaCriterioService;
-import com.example.proyecto.Models.Service.ITipoProyectoService;
+import com.example.proyecto.Models.IService.ICategoriaCriterioService;
+import com.example.proyecto.Models.IService.ITipoProyectoService;
 
 import jakarta.servlet.http.HttpServletRequest;
 

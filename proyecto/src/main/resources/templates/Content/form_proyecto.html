@@ -27,7 +27,7 @@
                 <label class="col-form-label">JURADO: </label>
                 <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple"
                     th:field="${proyecto.jurado}">
-                    <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                    <option th:each="jur : ${jurados}" th:value="${jur.idJurado}" th:if="${jur.estado != 'X'}"
                         th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
                     </option>
                 </select>
@@ -133,7 +133,7 @@
                 <label class="col-form-label">JURADOS : </label>
                 <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple"
                     th:field="${proyecto.jurado}">
-                    <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                    <option th:each="jur : ${jurados}" th:value="${jur.idJurado}" th:if="${jur.estado != 'X'}"
                         th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
                     </option>
                 </select>
@@ -279,7 +279,7 @@
                 <label class="col-form-label">JURADOS : </label>
                 <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple"
                     th:field="${proyecto.jurado}">
-                    <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                    <option th:each="jur : ${jurados}" th:value="${jur.idJurado}" th:if="${jur.estado != 'X'}"
                         th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
                     </option>
                 </select>
@@ -429,7 +429,7 @@
                 <label class="col-form-label">JURADOS : </label>
                 <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple"
                     th:field="${proyecto.jurado}">
-                    <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                    <option th:each="jur : ${jurados}" th:value="${jur.idJurado}" th:if="${jur.estado != 'X'}"
                         th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
                     </option>
                 </select>
@@ -578,7 +578,7 @@
                 <label class="col-form-label">JURADOS : </label>
                 <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple"
                     th:field="${proyecto.jurado}">
-                    <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                    <option th:each="jur : ${jurados}" th:value="${jur.idJurado}" th:if="${jur.estado != 'X'}"
                         th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
                     </option>
                 </select>
@@ -707,7 +707,7 @@
                 <label class="col-form-label">JURADOS : </label>
                 <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple"
                     th:field="${proyecto.jurado}">
-                    <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                    <option th:each="jur : ${jurados}" th:value="${jur.idJurado}" th:if="${jur.estado != 'X'}"
                         th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
                     </option>
                 </select>
@@ -822,7 +822,7 @@
                 <label class="col-form-label">JURADOS : </label>
                 <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple"
                     th:field="${proyecto.jurado}">
-                    <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                    <option th:each="jur : ${jurados}" th:value="${jur.idJurado}" th:if="${jur.estado != 'X'}"
                         th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
                     </option>
                 </select>
@@ -955,7 +955,7 @@
                 <label class="col-form-label">JURADOS : </label>
                 <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple"
                     th:field="${proyecto.jurado}">
-                    <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                    <option th:each="jur : ${jurados}" th:value="${jur.idJurado}" th:if="${jur.estado != 'X'}"
                         th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
                     </option>
                 </select>
@@ -1088,7 +1088,7 @@
                 <label class="col-form-label">JURADOS : </label>
                 <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple"
                     th:field="${proyecto.jurado}">
-                    <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                    <option th:each="jur : ${jurados}" th:value="${jur.idJurado}" th:if="${jur.estado != 'X'}"
                         th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
                     </option>
                 </select>
@@ -1221,7 +1221,7 @@
                 <label class="col-form-label">JURADOS : </label>
                 <select class="js-example-basic-multiple" style="width: 100%;" multiple="multiple"
                     th:field="${proyecto.jurado}">
-                    <option th:each="jur : ${jurados}" th:value="${jur.id_jurado}" th:if="${jur.estado != 'X'}"
+                    <option th:each="jur : ${jurados}" th:value="${jur.idJurado}" th:if="${jur.estado != 'X'}"
                         th:text="${jur.persona.nombres}+' '+${jur.persona.paterno}+' '+${jur.persona.materno}">
                     </option>
                 </select>

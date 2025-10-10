@@ -1,0 +1,81 @@
+<h4 class="py-3 mb-4"><span class="text-muted fw-light">Menú /</span> Actividad</h4>
+
+<div id="tablaRegistro"></div>
+
+<div class="modal fade" id="formularioActividad" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="contenidoModalActividad"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        cargarTabla();
+
+        // Limpia contenido al cerrar (evita duplicar scripts/ids)
+        $('#formularioActividad').on('hidden.bs.modal', function () {
+            $('#contenidoModalActividad').empty();
+        });
+    });
+
+    function cargarTabla() {
+        $.ajax({
+            type: 'POST',
+            url: "/actividad/tabla-registros",
+            success: function (html) { $("#tablaRegistro").html(html); },
+            error: function () {
+                $("#tablaRegistro").html(`
+            <div class="alert alert-danger m-3">
+                Ocurrió un error al cargar la tabla.
+                <button class="btn btn-sm btn-outline-light ms-2" onclick="cargarTabla()">Reintentar</button>
+            </div>
+            `);
+            }
+        });
+    }
+
+    // Registrar
+    $(document).on('click', '.btn-registrar-actividad', function () {
+        $('#formularioActividad').modal('show');
+        cargarFormularioAlert(
+            "/actividad/formulario",
+            "#contenidoModalActividad",
+            "#formularioActividad",
+            function onLoaded() {
+                manejarEnvioFormulario('#formularioActividad', {
+                    modalSelector: '#formularioActividad',
+                    recargarTablaFn: cargarTabla
+                });
+            }
+        );
+    });
+
+    // Editar
+    $(document).on('click', '.btn-editar-actividad', function () {
+        const id = $(this).data('id');
+        if (!id) return Swal.fire('Error', 'ID no válido.', 'error');
+
+        $('#formularioActividad').modal('show');
+        cargarFormularioEditAlert(
+            id,
+            "/actividad/formulario-edit",
+            "#contenidoModalActividad",
+            "#formularioActividad",
+            function onLoaded() {
+                manejarEnvioFormulario('#formularioActividad', {
+                    modalSelector: '#formularioActividad',
+                    recargarTablaFn: cargarTabla
+                });
+            }
+        );
+    });
+
+    // Eliminar
+    $(document).on('click', '.btn-eliminar-actividad', function () {
+        const id = $(this).data('id');
+        const nombre = $(this).data('nombre') || 'el registro';
+        if (!id) return Swal.fire('Error', 'ID no válido.', 'error');
+
+        eliminarRegistroAlert(nombre, id, "/actividad/eliminar", cargarTabla);
+    });
+</script>

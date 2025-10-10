@@ -1,0 +1,44 @@
+<div class="modal-header">
+    <h4 class="modal-title" th:text="${edit}? 'Modificar tipo participante' : 'Registrar tipo participante'"></h4>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<form id="formularioTipoParticipante" method="post"
+    th:action="${edit} ? @{/tipo-participante/modificar-tipoParticipante} : @{/tipo-participante/registrar-tipoParticipante}"
+    th:object="${tipoParticipante}" novalidate>
+    <input type="hidden" th:if="${edit}" th:field="*{idTipoParticipante}" />
+
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-12 col-md-4 mb-2">
+                <label class="form-label">Nombre</label>
+                <input type="text" th:field="*{nombre}" class="form-control" placeholder="Escriba un nombre" required />
+                <div class="valid-feedback">Correcto!</div>
+                <div class="invalid-feedback">Por favor introduzca un dato válido.</div>
+            </div>
+
+            <div class="col-12 col-md-4 mb-2">
+                <label class="form-label">Descripcion</label>
+                <input type="text" th:field="*{descripcion}" class="form-control" placeholder="Añade una descripcion" required />
+                <div class="valid-feedback">Correcto!</div>
+                <div class="invalid-feedback">Por favor introduzca un dato válido.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <div class="row">
+            <div class="col-12">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-success"
+                    th:text="${edit}? 'Guardar Cambios' : 'Guardar Registro'"></button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    manejarEnvioFormulario('#formularioTipoParticipante');
+</script>

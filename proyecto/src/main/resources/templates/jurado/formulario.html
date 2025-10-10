@@ -8,7 +8,7 @@
 <form id="formularioJurado" class="needs-validation" novalidate th:object="${jurado}"
     th:action="${edit} ? @{/jurado/modificar-jurado} : @{/jurado/registrar-jurado}" method="post">
 
-    <input type="hidden" th:field="*{id_jurado}">
+    <input type="hidden" th:field="*{idJurado}">
     <input type="hidden" th:field="*{estado}">
 
     <div class="modal-body">
