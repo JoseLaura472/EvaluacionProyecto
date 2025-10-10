@@ -243,13 +243,12 @@
                 while (theadRow.children.length > 4) { // ahora hay columna "Reporte" extra
                     theadRow.removeChild(theadRow.children[1]);
                 }
-                const anchor = theadRow.children[theadRow.children.length - 3];
-
+                const anchor = theadRow.children[theadRow.children.length - 3]; // antes de Promedio
                 jurados.forEach(j => {
                     const th = document.createElement('th');
                     th.className = 'text-center';
                     th.innerHTML = `<div class="small text-muted">Jurado</div><div class="fw-semibold">${j.nombre}</div>`;
-                     theadRow.insertBefore(th, anchor);
+                    theadRow.insertBefore(th, anchor);
                 });
             }
 
