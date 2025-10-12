@@ -353,24 +353,38 @@
 
                 // Init
                 async init() {
-                await this.cargarActividades();
-                if (this.actividades.length) {
-                    var first = this.actividades[0] || {};
-                    this.actividadId = (typeof first.id !== 'undefined' && first.id !== null) ? first.id : first.idActividad;
-                    this.actividadActual = this.actividades.find(function(a){
-                    var aid = (typeof a.id !== 'undefined' && a.id !== null) ? a.id : a.idActividad;
-                    return String(aid) === String(this.actividadId);
-                    }.bind(this));
-                    await this.onActividadChange();
-                }
+  await this.cargarActividades();
 
-                // Esperar hasta que cargue bootstrap.bundle
-                while (!window.bootstrap) { await new Promise(r => setTimeout(r, 30)); }
+  if (this.actividades && this.actividades.length) {
+    var first = this.actividades[0] || {};
+    this.actividadId = (typeof first.id !== 'undefined' && first.id !== null) ? first.id : first.idActividad;
 
-                this.bsModal = new bootstrap.Modal(document.getElementById('modalEvaluacion'));
-                this.toastOk = new bootstrap.Toast(document.getElementById('toastOk'));
-                this.toastErr = new bootstrap.Toast(document.getElementById('toastErr'));
-                },
+    var self = this;
+    this.actividadActual = this.actividades.find(function(a){
+      var aid = (typeof a.id !== 'undefined' && a.id !== null) ? a.id : a.idActividad;
+      return String(aid) === String(self.actividadId);
+    }) || null;
+
+    await this.onActividadChange();
+  }
+
+  // Espera bootstrap (por si el bundle carga lento)
+  var tries = 0;
+  while (!window.bootstrap && tries < 100) {
+    await new Promise(function(r){ setTimeout(r, 30); });
+    tries++;
+  }
+
+  var modalEl = document.getElementById('modalEvaluacion');
+  if (window.bootstrap && modalEl) {
+    this.bsModal = new bootstrap.Modal(modalEl);
+  }
+  var toastOkEl = document.getElementById('toastOk');
+  var toastErrEl = document.getElementById('toastErr');
+  if (window.bootstrap && toastOkEl) this.toastOk = new bootstrap.Toast(toastOkEl);
+  if (window.bootstrap && toastErrEl) this.toastErr = new bootstrap.Toast(toastErrEl);
+}
+,
 
                 // Cargas
                 async cargarActividades() {
