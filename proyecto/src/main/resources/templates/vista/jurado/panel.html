@@ -116,7 +116,7 @@
     <main class="container py-3">
         <div class="row mb-3">
             <div class="col-12">
-                <h5 class="mb-1" x-text="actividadActual?.nombre ?? '—'"></h5>
+                <h5 class="mb-1" x-text="(actividadActual && actividadActual.nombre) ? actividadActual.nombre : '—'"></h5>
                 <div class="text-muted small" x-text="(actividadActual && actividadActual.nombre) ? actividadActual.nombre : '—'"></div>
             </div>
         </div>
@@ -355,8 +355,12 @@
                 async init() {
                 await this.cargarActividades();
                 if (this.actividades.length) {
-                    this.actividadId = this.actividades[0].id ?? this.actividades[0].idActividad; // ver punto 3
-                    this.actividadActual = this.actividades[0];
+                    var first = this.actividades[0] || {};
+                    this.actividadId = (typeof first.id !== 'undefined' && first.id !== null) ? first.id : first.idActividad;
+                    this.actividadActual = this.actividades.find(function(a){
+                    var aid = (typeof a.id !== 'undefined' && a.id !== null) ? a.id : a.idActividad;
+                    return String(aid) === String(this.actividadId);
+                    }.bind(this));
                     await this.onActividadChange();
                 }
 
