@@ -354,15 +354,19 @@
                 async init() {
                     await this.cargarActividades();
                     if (this.actividades.length) {
-                        this.actividadId = this.actividades[0].id;
+                        this.actividadId = this.actividades[0].id ?? this.actividades[0].idActividad; // ver punto 3
                         this.actividadActual = this.actividades[0];
                         await this.onActividadChange();
                     }
-                    // Inicia Bootstrap Modal/Toast
+
+                    // Esperar hasta que cargue bootstrap.bundle
+                    while (!window.bootstrap) { await new Promise(r => setTimeout(r, 30)); }
+
                     this.bsModal = new bootstrap.Modal(document.getElementById('modalEvaluacion'));
                     this.toastOk = new bootstrap.Toast(document.getElementById('toastOk'));
                     this.toastErr = new bootstrap.Toast(document.getElementById('toastErr'));
-                },
+                    },
+
 
                 // Cargas
                 async cargarActividades() {
