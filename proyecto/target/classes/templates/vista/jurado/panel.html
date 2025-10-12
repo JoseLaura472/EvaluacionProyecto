@@ -217,7 +217,7 @@
                                         <div class="row g-2 align-items-center">
                                             <div class="col-4 col-sm-3 col-md-2">
                                                 <input :id="'puntaje'+idx" type="number" min="0" max="100" step="0.5"
-                                                    class="form-control" x-model.number="puntajes[c.id]"
+                                                    class="form-control" min="0" max="100" x-model.number="puntajes[c.id]"
                                                     @input="recalcular()">
                                             </div>
                                             <div class="col-8 col-sm-9 col-md-7">
