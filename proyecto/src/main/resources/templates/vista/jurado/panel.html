@@ -277,6 +277,22 @@
     </div>
 
     <script>
+          const input = document.getElementById('miInput');
+
+  input.addEventListener('input', () => {
+    let value = parseFloat(input.value);
+
+    // Si el valor no es número o es menor que 0
+    if (isNaN(value) || value < 0) {
+      input.value = 0;
+    }
+
+    // Si el valor es mayor que 100
+    if (value > 100) {
+      input.value = 100;
+    }
+  });
+  
         // avatar con iniciales
         const avatar = document.getElementById('avatar');
         const nom = /*[[${personaNom}]]*/ '' + ' ' + /*[[${personaApe}]]*/ '';
