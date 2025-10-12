@@ -354,8 +354,9 @@
                 async init() {
                     await this.cargarActividades();
                     if (this.actividades.length) {
-                        this.actividadId = this.actividades[0].id ?? this.actividades[0].idActividad; // ver punto 3
-                        this.actividadActual = this.actividades[0];
+                        this.actividadId = this.actividades[0].id ?? this.actividades[0].idActividad;
+this.actividadActual = this.actividades.find(a => (a.id ?? a.idActividad) == this.actividadId);
+
                         await this.onActividadChange();
                     }
 
