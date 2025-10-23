@@ -37,44 +37,54 @@ public class EvaluacionService {
     @Transactional
     public void guardarEvaluacion(Jurado jurado, EvaluacionGuardarDto dto) {
 
-        // 1) Cargar y validar inscripción
         Inscripcion insc = inscripcionRepo.findById(dto.getInscripcionId());
 
         if (!insc.getActividad().getIdActividad().equals(dto.getActividadId())) {
             throw new IllegalArgumentException("Actividad no coincide con la inscripción");
         }
 
-        // 2) Evitar doble evaluación del mismo jurado
         boolean yaExiste = evaluacionRepo
-                .existsByActividad_IdActividadAndInscripcion_IdInscripcionAndJurado_IdJurado(
-                        dto.getActividadId(), dto.getInscripcionId(), jurado.getIdJurado());
+        .existsByActividad_IdActividadAndInscripcion_IdInscripcionAndJurado_IdJuradoAndRubrica_IdRubrica(
+            dto.getActividadId(), dto.getInscripcionId(), jurado.getIdJurado(), dto.getRubricaId());
+
         if (yaExiste) {
             throw new IllegalStateException("La inscripción ya fue evaluada por este jurado");
         }
 
-        // 3) Cargar rúbrica
         Rubrica rub = rubricaRepo.findById(dto.getRubricaId());
 
-        // 4) Cargar criterios y validar 100%
         List<RubricaCriterio> criterios = criterioRepo.findByRubrica(rub.getIdRubrica());
-        if (criterios.isEmpty())
-            throw new IllegalStateException("La rúbrica no tiene criterios");
-        int sumaPorc = criterios.stream().mapToInt(RubricaCriterio::getPorcentaje).sum();
-        if (sumaPorc != 100)
-            throw new IllegalStateException("La rúbrica no suma 100%");
+        if (criterios.isEmpty()) throw new IllegalStateException("La rúbrica no tiene criterios");
+
+        boolean esEscala = (dto.getDetalles() != null && dto.getDetalles().size() == 1)
+        || criterios.stream().anyMatch(c -> c.getMaxPuntos() != null);
+
+        if (!esEscala) {
+            int sumaPorc = criterios.stream().mapToInt(RubricaCriterio::getPorcentaje).sum();
+            if (sumaPorc != 100) {
+                throw new IllegalStateException("La rúbrica no suma 100%");
+            }
+        }
 
         Map<Long, RubricaCriterio> mapCriterios = criterios.stream()
                 .collect(Collectors.toMap(RubricaCriterio::getIdRubricaCriterio, c -> c));
 
-        // 5) Crear evaluación (usamos cascade: ver entity Evaluacion con detalles +
-        // CascadeType.ALL)
         Evaluacion ev = new Evaluacion();
         ev.setActividad(insc.getActividad());
         ev.setInscripcion(insc);
+        ev.setEstado("A");
         ev.setJurado(jurado);
         ev.setRubrica(rub);
 
+        ev.setParticipante(insc.getParticipante());
+        ev.setCategoriaActividad(insc.getCategoriaActividad());
+
         double total = 0.0;
+
+        if (esEscala && (dto.getDetalles() == null || dto.getDetalles().size() != 1)) {
+            throw new IllegalArgumentException("La rúbrica de escala debe tener exactamente un detalle seleccionado");
+        }
+
         for (var d : dto.getDetalles()) {
             RubricaCriterio crit = mapCriterios.get(d.getCriterioId());
             if (crit == null)
@@ -84,32 +94,30 @@ public class EvaluacionService {
             if (punt < 0 || punt > 100)
                 throw new IllegalArgumentException("Puntaje fuera de rango (0..100)");
 
-            int porc = crit.getPorcentaje();
+            int porc = esEscala ? 100 : crit.getPorcentaje();
             double pond = punt * (porc / 100.0);
             total += pond;
 
             EvaluacionDetalle det = new EvaluacionDetalle();
-            det.setEvaluacion(ev); // FK
+            det.setEvaluacion(ev);
             det.setRubricaCriterio(crit);
             det.setPuntaje(punt);
+            det.setEstado("A");
             det.setPorcentaje(porc);
             det.setPonderado(pond);
 
-            ev.getDetalles().add(det); // ← IMPORTANTE (y requiere que 'detalles' esté inicializada)
+            ev.getDetalles().add(det);
         }
         ev.setTotalPonderacion(Math.round(total * 100.0) / 100.0);
 
-        evaluacionRepo.save(ev); // ← persiste cabecera + detalles (cascade)
+        evaluacionRepo.save(ev);
 
-        // 6) Notificar dashboard (SSE)
         var snap = dashService.snapshot(dto.getActividadId(), null);
         Map<String, Object> payload = Map.of(
                 "tipo", "EVALUACION_GUARDADA",
                 "filas", snap.getFilas(),
                 "categorias", snap.getCategorias(),
                 "resumenGlobal", snap.getResumenGlobal());
-
-        // Enviar SOLO después que se confirme el commit:
         TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
             @Override public void afterCommit() {
                 try {

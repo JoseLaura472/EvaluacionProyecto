@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.example.proyecto.Models.Dao.IRubricaCriterioDao;
+import com.example.proyecto.Models.Dto.RubricaCriterioDto;
 import com.example.proyecto.Models.Entity.RubricaCriterio;
 import com.example.proyecto.Models.IService.IRubricaCriterioServcie;
 
@@ -49,6 +50,11 @@ public class RubricaCriterioServiceImpl implements IRubricaCriterioServcie {
 
     @Override
     public List<RubricaCriterio> findByRubrica(Long rubricaId) {
-        return dao.listarRubricaCriterio();
+        return dao.findByRubrica(rubricaId);
+    }
+
+    @Override
+    public List<RubricaCriterioDto> listarCriteriosDto(Long rubricaId) {
+        return dao.listarCriteriosDto(rubricaId);
     }
 }

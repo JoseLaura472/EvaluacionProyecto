@@ -4,34 +4,51 @@
         <button type="button" class="btn btn-primary btn-registrar-rubrica">
             <i class="fa-solid fa-user-plus"></i> Agregar nuevo
         </button>
-    </div>
+    </div><br>
 
     <div class="card-datatable table-responsive pt-0">
         <table class="table table-hover" id="data-table-rubrica">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Actividad</th>
+                    <th>Tipo</th>
+                    <th>Referencia</th>
                     <th>Nombre</th>
                     <th>version</th>
-                    <th>Opciones</th>
+                    <th style="width: 160px;">Opciones</th>
                 </tr>
             </thead>
             <tbody class="animate__animated animate__bounceInDown">
                 <tr th:each="rub, idx : ${listarRubricas}" th:if="${rub.estado != 'X'}">
-                    <td th:text="${idx.index + 1}"></td>
-                    <td th:text="${rub.actividad.nombre}"></td>
-                    <td th:text="${rub.nombre}"></td>
-                    <td th:text="${rub.version}"></td>
+                    <td th:text="${idx.index + 1}">1</td>
+
+                    <!-- Tipo -->
                     <td>
-                        <button type="button" class="btn btn-sm btn-primary btn-editar-rubrica"
-                            th:attr="data-id=${rub.idRubrica}">
-                            <i class="fa-solid fa-pen-to-square"></i> Editar
-                        </button>
-                        <button type="button" class="btn btn-sm btn-danger btn-eliminar-rubrica"
-                            th:attr="data-id=${rub.idRubrica}, data-nombre=${rub.nombre}">
-                            <i class="fa-solid fa-trash"></i> Eliminar
-                        </button>
+                        <span class="badge bg-info" style="color: aliceblue;" th:if="${rub.actividad != null}">Actividad</span>
+                        <span class="badge bg-secondary"  style="color: aliceblue;" th:if="${rub.categoriaActividad != null}">Categoría</span>
+                    </td>
+
+                    <!-- Referencia (nombre de la actividad o de la categoría) -->
+                    <td>
+                        <span th:if="${rub.actividad != null}" th:text="${rub.actividad.nombre}">—</span>
+                        <span th:if="${rub.categoriaActividad != null}"
+                            th:text="${rub.categoriaActividad.nombre}">—</span>
+                    </td>
+
+                    <td th:text="${rub.nombre}">Nombre</td>
+                    <td th:text="${rub.version}">v1</td>
+
+                    <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-primary btn-editar-rubrica"
+                                th:attr="data-id=${rub.idRubrica}">
+                                <i class="fa-solid fa-pen-to-square me-1"></i> Editar
+                            </button>
+                            <button type="button" class="btn btn-danger btn-eliminar-rubrica"
+                                th:attr="data-id=${rub.idRubrica}, data-nombre=${rub.nombre}">
+                                <i class="fa-solid fa-trash me-1"></i> Eliminar
+                            </button>
+                        </div>
                     </td>
                 </tr>
             </tbody>

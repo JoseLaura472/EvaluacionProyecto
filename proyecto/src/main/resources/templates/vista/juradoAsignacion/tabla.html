@@ -7,33 +7,58 @@
     </div>
 
     <div class="card-datatable table-responsive pt-0">
-        <table class="table table-hover" id="data-table-juradoAsignacion">
+        <table class="table table-hover align-middle" id="data-table-juradoAsignacion">
             <thead>
                 <tr>
                     <th>#</th>
-                    <th>Actividad</th>
+                    <th>Tipo</th>
+                    <th>Referencia</th>
                     <th>Jurado</th>
-                    <th>Opciones</th>
+                    <th style="width: 160px;">Opciones</th>
                 </tr>
             </thead>
+
             <tbody class="animate__animated animate__bounceInDown">
-                <tr th:each="jurAsig, idx : ${listarJuradoAsignaciones}" th:if="${jurAsig.estado != 'X'}">
-                    <td th:text="${idx.index + 1}"></td>
-                    <td th:text="${jurAsig.actividad.nombre}"></td>
-                    <td th:text="${jurAsig.jurado.persona.nombreCompleto}"></td>
+                <tr th:each="ja, idx : ${listarJuradoAsignaciones}" th:if="${ja.estado != 'X'}">
+
+                    <td th:text="${idx.index + 1}">1</td>
+
+                    <!-- Tipo (Actividad/Categoría) -->
                     <td>
-                        <button type="button" class="btn btn-sm btn-primary btn-editar-juradoAsignacion"
-                            th:attr="data-id=${jurAsig.idJuradoAsignacion}">
-                            <i class="fa-solid fa-pen-to-square"></i> Editar
-                        </button>
-                        <button type="button" class="btn btn-sm btn-danger btn-eliminar-juradoAsignacion"
-                            th:attr="data-id=${jurAsig.idJuradoAsignacion}">
-                            <i class="fa-solid fa-trash"></i> Eliminar
-                        </button>
+                        <span class="badge bg-info" style="color: aliceblue;" th:if="${ja.actividad != null}">Actividad</span>
+                        <span class="badge bg-secondary" style="color: aliceblue;" th:if="${ja.categoriaActividad != null}">Categoría</span>
                     </td>
+
+                    <!-- Referencia (nombre de la Actividad o de la Categoría) -->
+                    <td>
+                        <span th:if="${ja.actividad != null}" th:text="${ja.actividad.nombre}">—</span>
+                        <span th:if="${ja.categoriaActividad != null}"
+                            th:text="${ja.categoriaActividad.nombre}">—</span>
+                    </td>
+
+                    <!-- Jurado (persona.nombreCompleto, con fallback) -->
+                    <td>
+                        <span
+                            th:text="${ja.jurado != null && ja.jurado.persona != null ? ja.jurado.persona.nombreCompleto : '—'}">—</span>
+                    </td>
+
+                    <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn btn-primary btn-editar-juradoAsignacion"
+                                th:attr="data-id=${ja.idJuradoAsignacion}">
+                                <i class="fa-solid fa-pen-to-square me-1"></i> Editar
+                            </button>
+                            <button type="button" class="btn btn-danger btn-eliminar-juradoAsignacion"
+                                th:attr="data-id=${ja.idJuradoAsignacion},data-nombre=${ja.jurado != null && ja.jurado.persona != null ? ja.jurado.persona.nombreCompleto : 'este registro'}">
+                                <i class="fa-solid fa-trash me-1"></i> Eliminar
+                            </button>
+                        </div>
+                    </td>
+
                 </tr>
             </tbody>
         </table>
+
     </div>
 </div>
 

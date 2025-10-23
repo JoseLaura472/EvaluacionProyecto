@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.example.proyecto.Models.Dto.ParticipanteListadoDto;
 import com.example.proyecto.Models.Entity.Participante;
 import com.example.proyecto.Models.Service.IServiceGenerico;
 
@@ -12,4 +13,7 @@ import com.example.proyecto.Models.Service.IServiceGenerico;
 public interface IParticipanteService extends IServiceGenerico<Participante, Long> {
     Optional<Participante> buscarPorNombre(String nombre);
     List<Participante> listarParticipantes();
+    List<ParticipanteListadoDto> listarPorCategoria(Long categoriaId);
+    List<ParticipanteListadoDto> listarPendientesPorCategoria(Long categoriaId, Long juradoId);
+
 }

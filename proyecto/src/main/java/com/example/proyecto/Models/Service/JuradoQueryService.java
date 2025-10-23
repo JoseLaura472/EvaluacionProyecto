@@ -31,32 +31,34 @@ public class JuradoQueryService {
     }
 
     public List<CategoriaDto> categorias(Long actId) {
-        return categoriaRepo.findByActividad(actId).stream().map(c -> {
-            var d = new CategoriaDto();
-            d.setId(c.getIdCategoriaActividad());
-            d.setNombre(c.getNombre());
-            return d;
-        }).toList();
+        return categoriaRepo.findByActividad(actId).stream()
+                .map(c -> new CategoriaDto(c.getIdCategoriaActividad(), c.getNombre()))
+                .toList();
     }
 
     public RubricaDto rubricaDeActividad(Long actId) {
         var rub = rubricaRepo.findByActividadOrder(actId).stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("No hay rúbrica para la actividad"));
-        var dto = new RubricaDto();
-        dto.setId(rub.getIdRubrica());
-        dto.setNombre(rub.getNombre());
-        dto.setVersion(rub.getVersion());
-        var crits = criterioRepo.findByRubrica(rub.getIdRubrica()).stream().map(c -> {
-            var cd = new RubricaCriterioDto();
-            cd.setId(c.getIdRubricaCriterio());
-            cd.setNombre(c.getNombre());
-            cd.setPorcentaje(c.getPorcentaje());
-            cd.setDescripcion(c.getDescripcion());
-            return cd;
-        }).toList();
-        dto.setCriterios(crits);
-        return dto;
+            .orElseThrow(() -> new IllegalStateException("No hay rúbrica para la actividad"));
+
+        List<RubricaCriterioDto> crits = criterioRepo.findByRubrica(rub.getIdRubrica())
+            .stream()
+            .map(c -> new RubricaCriterioDto(
+                    c.getIdRubricaCriterio(),
+                    c.getNombre(),
+                    c.getPorcentaje(),   // Integer
+                    c.getMaxPuntos(),    // Integer
+                    c.getDescripcion()
+            ))
+            .toList();
+
+        return new RubricaDto(
+            rub.getIdRubrica(),
+            rub.getNombre(),
+            rub.getVersion(),
+            crits
+        );
     }
+
 
     public List<InscripcionPendienteDto> pendientes(Long actId, Long catId, Long idJurado) {
         return inscripcionRepo.findPendientesByActividadAndCategoriaExcluyendoEvaluadas(actId, catId, idJurado)

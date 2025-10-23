@@ -2,6 +2,8 @@ package com.example.proyecto.Models.IService;
 
 import java.util.List;
 
+import org.springframework.data.repository.query.Param;
+
 import com.example.proyecto.Models.Entity.Persona;
 
 public interface IPersonaService {
@@ -16,5 +18,5 @@ public interface IPersonaService {
 	
 	public Persona getPersonaCI(String ci); 
 
-	List<Persona> listarParticipantes();
+	List<Persona> listarPersona(@Param("estado") String estado);
 }

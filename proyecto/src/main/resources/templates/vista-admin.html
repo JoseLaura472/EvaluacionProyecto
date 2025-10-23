@@ -101,9 +101,9 @@
                     <template id="tpl-row">
                         <tr>
                             <td class="text-center">
-      <span class="row-medalla me-1"></span>
-      <span class="row-puesto small text-muted"></span>
-    </td>
+                                <span class="row-medalla me-1"></span>
+                                <span class="row-puesto small text-muted"></span>
+                            </td>
                             <td>
                                 <div class="fw-semibold row-participante"></div>
                                 <div class="small text-muted row-institucion"></div>
@@ -115,7 +115,7 @@
                     </template>
 
                 </div>
-            </div>
+            </div><br><br>
             <footer th:replace="~{layout/footer :: footer}"></footer>
         </div>
     </div>
@@ -282,102 +282,102 @@
             }
 
             function renderTbody() {
-  // Limpia filas actuales (menos la vacía)
-  tbodyRows.querySelectorAll('tr:not(#fila-empty)').forEach(tr => tr.remove());
+                // Limpia filas actuales (menos la vacía)
+                tbodyRows.querySelectorAll('tr:not(#fila-empty)').forEach(tr => tr.remove());
 
-  // Filtra por categoría (si aplica)
-  const base = categoriaId ? filasFull.filter(f => f.categoriaId === categoriaId) : filasFull;
+                // Filtra por categoría (si aplica)
+                const base = categoriaId ? filasFull.filter(f => f.categoriaId === categoriaId) : filasFull;
 
-  if (!base.length) { 
-    filaEmpty.style.display = '';
-    return; 
-  }
-  filaEmpty.style.display = 'none';
+                if (!base.length) {
+                    filaEmpty.style.display = '';
+                    return;
+                }
+                filaEmpty.style.display = 'none';
 
-  // Ordena por puntos desc (luego por promedio desc si quieres un desempate estable)
-  const ordenado = base.slice().sort((a, b) => {
-    const diff = getPuntos(b) - getPuntos(a);
-    if (diff !== 0) return diff;
-    const pa = typeof a.promedio === 'number' ? a.promedio : 0;
-    const pb = typeof b.promedio === 'number' ? b.promedio : 0;
-    return pb - pa;
-  });
+                // Ordena por puntos desc (luego por promedio desc si quieres un desempate estable)
+                const ordenado = base.slice().sort((a, b) => {
+                    const diff = getPuntos(b) - getPuntos(a);
+                    if (diff !== 0) return diff;
+                    const pa = typeof a.promedio === 'number' ? a.promedio : 0;
+                    const pb = typeof b.promedio === 'number' ? b.promedio : 0;
+                    return pb - pa;
+                });
 
-  // Asigna ranking con empates (1,1,3)
-  let lastPts = null, lastRank = 0, i = 0;
-  const ranked = ordenado.map(f => {
-    i += 1;
-    const pts = getPuntos(f);
-    const rank = (pts === lastPts) ? lastRank : i;
-    lastPts = pts;
-    lastRank = rank;
-    return { ...f, __rank: rank, __pts: pts };
-  });
+                // Asigna ranking con empates (1,1,3)
+                let lastPts = null, lastRank = 0, i = 0;
+                const ranked = ordenado.map(f => {
+                    i += 1;
+                    const pts = getPuntos(f);
+                    const rank = (pts === lastPts) ? lastRank : i;
+                    lastPts = pts;
+                    lastRank = rank;
+                    return { ...f, __rank: rank, __pts: pts };
+                });
 
-  const frag = document.createDocumentFragment();
+                const frag = document.createDocumentFragment();
 
-  ranked.forEach(f => {
-    const tr = tplRow.content.firstElementChild.cloneNode(true);
+                ranked.forEach(f => {
+                    const tr = tplRow.content.firstElementChild.cloneNode(true);
 
-    // Puesto / Medalla
-    const medallaEl = tr.querySelector('.row-medalla');
-    const puestoEl  = tr.querySelector('.row-puesto');
-    puestoEl.textContent = `#${f.__rank}`;
-    medallaEl.textContent = (f.__rank === 1) ? '🥇' : (f.__rank === 2) ? '🥈' : (f.__rank === 3) ? '🥉' : '';
+                    // Puesto / Medalla
+                    const medallaEl = tr.querySelector('.row-medalla');
+                    const puestoEl = tr.querySelector('.row-puesto');
+                    puestoEl.textContent = `#${f.__rank}`;
+                    medallaEl.textContent = (f.__rank === 1) ? '🥇' : (f.__rank === 2) ? '🥈' : (f.__rank === 3) ? '🥉' : '';
 
-    // Participante / Institución
-    tr.querySelector('.row-participante').textContent = f.participante ?? '—';
-    tr.querySelector('.row-institucion').textContent = f.institucion ?? '—';
+                    // Participante / Institución
+                    tr.querySelector('.row-participante').textContent = f.participante ?? '—';
+                    tr.querySelector('.row-institucion').textContent = f.institucion ?? '—';
 
-    // Quita las celdas "Promedio" y "Estado" del template para reinsertarlas luego,
-    // pero búscalas por clase (no por índice).
-    const promCell   = tr.querySelector('.row-promedio')?.closest('td');
-    const estadoCell = tr.querySelector('.row-estado')?.closest('td');
-    if (promCell)   promCell.remove();
-    if (estadoCell) estadoCell.remove();
+                    // Quita las celdas "Promedio" y "Estado" del template para reinsertarlas luego,
+                    // pero búscalas por clase (no por índice).
+                    const promCell = tr.querySelector('.row-promedio')?.closest('td');
+                    const estadoCell = tr.querySelector('.row-estado')?.closest('td');
+                    if (promCell) promCell.remove();
+                    if (estadoCell) estadoCell.remove();
 
-    // Inserta columnas de cada jurado (en el orden del thead)
-    jurados.forEach(j => {
-      const td = document.createElement('td');
-      td.className = 'text-center';
-      const val = f.scores && f.scores[j.id] !== undefined ? Number(f.scores[j.id]).toFixed(2) : '—';
-      td.innerHTML = (val === '—') ? '<span class="text-muted">—</span>' : `<span class="fw-semibold">${val}</span>`;
-      tr.appendChild(td);
-    });
+                    // Inserta columnas de cada jurado (en el orden del thead)
+                    jurados.forEach(j => {
+                        const td = document.createElement('td');
+                        td.className = 'text-center';
+                        const val = f.scores && f.scores[j.id] !== undefined ? Number(f.scores[j.id]).toFixed(2) : '—';
+                        td.innerHTML = (val === '—') ? '<span class="text-muted">—</span>' : `<span class="fw-semibold">${val}</span>`;
+                        tr.appendChild(td);
+                    });
 
-    // Promedio (o puntos) mostrado
-    const tdProm = document.createElement('td');
-    tdProm.className = 'text-end';
-    // Muestra el total de puntos si existe; caso contrario, el promedio
-    const toShow = (typeof f.puntos === 'number') ? f.puntos : (typeof f.promedio === 'number' ? f.promedio : 0);
-    const fmt = Number.isInteger(toShow) ? toShow : toShow.toFixed(2);
-    tdProm.innerHTML = `<span class="fw-bold">${fmt}</span>`;
-    tr.appendChild(tdProm);
+                    // Promedio (o puntos) mostrado
+                    const tdProm = document.createElement('td');
+                    tdProm.className = 'text-end';
+                    // Muestra el total de puntos si existe; caso contrario, el promedio
+                    const toShow = (typeof f.puntos === 'number') ? f.puntos : (typeof f.promedio === 'number' ? f.promedio : 0);
+                    const fmt = Number.isInteger(toShow) ? toShow : toShow.toFixed(2);
+                    tdProm.innerHTML = `<span class="fw-bold">${fmt}</span>`;
+                    tr.appendChild(tdProm);
 
-    // Estado
-    const tdEstado = document.createElement('td');
-    tdEstado.className = 'text-center';
-    tdEstado.innerHTML = `<span class="badge ${f.completado ? 'text-bg-success' : 'text-bg-secondary'}">
-      ${f.completado ? 'Completo' : 'Pendiente'}
-    </span>`;
-    tr.appendChild(tdEstado);
+                    // Estado
+                    const tdEstado = document.createElement('td');
+                    tdEstado.className = 'text-center';
+                    tdEstado.innerHTML = `<span class="badge ${f.completado ? 'text-bg-success' : 'text-bg-secondary'}">
+                        ${f.completado ? 'Completo' : 'Pendiente'}
+                        </span>`;
+                                        tr.appendChild(tdEstado);
 
-    // Reporte PDF
-    const tdPdf = document.createElement('td');
-    tdPdf.className = 'text-center';
-    tdPdf.innerHTML = `
-      <a class="btn btn-sm btn-outline-secondary"
-         href="/api/admin/concurso/${actividadId}/reporte/inscripcion/${f.inscripcionId}.pdf"
-         target="_blank" rel="noopener">
-         <i class="bi bi-file-earmark-pdf"></i> PDF
-      </a>`;
-    tr.appendChild(tdPdf);
+                                        // Reporte PDF
+                                        const tdPdf = document.createElement('td');
+                                        tdPdf.className = 'text-center';
+                                        tdPdf.innerHTML = `
+                        <a class="btn btn-sm btn-outline-secondary"
+                            href="/api/admin/concurso/${actividadId}/reporte/inscripcion/${f.inscripcionId}.pdf"
+                            target="_blank" rel="noopener">
+                            <i class="bi bi-file-earmark-pdf"></i> PDF
+                        </a>`;
+                    tr.appendChild(tdPdf);
 
-    frag.appendChild(tr);
-  });
+                    frag.appendChild(tr);
+                });
 
-  tbodyRows.appendChild(frag);
-}
+                tbodyRows.appendChild(frag);
+            }
 
 
             function marcarActualizado() {
@@ -423,7 +423,7 @@
             if (typeof f.puntos === 'number') return f.puntos;
             if (typeof f.promedio === 'number') return f.promedio;
             return 0;
-            }
+        }
 
     </script>
 

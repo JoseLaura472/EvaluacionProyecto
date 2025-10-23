@@ -1,136 +1,82 @@
 package com.example.proyecto.Controllers.PersonaControllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.proyecto.Models.Entity.Estudiante;
-import com.example.proyecto.Models.Entity.Persona;
 import com.example.proyecto.Models.IService.IEstudianteService;
+import com.example.proyecto.Models.IService.IParticipanteService;
 import com.example.proyecto.Models.IService.IPersonaService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 
 @Controller
+@RequestMapping("/estudiante")
+@RequiredArgsConstructor
 public class EstudianteController {
 
-    @Autowired
-	private IEstudianteService estudianteService;
+	private final IEstudianteService estudianteService;
+	private final IPersonaService personaService;
+	private final IParticipanteService participanteService;
 
-    @Autowired
-    private IPersonaService personaService;
+	@GetMapping("/vista")
+    public String vista() {
+        return "vista/estudiante/vista";
+    }
 
-      // FUNCION PARA LA VISUALIZACION DE REGISTRO DE MNACIONALIDAD
-	@RequestMapping(value = "/EstudianteR", method = RequestMethod.GET) // Pagina principal
-	public String EstudianteR(HttpServletRequest request, Model model) {
-		if (request.getSession().getAttribute("usuario") != null) {
+    @PostMapping("/tabla-registros")
+    public String tabla(Model model) throws Exception {
+        model.addAttribute("listasEstudiantes", estudianteService.listaEstudiantes("A"));
+        return "vista/estudiante/tabla";
+    }
 
+    @PostMapping("/formulario")
+    public String formulario(Model model, Estudiante estudiante) {
+        model.addAttribute("listasPersonas", personaService.listarPersona("ESTUDIANTE"));
+        model.addAttribute("listasParticipante", participanteService.listarParticipantes());
+        return "vista/estudiante/formulario";
+    }
 
-			return "persona/gestionar-Estudiante";
-		} else {
-			return "redirect:LoginR";
-		}
-	}
+    @PostMapping("/formulario-edit/{idEstudiante}")
+    public String formularioEdit(Model model, @PathVariable("idEstudiante") Long idEstudiante)
+            throws Exception {
+        model.addAttribute("estudiante", estudianteService.findOne(idEstudiante));
+        model.addAttribute("edit", "true");
+		model.addAttribute("listasPersonas", personaService.listarPersona("ESTUDIANTE"));
+        model.addAttribute("listasParticipante", participanteService.listarParticipantes());
+        return "vista/estudiante/formulario";
+    }
 
-   
-	@RequestMapping(value = "/EstudianteF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
-	public ResponseEntity<String> EstudianteF(@Validated Estudiante estudiante,@Validated Persona persona, RedirectAttributes redirectAttrs) { // validar los datos capturados (1)
-		
-		if (estudiante.getId_estudiante() == null && persona.getIdPersona() == null) {
-			persona.setEstado("E");
-			personaService.save(persona);
-			estudiante.setPersona(persona);
-			estudiante.setEstado("A");
-			estudianteService.save(estudiante);
-			return ResponseEntity.ok("1");
-		}else{
-			Persona p = personaService.getPersonaCI(persona.getCi());
-			if (p != null) {
-				System.out.println("ya Existe un Registro Igual");
-			}
-			return ResponseEntity.ok("3");
-		}
-		
-	}
+    @PostMapping("/registrar-estudiante")
+    public ResponseEntity<String> registro(HttpServletRequest request,
+            @ModelAttribute Estudiante estudiante) {
 
-	@GetMapping("/nuevo_registroE")
-	public String nuevo_registroE(Model model) {
+        estudiante.setEstado("A");
+        estudianteService.save(estudiante);
+        return ResponseEntity.ok("Se realizó el registro correctamente");
+    }
 
-		model.addAttribute("persona", new Persona());
-		model.addAttribute("estudiante", new Estudiante());
-		return "persona/contentPersona :: Estudiante";
-	}
-	
-	@GetMapping("/tabla_estudiantes")
-	public String tabla_estudiantes(Model model) {
+    @PostMapping("/modificar-estudiante")
+    public ResponseEntity<String> modificar(HttpServletRequest request,
+            @ModelAttribute Estudiante estudiante) {
+        estudiante.setEstado("A");
+        estudianteService.save(estudiante);
+        return ResponseEntity.ok("Se realizó la modificación correctamente");
+    }
 
-		model.addAttribute("estudiantes", estudianteService.listaEstudiantes("A"));
-
-		return "persona/contentPersona :: Tabla_Estudiantes";
-	}
-
-	// @GetMapping("/tabla_estudiantes")
-    // public String tabla_estudiantes(@RequestParam(defaultValue = "0") int page,
-    //                                 @RequestParam(defaultValue = "10") int size,
-    //                                 @RequestParam(defaultValue = "A") String estado,
-    //                                 Model model) {
-    //     Pageable pageable = (Pageable) PageRequest.of(page, size);
-    //     Page<Estudiante> estudiantesPage = estudianteService.findByEstadoWithPersona(estado, pageable);
-        
-    //     model.addAttribute("estudiantes", estudiantesPage.getContent());
-    //     model.addAttribute("totalPages", estudiantesPage.getTotalPages());
-    //     model.addAttribute("currentPage", page);
-
-    //     return "persona/contentPersona :: Tabla_Estudiantes";
-    // }
-
-    @RequestMapping(value = "/editar-estudiante/{id_estudiante}")
-	public String editar_estudiante(@PathVariable("id_estudiante") Long id_estudiante, Model model) {
-
-		Estudiante estudiante = estudianteService.findOne(id_estudiante);
-
-		model.addAttribute("estudiante", estudiante);
-        model.addAttribute("persona", estudiante.getPersona());
-		model.addAttribute("edit", "true");
-
-		return "persona/contentPersona :: Estudiante";
-	}
-
-	@RequestMapping(value = "/EstudianteModF", method = RequestMethod.POST) // Enviar datos de Registro a Lista
-	public ResponseEntity<String> EstudianteModF(@Validated Estudiante estudiante, @Validated Persona persona,
-			RedirectAttributes redirectAttrs) { // validar los datos capturados (1)
-		
-		persona.setEstado("A");
-		personaService.save(persona);
-		estudiante.setPersona(persona);
-		estudiante.setEstado("A");
-		estudianteService.save(estudiante);
-		return ResponseEntity.ok("2");
-	}
-
-	@RequestMapping(value = "/eliminar-estudiante/{id_estudiante}")
-	@ResponseBody
-	public void eliminar_estudiante(@PathVariable("id_estudiante") Long id_estudiante) {
-
-		Estudiante estudiante = estudianteService.findOne(id_estudiante);
-
-		estudiante.setEstado("X");
-		Persona persona = estudiante.getPersona();
-
-		persona.setEstado("X");
-
-		personaService.save(persona);
-
-		estudianteService.save(estudiante);
-
-	}
-
+    @PostMapping("/eliminar/{idEstudiante}")
+    public ResponseEntity<String> eliminar(Model model, @PathVariable("idEstudiante") Long idEstudiante)
+            throws Exception {
+        Estudiante p = estudianteService.findOne(idEstudiante);
+        p.setEstado("X"); // ó "ELIMINADO"
+        estudianteService.save(p);
+        return ResponseEntity.ok("Registro Eliminado");
+    }
 }

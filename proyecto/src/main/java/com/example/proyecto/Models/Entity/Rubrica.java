@@ -10,11 +10,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "rubrica")
+@Table(name = "rubrica",
+uniqueConstraints = {
+    @UniqueConstraint(name="uk_rubrica_act_cat_ver",
+      columnNames = {"id_actividad","id_categoria_actividad","version"})
+})
 @Setter @Getter
 public class Rubrica extends AuditoriaConfig{
     @Id
@@ -24,6 +29,10 @@ public class Rubrica extends AuditoriaConfig{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_actividad")
     private Actividad actividad;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_categoria_actividad")
+    private CategoriaActividad categoriaActividad;
 
     private String nombre;
     private String version;

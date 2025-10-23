@@ -11,6 +11,10 @@
 <script>
     $(document).ready(function () {
         cargarTablaPersona();
+
+        $('#modalFormularioPersona').on('hidden.bs.modal', function () {
+            $('#contenidoModalPersona').empty();
+        });
     });
 
     function cargarTablaPersona() {
@@ -31,28 +35,40 @@
         });
     }
 
-    function cargarFormulario() {
-        cargarFormularioAlert("/persona/formulario", "#contenidoModalPersona", "#formularioPersona");
-    }
-
-    function cargarFormularioEdit(id) {
-        cargarFormularioEditAlert(id, "/persona/formulario-edit", "#contenidoModalPersona", "#formularioPersona");
-    }
-
-    // Abrir formulario "Registrar"
+    // Registrar
     $(document).on('click', '.btn-registrar-persona', function () {
-
         $('#modalFormularioPersona').modal('show');
-        cargarFormulario();
+        cargarFormularioAlert(
+            "/persona/formulario",
+            "#contenidoModalPersona",
+            "#modalFormularioPersona",
+            function onLoaded() {
+                manejarEnvioFormulario('#modalFormularioPersona', {
+                    modalSelector: '#modalFormularioPersona',
+                    recargarTablaFn: cargarTabla
+                });
+            }
+        );
     });
 
-    // Abrir formulario "Editar"
+    // Editar
     $(document).on('click', '.btn-editar-persona', function () {
         const id = $(this).data('id');
         if (!id) return Swal.fire('Error', 'ID no válido.', 'error');
 
         $('#modalFormularioPersona').modal('show');
-        cargarFormularioEdit(id);
+        cargarFormularioEditAlert(
+            id,
+            "/persona/formulario-edit",
+            "#contenidoModalPersona",
+            "#modalFormularioPersona",
+            function onLoaded() {
+                manejarEnvioFormulario('#modalFormularioPersona', {
+                    modalSelector: '#modalFormularioPersona',
+                    recargarTablaFn: cargarTabla
+                });
+            }
+        );
     });
 
     // Eliminar
@@ -61,7 +77,6 @@
         const nombre = $(this).data('nombre') || 'el registro';
         if (!id) return Swal.fire('Error', 'ID no válido.', 'error');
 
-        // usa tu helper y OJO con el nombre de la función de recarga
-        eliminarRegistroAlert(nombre, id, "/persona/eliminar", cargarTablaPersona);
+        eliminarRegistroAlert(nombre, id, "/persona/eliminar", cargarTabla);
     });
 </script>

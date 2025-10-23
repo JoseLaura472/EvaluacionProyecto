@@ -10,9 +10,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.proyecto.Models.Entity.Inscripcion;
+import com.example.proyecto.Models.Entity.ParticipanteCategoria;
 import com.example.proyecto.Models.IService.IActividadService;
 import com.example.proyecto.Models.IService.ICategoriaActividadService;
 import com.example.proyecto.Models.IService.IInscripcionService;
+import com.example.proyecto.Models.IService.IParticipanteCategoriaService;
 import com.example.proyecto.Models.IService.IParticipanteService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,6 +29,7 @@ public class InscripcionController {
     private final IActividadService actividadService;
     private final ICategoriaActividadService categoriaActividadService;
     private final IParticipanteService participanteService;
+    private final IParticipanteCategoriaService participanteCategoriaService;
 
     @GetMapping("/vista")
     public String vista() {
@@ -61,6 +64,13 @@ public class InscripcionController {
 
         inscripcion.setEstado("A");
         inscripcionService.save(inscripcion);
+        
+        ParticipanteCategoria pc = new ParticipanteCategoria();
+        pc.setParticipante(inscripcion.getParticipante());
+        pc.setCategoriaActividad(inscripcion.getCategoriaActividad());
+        pc.setEstado("A");
+        participanteCategoriaService.save(pc);
+
         return ResponseEntity.ok("Se realizó el registro correctamente");
     }
 

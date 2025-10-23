@@ -1,6 +1,7 @@
 package com.example.proyecto.Models.IServiceImpl;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -52,4 +53,16 @@ public class EvaluacionServiceImpl implements IEvaluacionService {
         return evaluacionDao.findFullByActividadAndInscripcion(actId, inscId);
     }
 
+    @Override
+    public Optional<Evaluacion> findByJuradoPersonaAndParticipanteAndRubrica(Long idPersonaJurado, Long idParticipante,
+            Long idRubrica) {
+        return evaluacionDao.findByJuradoPersonaAndParticipanteAndRubrica(idPersonaJurado, idParticipante, idRubrica);
+    }
+
+    @Override
+    public boolean existsByActividad_IdActividadAndInscripcion_IdInscripcionAndJurado_IdJuradoAndRubrica_IdRubrica(
+            Long actividadId, Long inscripcionId, Long juradoId, Long rubricaId) {
+        return evaluacionDao.existsByActividad_IdActividadAndInscripcion_IdInscripcionAndJurado_IdJuradoAndRubrica_IdRubrica(
+            actividadId, inscripcionId, juradoId, rubricaId);
+    }
 }

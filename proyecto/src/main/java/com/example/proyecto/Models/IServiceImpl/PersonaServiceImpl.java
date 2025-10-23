@@ -45,7 +45,7 @@ public class PersonaServiceImpl implements IPersonaService{
     }
 
     @Override
-    public List<Persona> listarParticipantes() {
-        return personaDao.listarParticipantes();
+    public List<Persona> listarPersona(String estado) {
+        return personaDao.listarPersona(estado);
     }
 }

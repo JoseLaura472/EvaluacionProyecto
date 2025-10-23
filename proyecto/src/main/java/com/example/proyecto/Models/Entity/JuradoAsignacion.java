@@ -23,7 +23,11 @@ public class JuradoAsignacion extends AuditoriaConfig{
  
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_actividad")
-    private Actividad actividad; 
+    private Actividad actividad;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_categoria_actividad")
+    private CategoriaActividad categoriaActividad;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_jurado")

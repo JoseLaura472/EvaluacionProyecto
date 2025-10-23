@@ -14,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.proyecto.Models.Entity.Proyecto;
 import com.example.proyecto.Models.Entity.Usuario;
+import com.example.proyecto.Models.IService.IJuradoAsignacionService;
 import com.example.proyecto.Models.IService.IProyectoService;
 import com.example.proyecto.Models.IService.ITipoProyectoService;
 import com.example.proyecto.Models.IService.IUsuarioService;
@@ -31,6 +32,7 @@ public class loginController {
     private final IProyectoService proyectoService;
     private final ITipoProyectoService tipoProyectoService;
     private final AuthService authService;
+    private final IJuradoAsignacionService juradoAsignacionService;
 
     // Funcion de visualizacion de iniciar sesiòn administrador
     @RequestMapping(value = "/LoginR", method = RequestMethod.GET)
@@ -52,39 +54,69 @@ public class loginController {
                             RedirectAttributes flash) {
 
         Usuario usuario = authService.autenticar(user, contrasena);
-
         if (usuario == null) {
             flash.addFlashAttribute("error", "Usuario o contraseña incorrectos");
             return "redirect:/LoginR";
         }
 
-        String estado = usuario.getEstado() != null ? usuario.getEstado().trim().toUpperCase() : "";
+        // Normaliza estado
+        String estado = (usuario.getEstado() == null) ? "" : usuario.getEstado().trim().toUpperCase();
 
+        // Cuenta bloqueada
         if ("X".equals(estado)) {
-            request.getSession().invalidate();
+            HttpSession s = request.getSession(false);
+            if (s != null) s.invalidate();
             flash.addFlashAttribute("warn", "Tu cuenta está bloqueada.");
             return "redirect:/cerrar_sesionAdm";
         }
 
+        // Asegura persona cargada
         if (usuario.getPersona() == null || usuario.getPersona().getIdPersona() == null) {
-            usuario = usuarioService.findByUsuario(usuario.getUsuario())
-                        .orElse(usuario);
+            usuario = usuarioService.findByUsuario(usuario.getUsuario()).orElse(usuario);
         }
 
+        // === MUY IMPORTANTE: reinicia sesión para no arrastrar flags previos ===
+        HttpSession old = request.getSession(false);
+        if (old != null) old.invalidate();
         HttpSession session = request.getSession(true);
+
+        // Guarda datos mínimos en sesión
         session.setAttribute("usuario", usuario);
         session.setAttribute("persona", usuario.getPersona());
-        flash.addFlashAttribute("success", usuario.getPersona() != null
-                ? usuario.getPersona().getNombres() : usuario.getUsuario());
 
-        switch (estado) {
-            case "J":
-                return "redirect:/jurado/panel";
-            case "A":
-            default:
-                return "redirect:/admin/inicio";
+        flash.addFlashAttribute("success",
+                (usuario.getPersona() != null ? usuario.getPersona().getNombres() : usuario.getUsuario()));
+
+        // === Resolución de “roles” por estado (ajusta si además usas tabla de roles) ===
+        boolean esAdmin  = "A".equalsIgnoreCase(estado) /* || usuario.tieneRol("ADMINISTRADOR") */;
+        boolean esJurado = "J".equalsIgnoreCase(estado) /* || usuario.tieneRol("JURADO") */;
+
+        Long idPersona = (usuario.getPersona() != null) ? usuario.getPersona().getIdPersona() : null;
+
+        // ADMIN tiene prioridad SIEMPRE
+        if (esAdmin) {
+            // Limpia cualquier bandera de jurado por si acaso
+            session.removeAttribute("juradoCategoria");
+            System.out.println("[logearseF] usuario admin, redirigiendo a /admin/inicio");
+            return "redirect:/admin/inicio";
         }
+
+        if (esJurado) {
+            boolean tieneCategoria = false;
+            if (idPersona != null) {
+                try {
+                    tieneCategoria = juradoAsignacionService.existsCategoriaAsignadaByPersona(idPersona);
+                } catch (Exception ignore) {}
+            }
+            session.setAttribute("juradoCategoria", tieneCategoria);
+            return tieneCategoria ? "redirect:/jurado/panel-categoria" : "redirect:/jurado/panel";
+        }
+
+        // Fallback para otros estados/tipos de usuario
+        session.removeAttribute("juradoCategoria");
+        return "redirect:/inicio";
     }
+
 
     @GetMapping("/admin/inicio")
     public String adminInicio(HttpServletRequest request, Model model) {

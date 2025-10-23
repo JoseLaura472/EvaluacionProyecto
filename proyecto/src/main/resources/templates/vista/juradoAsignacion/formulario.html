@@ -1,16 +1,21 @@
 <style>
-  /* Altura tipo "lg" de Bootstrap */
-  .select2-container .select2-selection--single {
-    height: calc(2.5rem + 2px);
-  }
-  .select2-container--default .select2-selection--single .select2-selection__rendered {
-    line-height: calc(2.5rem);
-  }
-  .select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: calc(2.5rem);
-  }
-  /* Ancho completo siempre */
-  .select2-container { width: 100% !important; }
+    /* Altura tipo "lg" de Bootstrap */
+    .select2-container .select2-selection--single {
+        height: calc(2.5rem + 2px);
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: calc(2.5rem);
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: calc(2.5rem);
+    }
+
+    /* Ancho completo siempre */
+    .select2-container {
+        width: 100% !important;
+    }
 </style>
 
 <div class="modal-header">
@@ -23,49 +28,147 @@
 <form id="formularioJuradoAsignacion" method="post"
     th:action="${edit} ? @{/jurado-asignacion/modificar-juradoAsignacion} : @{/jurado-asignacion/registrar-juradoAsignacion}"
     th:object="${juradoAsignacion}" novalidate>
+
     <input type="hidden" th:if="${edit}" th:field="*{idJuradoAsignacion}" />
 
     <div class="modal-body">
-        <div class="row">
+        <div class="row g-3">
+
+            <!-- Actividad (opción 1) -->
             <div class="col-12 col-md-6">
-                <label class="form-label">Actividad</label>
-                <select class="select2" th:field="*{actividad.idActividad}" required>
-                    <option value="">Seleccione…</option>
+                <label class="form-label">Actividad (opción 1)</label>
+                <select class="form-select select2" id="sel-actividad" th:field="*{actividad.idActividad}">
+                    <option value="">— Seleccione… —</option>
                     <option th:each="actividad : ${listarActividades}" th:value="${actividad.idActividad}"
                         th:text="${actividad.nombre}">
                     </option>
                 </select>
-
-                <div class="valid-feedback">Correcto!</div>
-                <div class="invalid-feedback">Debe seleccionar a una Actividad.</div>
+                <small class="text-muted">Si elige Actividad, no elija Categoría.</small>
+                <div class="invalid-feedback">Seleccione una Actividad o elija Categoría.</div>
             </div>
 
+            <!-- Categoría de Actividad (opción 2) -->
+            <div class="col-12 col-md-6">
+                <label class="form-label">Categoría de Actividad (opción 2)</label>
+                <select class="form-select select2" id="sel-categoria"
+                    th:field="*{categoriaActividad.idCategoriaActividad}">
+                    <option value="">— Seleccione… —</option>
+                    <option th:each="cat : ${listarCategorias}" th:value="${cat.idCategoriaActividad}"
+                        th:text="${cat.nombre}">
+                    </option>
+                </select>
+                <small class="text-muted">Si elige Categoría, no elija Actividad.</small>
+                <div class="invalid-feedback">Seleccione una Categoría o elija Actividad.</div>
+            </div>
+
+            <!-- Jurado (requerido siempre) -->
             <div class="col-12 col-md-6">
                 <label class="form-label">Jurado</label>
-                <select class="select2" th:field="*{jurado.idJurado}" required>
-                    <option value="">Seleccione…</option>
+                <select class="form-select select2" th:field="*{jurado.idJurado}" required>
+                    <option value="">— Seleccione… —</option>
                     <option th:each="jurado : ${listarJurados}" th:value="${jurado.idJurado}"
                         th:text="${jurado.persona.nombreCompleto}">
                     </option>
                 </select>
-
-                <div class="valid-feedback">Correcto!</div>
                 <div class="invalid-feedback">Debe seleccionar a un Jurado.</div>
             </div>
+
         </div>
     </div>
 
-    <div class="modal-footer">
-        <div class="row">
-            <div class="col-12">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-success"
-                    th:text="${edit}? 'Guardar Cambios' : 'Guardar Registro'"></button>
-            </div>
-        </div>
+    <div class="modal-footer d-flex gap-2">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-success"
+            th:text="${edit}? 'Guardar Cambios' : 'Guardar Registro'"></button>
     </div>
 </form>
 
+
 <script>
     manejarEnvioFormulario('#formularioJuradoAsignacion');
+
+    (function () {
+        const $form = $('#formularioJuradoAsignacion');
+        const $selAct = $('#sel-actividad');
+        const $selCat = $('#sel-categoria');
+
+        function initMutuaExclusion() {
+            const hasAct = ($selAct.val() && $selAct.val().trim() !== '');
+            const hasCat = ($selCat.val() && $selCat.val().trim() !== '');
+
+            if (hasAct && !hasCat) {
+                $selCat.prop('disabled', true);
+            } else if (hasCat && !hasAct) {
+                $selAct.prop('disabled', true);
+            } else {
+                $selAct.prop('disabled', false);
+                $selCat.prop('disabled', false);
+            }
+        }
+
+        function onChangeActividad() {
+            const val = $selAct.val();
+            if (val && val !== '') {
+                $selCat.val('').trigger('change');
+                $selCat.prop('disabled', true);
+                $selAct.prop('disabled', false);
+            } else {
+                $selCat.prop('disabled', false);
+            }
+        }
+
+        function onChangeCategoria() {
+            const val = $selCat.val();
+            if (val && val !== '') {
+                $selAct.val('').trigger('change');
+                $selAct.prop('disabled', true);
+                $selCat.prop('disabled', false);
+            } else {
+                $selAct.prop('disabled', false);
+            }
+        }
+
+        function beforeSubmitNormalize(e) {
+            // limpiar ocultos previos
+            $form.find('input[name="actividad.idActividad"][type="hidden"]').remove();
+            $form.find('input[name="categoriaActividad.idCategoriaActividad"][type="hidden"]').remove();
+
+            const vAct = ($selAct.prop('disabled') ? '' : ($selAct.val() || '').trim());
+            const vCat = ($selCat.prop('disabled') ? '' : ($selCat.val() || '').trim());
+
+            const hasAct = vAct !== '';
+            const hasCat = vCat !== '';
+
+            // Regla XOR
+            if ((hasAct && hasCat) || (!hasAct && !hasCat)) {
+                e.preventDefault();
+                Swal.fire('Validación', 'Debes seleccionar exactamente una opción: Actividad o Categoría.', 'warning');
+                return false;
+            }
+
+            // Forzar null del campo opuesto (para edición)
+            if ($selAct.prop('disabled')) {
+                $('<input>', { type: 'hidden', name: 'actividad.idActividad', value: '' }).appendTo($form);
+            }
+            if ($selCat.prop('disabled')) {
+                $('<input>', { type: 'hidden', name: 'categoriaActividad.idCategoriaActividad', value: '' }).appendTo($form);
+            }
+            return true;
+        }
+
+        $(document).on('change', '#sel-actividad', onChangeActividad);
+        $(document).on('change', '#sel-categoria', onChangeCategoria);
+
+        $form.on('submit', function (e) {
+            if (!beforeSubmitNormalize(e)) return;
+        });
+
+        // Inicializar (modo crear/editar)
+        initMutuaExclusion();
+
+        // Si usas Select2 en modales:
+        if ($.fn.select2) {
+            $('.select2').select2({ dropdownParent: $form.closest('.modal') });
+        }
+    })();
 </script>

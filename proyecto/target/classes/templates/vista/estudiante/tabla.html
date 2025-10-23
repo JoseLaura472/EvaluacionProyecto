@@ -1,0 +1,54 @@
+<div class="card">
+    <div class="card-header d-flex justify-content-lg-between">
+        <h5>Registro participante</h5>
+        <button type="button" class="btn btn-primary btn-registrar-estudiante">
+            <i class="fa-solid fa-user-plus"></i> Agregar nuevo
+        </button>
+    </div>
+
+    <div class="card-datatable table-responsive pt-0">
+        <table class="table table-hover" id="data-table-estudiante">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Persona</th>
+                    <th>proyecto</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+            <tbody class="animate__animated animate__bounceInDown">
+                <tr th:each="listEstud, idx : ${listasEstudiantes}" th:if="${listEstud.estado != 'X'}">
+                    <td th:text="${idx.index + 1}"></td>
+                    <td th:text="${listEstud.persona.nombres} + ' ' + ${listEstud.persona.paterno} + ' ' + ${listEstud.persona.materno}"></td>
+                    <td th:text="${listEstud.participante.nombre} + ' ' + ${listEstud.participante.institucion}"></td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-primary btn-editar-estudiante"
+                            th:attr="data-id=${listEstud.id_estudiante}">
+                            <i class="fa-solid fa-pen-to-square"></i> Editar
+                        </button>
+                        <button type="button" class="btn btn-sm btn-danger btn-eliminar-estudiante"
+                            th:attr="data-id=${listEstud.id_estudiante}, data-nombre=${listEstud.persona.nombres} + ' ' + ${listEstud.persona.paterno} + ' ' + ${listEstud.persona.materno}">
+                            <i class="fa-solid fa-trash"></i> Eliminar
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $('#data-table-estudiante').DataTable({
+        language: {
+            sProcessing: "Procesando...",
+            sLengthMenu: "Mostrar _MENU_ registros",
+            sZeroRecords: "No se encontraron resultados",
+            sInfo: "Mostrando _START_ a _END_ de _TOTAL_",
+            sInfoEmpty: "Mostrando 0 a 0 de 0",
+            sInfoFiltered: "(filtrado de _MAX_ registros)",
+            sSearch: "Buscar:",
+            oPaginate: { sFirst: "Primero", sLast: "Último", sNext: "Siguiente", sPrevious: "Anterior" },
+            oAria: { sSortAscending: ": Orden ascendente", sSortDescending: ": Orden descendente" }
+        }
+    });
+</script>

@@ -1,16 +1,21 @@
 <style>
-  /* Altura tipo "lg" de Bootstrap */
-  .select2-container .select2-selection--single {
-    height: calc(2.5rem + 2px);
-  }
-  .select2-container--default .select2-selection--single .select2-selection__rendered {
-    line-height: calc(2.5rem);
-  }
-  .select2-container--default .select2-selection--single .select2-selection__arrow {
-    height: calc(2.5rem);
-  }
-  /* Ancho completo siempre */
-  .select2-container { width: 100% !important; }
+    /* Altura tipo "lg" de Bootstrap */
+    .select2-container .select2-selection--single {
+        height: calc(2.5rem + 2px);
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: calc(2.5rem);
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: calc(2.5rem);
+    }
+
+    /* Ancho completo siempre */
+    .select2-container {
+        width: 100% !important;
+    }
 </style>
 
 <div class="modal-header">
@@ -21,50 +26,152 @@
 </div>
 
 <form id="formularioRubrica" method="post"
-    th:action="${edit} ? @{/rubrica/modificar-rubrica} : @{/rubrica/registrar-rubrica}"
-    th:object="${rubrica}" novalidate>
+    th:action="${edit} ? @{/rubrica/modificar-rubrica} : @{/rubrica/registrar-rubrica}" th:object="${rubrica}"
+    novalidate>
+
     <input type="hidden" th:if="${edit}" th:field="*{idRubrica}" />
 
     <div class="modal-body">
-        <div class="row">
+        <div class="row g-3">
+
+            <!-- Selección por ACTIVIDAD (opción 1) -->
             <div class="col-12 col-md-6">
-                <label class="form-label">Actividad</label>
-                <select class="select2" th:field="*{actividad.idActividad}" required>
-                    <option value="">Seleccione…</option>
-                    <option th:each="act : ${listarActividades}" th:value="${act.idActividad}"
-                        th:text="${act.nombre}">
+                <label class="form-label">Actividad (opción 1)</label>
+                <select class="form-select select2" id="sel-actividad" th:field="*{actividad.idActividad}">
+                    <option value="">— Seleccione… —</option>
+                    <option th:each="act : ${listarActividades}" th:value="${act.idActividad}" th:text="${act.nombre}">
                     </option>
                 </select>
-
-                <div class="valid-feedback">Correcto!</div>
-                <div class="invalid-feedback">Debe seleccionar a una tipoParticipante.</div>
+                <small class="text-muted">Si elige Actividad, no elija Categoría.</small>
+                <div class="invalid-feedback">Seleccione una Actividad o elija Categoría.</div>
             </div>
-            <div class="col-12 col-md-4 mb-2">
+
+            <!-- Selección por CATEGORÍA (opción 2) -->
+            <div class="col-12 col-md-6">
+                <label class="form-label">Categoría de Actividad (opción 2)</label>
+                <select class="form-select select2" id="sel-categoria"
+                    th:field="*{categoriaActividad.idCategoriaActividad}">
+                    <option value="">— Seleccione… —</option>
+                    <option th:each="cat : ${listarCategorias}" th:value="${cat.idCategoriaActividad}"
+                        th:text="${cat.nombre}"></option>
+                </select>
+                <small class="text-muted">Si elige Categoría, no elija Actividad.</small>
+                <div class="invalid-feedback">Seleccione una Categoría o elija Actividad.</div>
+            </div>
+
+            <div class="col-12 col-md-4">
                 <label class="form-label">Nombre</label>
                 <input type="text" th:field="*{nombre}" class="form-control" placeholder="Escriba un nombre" required />
-                <div class="valid-feedback">Correcto!</div>
-                <div class="invalid-feedback">Por favor introduzca un dato válido.</div>
+                <div class="invalid-feedback">Por favor, introduzca un nombre.</div>
             </div>
-            <div class="col-12 col-md-4 mb-2">
-                <label class="form-label">Version</label>
-                <input type="text" th:field="*{version}" class="form-control" placeholder="Añade una version" required />
-                <div class="valid-feedback">Correcto!</div>
-                <div class="invalid-feedback">Por favor introduzca un dato válido.</div>
+
+            <div class="col-12 col-md-4">
+                <label class="form-label">Versión</label>
+                <input type="text" th:field="*{version}" class="form-control" placeholder="Ej: v1, 2025-1" required />
+                <div class="invalid-feedback">Por favor, introduzca la versión.</div>
             </div>
+
         </div>
     </div>
 
-    <div class="modal-footer">
-        <div class="row">
-            <div class="col-12">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <button type="submit" class="btn btn-success"
-                    th:text="${edit}? 'Guardar Cambios' : 'Guardar Registro'"></button>
-            </div>
-        </div>
+    <div class="modal-footer d-flex gap-2">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-success"
+            th:text="${edit}? 'Guardar Cambios' : 'Guardar Registro'"></button>
     </div>
 </form>
 
 <script>
     manejarEnvioFormulario('#formularioRubrica');
+
+    (function () {
+        const $form = $('#formularioRubrica');
+        const $selAct = $('#sel-actividad');
+        const $selCat = $('#sel-categoria');
+
+        // Al cargar (modo editar): activar la exclusión según el valor preexistente
+        function initMutuaExclusion() {
+            const hasAct = ($selAct.val() && $selAct.val().trim() !== '');
+            const hasCat = ($selCat.val() && $selCat.val().trim() !== '');
+
+            if (hasAct && !hasCat) {
+                $selCat.prop('disabled', true);
+            } else if (hasCat && !hasAct) {
+                $selAct.prop('disabled', true);
+            } else {
+                // Ninguno o ambos: habilitar ambos para que el usuario corrija
+                $selAct.prop('disabled', false);
+                $selCat.prop('disabled', false);
+            }
+        }
+
+        function onChangeActividad() {
+            const val = $selAct.val();
+            if (val && val !== '') {
+                // Si elige actividad, bloquea categoría y límpiala
+                $selCat.val('').trigger('change');
+                $selCat.prop('disabled', true);
+                $selAct.prop('disabled', false);
+            } else {
+                // Si deselecciona actividad, habilita categoría
+                $selCat.prop('disabled', false);
+            }
+        }
+
+        function onChangeCategoria() {
+            const val = $selCat.val();
+            if (val && val !== '') {
+                // Si elige categoría, bloquea actividad y límpiala
+                $selAct.val('').trigger('change');
+                $selAct.prop('disabled', true);
+                $selCat.prop('disabled', false);
+            } else {
+                // Si deselecciona categoría, habilita actividad
+                $selAct.prop('disabled', false);
+            }
+        }
+
+        // Antes de enviar: validar XOR y asegurar "null" del campo bloqueado
+        function beforeSubmitNormalize(e) {
+            // Eliminar ocultos previos (si recarga el modal)
+            $form.find('input[name="actividad.idActividad"][type="hidden"]').remove();
+            $form.find('input[name="categoriaActividad.idCategoriaActividad"][type="hidden"]').remove();
+
+            const vAct = ($selAct.prop('disabled') ? '' : ($selAct.val() || '').trim());
+            const vCat = ($selCat.prop('disabled') ? '' : ($selCat.val() || '').trim());
+
+            const hasAct = vAct !== '';
+            const hasCat = vCat !== '';
+
+            // Regla XOR en front
+            if ((hasAct && hasCat) || (!hasAct && !hasCat)) {
+                e.preventDefault();
+                Swal.fire('Validación', 'Debes seleccionar exactamente una opción: Actividad o Categoría.', 'warning');
+                return false;
+            }
+
+            // Forzar null explícito del campo bloqueado (para edición)
+            if ($selAct.prop('disabled')) {
+                // Quiere decir que eligió Categoría -> actividad debe ir null
+                $('<input>', { type: 'hidden', name: 'actividad.idActividad', value: '' }).appendTo($form);
+            }
+            if ($selCat.prop('disabled')) {
+                // Eligió Actividad -> categoría debe ir null
+                $('<input>', { type: 'hidden', name: 'categoriaActividad.idCategoriaActividad', value: '' }).appendTo($form);
+            }
+            return true;
+        }
+
+        // Bind events
+        $(document).on('change', '#sel-actividad', onChangeActividad);
+        $(document).on('change', '#sel-categoria', onChangeCategoria);
+
+        $form.on('submit', function (e) {
+            if (!beforeSubmitNormalize(e)) return;
+            // deja continuar: tu manejador manejarEnvioFormulario ya recoge el submit
+        });
+
+        // Inicializar
+        initMutuaExclusion();
+    })();
 </script>

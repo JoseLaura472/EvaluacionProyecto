@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.example.proyecto.Models.Dao.IJuradoAsignacionDao;
+import com.example.proyecto.Models.Dto.CategoriaDto;
 import com.example.proyecto.Models.Entity.Actividad;
 import com.example.proyecto.Models.Entity.Jurado;
 import com.example.proyecto.Models.Entity.JuradoAsignacion;
@@ -51,6 +52,21 @@ public class JuradoAsignacionServiceImpl implements IJuradoAsignacionService {
     @Override
     public List<Jurado> findJuradosByActividadOrdenAsignacion(Long actId) {
         return dao.findJuradosByActividadOrdenAsignacion(actId);
+    }
+
+    @Override
+    public boolean existsCategoriaAsignadaByPersona(Long idPersona) {
+        return dao.existsCategoriaAsignadaByPersona(idPersona);
+    }
+
+    @Override
+    public List<CategoriaDto> listarCategoriasDeJuradoPorPersona(Long idPersona) {
+        return dao.listarCategoriasDeJuradoPorPersona(idPersona);
+    }
+
+    @Override
+    public List<Jurado> findJuradosByActividadAndCategoriaOrdenAsignacion(Long actividadId, Long categoriaId) {
+        return dao.findJuradosByActividadAndCategoriaOrdenAsignacion(actividadId, categoriaId);
     }
 
 }

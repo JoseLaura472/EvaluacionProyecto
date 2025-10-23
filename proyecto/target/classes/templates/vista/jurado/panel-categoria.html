@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head th:replace="~{layout/head :: head}"></head>
+<link rel="stylesheet" href="/assets/css/style-vista-evaluador-ctg.css">
+
+<body>
+    <div class="container-xxl py-3" id="app">
+        <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
+            <h4 class="me-auto mb-0">Panel del Jurado – por Categoría</h4>
+            <span class="chip" id="lbl-jurado"
+                th:text="${session.persona != null ? session.persona.nombres : 'Jurado'}">Jurado</span>
+        </div>
+
+        <div class="card p-3 mb-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-4">
+                    <div class="kpi">Categoría: <span id="lbl-categoria">—</span></div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="kpi">Participantes: <span id="kpi-part">—</span></div>
+                </div>
+                <div class="col-6 col-md-2">
+                    <div class="kpi">Rúbricas: <span id="kpi-rub">—</span></div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <input id="inp-buscar" class="form-control" placeholder="Buscar participante…">
+                </div>
+            </div>
+        </div>
+        <div class="row" id="grid-participantes"></div>
+    </div>
+
+    <div class="modal fade" id="modalEval" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title">Evaluar: <span id="m-participante">—</span></h5>
+                        <div class="text-muted small">Categoría: <span id="m-categoria">—</span></div>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body position-relative">
+                    <ol id="rub-stepper" class="rub-steps mb-3"></ol>
+
+                    <div class="wizard-nav mb-2">
+                        <button class="btn btn-outline-secondary" id="btn-prev">
+                            <i class="fa fa-chevron-left mr-1"></i> Anterior
+                        </button>
+                        <button class="btn btn-outline-secondary" id="btn-next">
+                            Siguiente <i class="fa fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+
+                    <div id="carouselRubricas" class="carousel slide" data-interval="false" data-wrap="false"
+                        data-keyboard="false">
+                        <div class="carousel-inner" id="rub-slides"></div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="footer-left mr-auto">
+                        <span class="kpi">Total acumulado: <span id="kpi-total">0</span> pts</span>
+                    </div>
+                    <button class="btn btn-success" id="btn-finalizar" disabled>
+                        <i class="fa fa-check mr-1"></i> Finalizar evaluación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{layout/script :: script}"></div>
+    <script>
+        (function () {
+            let categoria = null, participantes = [], participanteSel = null, rubricas = [], valores = {};
+
+            function getParticipanteId(p) {
+                return Number(p?.idParticipante ?? p?.participanteId ?? p?.id);
+            }
+
+            function htmlCardParticipante(p) {
+                const pid = p.idParticipante ?? p.id ?? p.participanteId;
+                const institucion = (p.institucion ?? '').trim();
+                return `
+                <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
+                    <div class="card card-part h-100" data-id="${pid}">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start gap-2">
+                        <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width:44px;height:44px;">
+                            <i class="fa fa-user-o"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">${p.nombre}</h6>
+                            <div class="text-muted small">${institucion}</div>
+                        </div>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-outline-primary btn-sm btn-evaluar" data-id="${pid}" data-nombre="${p.nombre}">
+                        <i class="fa fa-clipboard-check mr-1"></i> Evaluar
+                        </button>
+                    </div>
+                    </div>
+                </div>`;
+            }
+
+            function renderGrid(q = '') {
+                const $g = $('#grid-participantes').empty();
+                let list = participantes || [];
+                if (q) { const s = q.toLowerCase(); list = list.filter(p => (`${p.nombre} ${p.institucion ?? ''}`).toLowerCase().includes(s)); }
+                if (!list.length) { $g.html('<div class="text-center text-muted py-5">No hay participantes para mostrar.</div>'); }
+                else list.forEach(p => $g.append(htmlCardParticipante(p)));
+                $('#kpi-part').text(list.length);
+            }
+
+            function idxActivo() {
+                const $it = $('#carouselRubricas .carousel-item');
+                return Math.max(0, $it.index($it.filter('.active')));
+            }
+            const isLast = i => i >= rubricas.length - 1;
+            const isFirst = i => i <= 0;
+
+            const scoreOf = c => (c.maxPuntos != null ? Number(c.maxPuntos) : (c.porcentaje != null ? Number(c.porcentaje) : 0));
+            const totalSeleccionado = () => Object.values(valores).reduce((a, v) => a + (Number(v?.puntaje) || 0), 0);
+
+            function setProgreso() {
+
+                $('#rub-stepper .rub-step').each(function (i) {
+                    const r = rubricas[i]; const answered = !!valores[r.id]?.critId;
+                    $(this).toggleClass('r-done', answered);
+                });
+
+                $('#kpi-total').text(totalSeleccionado());
+
+                const tot = rubricas.length, ok = Object.values(valores).filter(v => !!v?.critId).length;
+                $('#btn-finalizar').prop('disabled', ok < tot || !participanteSel);
+            }
+
+            function buildCarousel() {
+                const $slides = $('#rub-slides').empty();
+                const $steps = $('#rub-stepper').empty();
+
+                rubricas.forEach((r, i) => {
+                    $steps.append(`<li class="rub-step ${i === 0 ? 'r-active' : ''}" data-idx="${i}">${i + 1}</li>`);
+                });
+
+                rubricas.forEach((r, i) => {
+                    valores[r.id] = valores[r.id] || { critId: null, puntaje: 0 };
+
+                    const $slide = $(`
+                        <div class="carousel-item ${i === 0 ? 'active' : ''}">
+                        <div class="rub-header">
+                            <h5 class="mb-0">${r.nombre}</h5>
+                            <span class="rub-chip">v${r.version ?? '-'}</span>
+                            <div class="ml-auto kpi">TOTAL rúbrica: <span id="total-${r.id}">${valores[r.id]?.puntaje || 0}</span></div>
+                        </div>
+                        <div class="opts-list" id="zona-crit-${r.id}"></div>
+                        </div>`);
+                    const $zona = $slide.find(`#zona-crit-${r.id}`);
+                    const radioName = `rub-${r.id}`;
+
+                    (r.criterios || []).forEach(c => {
+                        const puntaje = scoreOf(c);
+                        const checked = (valores[r.id].critId === c.id) ? 'checked' : '';
+                        const idInput = `${radioName}-${c.id}`;
+
+                        const $opt = $(`
+                            <label class="opt-row ${checked ? 'active' : ''}" for="${idInput}">
+                                <div class="opt-left">
+                                <div class="opt-title">${c.nombre}</div>
+                                <div class="opt-score">Puntaje: <strong>${puntaje}</strong></div>
+                                </div>
+                                <div class="opt-right">
+                                <input type="radio" id="${idInput}" name="${radioName}" value="${c.id}" data-score="${puntaje}">
+                                </div>
+                            </label>`);
+
+                        if (checked) $opt.find('input[type="radio"]').prop('checked', true);
+
+                        $opt.on('change', `input[name="${radioName}"]`, function () {
+                            const selId = Number(this.value);
+                            const score = Number(this.dataset.score || '0');
+                            valores[r.id] = { critId: selId, puntaje: score };
+                            $(`#total-${r.id}`).text(score);
+                            $zona.find('.opt-row').removeClass('active');
+                            $opt.addClass('active');
+                            setProgreso();
+                            const i = idxActivo();
+                            if (!isLast(i)) $('#carouselRubricas').carousel('next');
+                        });
+
+                        $zona.append($opt);
+                    });
+
+                    $slides.append($slide);
+                });
+
+                $('#carouselRubricas')
+                    .off('slide.bs.carousel').on('slide.bs.carousel', function (ev) {
+                        const from = ev.from, to = ev.to;
+                        if (to > from) {
+                            const r = rubricas[from];
+                            if (!valores[r.id]?.critId) { ev.preventDefault(); }
+                        }
+                    })
+                    .off('slid.bs.carousel').on('slid.bs.carousel', function () {
+                        const i = idxActivo();
+                        $('#rub-stepper .rub-step').removeClass('r-active').eq(i).addClass('r-active');
+                        $('#btn-prev').prop('disabled', isFirst(i));
+                        const r = rubricas[i]; const ok = !!valores[r.id]?.critId;
+                        $('#btn-next').prop('disabled', !ok || isLast(i));
+                        setProgreso();
+                    });
+
+                $('#carouselRubricas').on('touchstart', e => e.preventDefault());
+
+                $('#btn-prev').prop('disabled', true);
+                const first = rubricas[0];
+                $('#btn-next').prop('disabled', !valores[first.id]?.critId);
+                setProgreso();
+            }
+
+            function abrirModalPara(p) {
+                participanteSel = p;
+                $('#m-participante').text(p.nombre);
+                $('#m-categoria').text(categoria.nombre);
+                valores = {}; rubricas.forEach(r => valores[r.id] = { critId: null, puntaje: 0 });
+                buildCarousel();
+                // Mostrar BS4
+                $('#modalEval').modal({ backdrop: 'static', keyboard: false, show: true });
+            }
+
+            async function finalizarTodo() {
+                const faltan = rubricas.filter(r => !valores[r.id]?.critId);
+                if (faltan.length) { Swal.fire('Aviso', 'Responde todas las rúbricas antes de finalizar.', 'info'); return; }
+                $('#btn-finalizar').prop('disabled', true);
+                try {
+                    for (const r of rubricas) {
+                        const sel = valores[r.id];
+                        const body = {
+                            categoriaId: Number(categoria.id),
+                            participanteId: getParticipanteId(participanteSel), 
+                            rubricaId: Number(r.id),
+                            detalles: [{ criterioId: Number(sel.critId), puntaje: Number(sel.puntaje) }]
+                        };
+                        await $.ajax({ url: '/jurado/api/evaluar', method: 'POST', contentType: 'application/json', data: JSON.stringify(body) });
+                    }
+                    const pid = getParticipanteId(participanteSel);
+                    participantes = participantes.filter(p => getParticipanteId(p) !== pid);
+                    renderGrid($('#inp-buscar').val() || '');
+
+                    Swal.fire('OK', 'Evaluación finalizada', 'success');
+                    $('#modalEval').modal('hide');
+                    participanteSel = null;
+                } catch (e) {
+                    Swal.fire('Error', (e && e.responseText) || 'No se pudo finalizar', 'error');
+                    $('#btn-finalizar').prop('disabled', false);
+                }
+            }
+
+            $(document).on('click', '.btn-evaluar', function (e) {
+                e.preventDefault(); e.stopPropagation();
+                const id = Number($(this).attr('data-id'));
+                const p = participantes.find(x => Number(x.idParticipante ?? x.id ?? x.participanteId) === id);
+                if (!p) { Swal.fire('Error', 'Participante no encontrado.', 'error'); return; }
+
+                if (!Array.isArray(rubricas) || !rubricas.length) {
+                    $.getJSON('/jurado/api/rubricas', { categoriaId: categoria.id })
+                        .done(list => { rubricas = list || []; $('#kpi-rub').text(rubricas.length); abrirModalPara(p); })
+                        .fail(() => Swal.fire('Error', 'No se pudieron cargar las rúbricas.', 'error'));
+                    return;
+                }
+                abrirModalPara(p);
+            });
+
+            $('#inp-buscar').on('input', function () { renderGrid(this.value || ''); });
+            $('#btn-prev').on('click', function () { const i = idxActivo(); if (!isFirst(i)) $('#carouselRubricas').carousel('prev'); });
+            $('#btn-next').on('click', function () {
+                const i = idxActivo(); const r = rubricas[i];
+                if (!valores[r.id]?.critId) { Swal.fire('Aviso', 'Debes seleccionar una opción antes de continuar.', 'info'); return; }
+                if (!isLast(i)) $('#carouselRubricas').carousel('next');
+            });
+            $('#btn-finalizar').on('click', finalizarTodo);
+
+            function cargarMiCategoria() {
+                return $.getJSON('/jurado/api/mi-categoria').then(cat => {
+                    categoria = { id: cat.idCategoriaActividad ?? cat.id, nombre: cat.nombre };
+                    $('#lbl-categoria').text(categoria.nombre);
+                    return categoria;
+                });
+            }
+            function cargarRubricas() { return $.getJSON('/jurado/api/rubricas', { categoriaId: categoria.id }).then(list => { rubricas = list || []; $('#kpi-rub').text(rubricas.length); }); }
+
+            function cargarParticipantes() {
+                return $.getJSON('/jurado/api/participantes', { categoriaId: categoria.id , soloPendientes: true })
+                    .done(list => { participantes = Array.isArray(list) ? list : []; renderGrid(); })
+                    .fail(() => { participantes = []; renderGrid(); Swal.fire('Error', 'No se pudo cargar la lista de participantes', 'error'); });
+            }
+
+            (async function init() {
+                try { await cargarMiCategoria(); await Promise.all([cargarRubricas(), cargarParticipantes()]); }
+                catch (e) { Swal.fire('Error', 'No se pudo inicializar el panel', 'error'); }
+            })();
+        })();
+    </script>
+</body>
+
+</html>

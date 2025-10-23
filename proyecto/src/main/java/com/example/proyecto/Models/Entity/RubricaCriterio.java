@@ -26,6 +26,9 @@ public class RubricaCriterio extends AuditoriaConfig{
     private Rubrica rubrica;
     
     private String nombre;
+    //para bandas
     private int porcentaje;
     private String descripcion;
+    //para fexcoin
+    private Integer maxPuntos;
 }

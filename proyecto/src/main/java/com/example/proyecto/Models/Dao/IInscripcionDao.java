@@ -50,4 +50,18 @@ public interface IInscripcionDao extends JpaRepository<Inscripcion, Long> {
     """)
     Optional<Inscripcion> fetchFull(@Param("actId") Long actId,
                                     @Param("inscId") Long inscId);
+
+    @Query("""
+        select i
+        from Inscripcion i
+        join i.actividad a
+        join i.categoriaActividad c
+        join i.participante p
+        where coalesce(i.estado,'A') = 'A'
+        and c.idCategoriaActividad = :categoriaId
+        and p.idParticipante = :participanteId
+    """)
+    Optional<Inscripcion> findByCategoriaAndParticipante(@Param("categoriaId") Long categoriaId,
+                                                        @Param("participanteId") Long participanteId);
+
 }

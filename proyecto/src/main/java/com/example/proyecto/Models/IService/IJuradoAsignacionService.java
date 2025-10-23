@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 
+import com.example.proyecto.Models.Dto.CategoriaDto;
 import com.example.proyecto.Models.Entity.Actividad;
 import com.example.proyecto.Models.Entity.Jurado;
 import com.example.proyecto.Models.Entity.JuradoAsignacion;
@@ -15,4 +16,8 @@ public interface IJuradoAsignacionService extends IServiceGenerico<JuradoAsignac
     List<JuradoAsignacion> listarJuradoAsignacion();
     List<Actividad> findActividadesAsignadas(@Param("idJurado") Long idJurado);
     List<Jurado> findJuradosByActividadOrdenAsignacion(@Param("actId") Long actId);
+    boolean existsCategoriaAsignadaByPersona(@Param("idPersona") Long idPersona);
+    List<CategoriaDto> listarCategoriasDeJuradoPorPersona(Long idPersona);
+
+    List<Jurado> findJuradosByActividadAndCategoriaOrdenAsignacion(Long actividadId, Long categoriaId);
 }

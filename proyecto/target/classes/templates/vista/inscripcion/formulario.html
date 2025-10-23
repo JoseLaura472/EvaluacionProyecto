@@ -54,7 +54,7 @@
             </div>
 
             <div class="col-12 col-md-6">
-                <label class="form-label">Tipo inscripcion</label>
+                <label class="form-label">Participante</label>
                 <select class="select2" th:field="*{participante.idParticipante}" required>
                     <option value="">Seleccione…</option>
                     <option th:each="parti : ${listarParticipantes}" th:value="${parti.idParticipante}"

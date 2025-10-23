@@ -1,0 +1,68 @@
+<style>
+  /* Altura tipo "lg" de Bootstrap */
+  .select2-container .select2-selection--single {
+    height: calc(2.5rem + 2px);
+  }
+  .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: calc(2.5rem);
+  }
+  .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: calc(2.5rem);
+  }
+  /* Ancho completo siempre */
+  .select2-container { width: 100% !important; }
+</style>
+
+<div class="modal-header">
+    <h4 class="modal-title" th:text="${edit}? 'Modificar tipo estudiante' : 'Registrar tipo estudiante'"></h4>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<form id="formularioEstudiante" method="post"
+    th:action="${edit} ? @{/estudiante/modificar-estudiante} : @{/estudiante/registrar-estudiante}"
+    th:object="${estudiante}" novalidate>
+    <input type="hidden" th:if="${edit}" th:field="*{id_estudiante}"/>
+
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <label class="form-label">Persona</label>
+                <select class="select2" th:field="*{persona.idPersona}" required>
+                    <option value="">Seleccione…</option>
+                    <option th:each="lisP : ${listasPersonas}" th:value="${lisP.idPersona}"
+                        th:text="${lisP.nombres + ' - ' + lisP.paterno + ' ' + lisP.materno}">
+                    </option>
+                </select>
+                <div class="valid-feedback">Correcto!</div>
+                <div class="invalid-feedback">Debe seleccionar a una persona.</div>
+            </div>
+            <div class="col-12 col-md-6">
+                <label class="form-label">Proyecto</label>
+                <select class="select2" th:field="*{participante.idParticipante}" required>
+                    <option value="">Seleccione…</option>
+                    <option th:each="lisPart : ${listasParticipante}" th:value="${lisPart.idParticipante}"
+                        th:text="${lisPart.nombre + ' - ' + lisPart.institucion}">
+                    </option>
+                </select>
+                <div class="valid-feedback">Correcto!</div>
+                <div class="invalid-feedback">Debe seleccionar a un proyecto.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <div class="row">
+            <div class="col-12">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-success"
+                    th:text="${edit}? 'Guardar Cambios' : 'Guardar Registro'"></button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    manejarEnvioFormulario('#formularioEstudiante');
+</script>

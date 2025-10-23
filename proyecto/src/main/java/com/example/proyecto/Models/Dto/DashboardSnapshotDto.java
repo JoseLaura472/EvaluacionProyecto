@@ -49,5 +49,7 @@ public class DashboardSnapshotDto {
         private Map<Long, Double> scores = new HashMap<>(); // juradoId -> total
         private Double promedio;
         private boolean completado;
+        private Integer rubricasTotales;
+        Map<Long, Integer> rubricasPorJurado = new HashMap<>();
     }
 }

@@ -23,4 +23,31 @@ public interface IRubricaDao extends JpaRepository<Rubrica, Long> {
         order by r.version desc nulls last, r.idRubrica desc
     """)
     List<Rubrica> findByActividadOrder(@Param("actId") Long actId);
+
+    // Evitar duplicados cuando se asocia a una ACTIVIDAD (estado activo)
+    boolean existsByActividad_IdActividadAndVersionAndEstado(Long idActividad, String version, String estado);
+
+    // Evitar duplicados cuando se asocia a una CATEGORÍA (estado activo)
+    boolean existsByCategoriaActividad_IdCategoriaActividadAndVersionAndEstado(Long idCategoria, String version, String estado);
+
+    // Para modificar (ignorar el mismo registro)
+    boolean existsByActividad_IdActividadAndVersionAndEstadoAndIdRubricaNot(Long idActividad, String version, String estado, Long idRubrica);
+    boolean existsByCategoriaActividad_IdCategoriaActividadAndVersionAndEstadoAndIdRubricaNot(Long idCategoria, String version, String estado, Long idRubrica);
+
+    @Query("""
+        select r
+        from Rubrica r
+        left join fetch r.categoriaActividad c
+        where r.estado='A' and c.idCategoriaActividad = :categoriaId
+        order by r.idRubrica desc
+    """)
+    List<Rubrica> findActivasPorCategoriaOrderDesc(@Param("categoriaId") Long categoriaId);
+
+    @Query("""
+        select count(r) 
+        from Rubrica r 
+        where r.categoriaActividad.idCategoriaActividad = :categoriaId 
+          and coalesce(r.estado,'A') = 'A'
+    """)
+    long countActivasByCategoria(@Param("categoriaId") Long categoriaId);
 }

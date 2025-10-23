@@ -41,7 +41,15 @@ public class Evaluacion extends AuditoriaConfig{
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_rubrica")
-    private Rubrica rubrica; 
+    private Rubrica rubrica;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_participante")
+    private Participante participante;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_categoria_actividad")
+    private CategoriaActividad categoriaActividad;
 
     private double totalPonderacion;
 

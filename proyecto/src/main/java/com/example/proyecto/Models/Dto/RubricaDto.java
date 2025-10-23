@@ -2,13 +2,5 @@ package com.example.proyecto.Models.Dto;
 
 import java.util.List;
 
-import lombok.Getter;
-import lombok.Setter;
+public record RubricaDto(Long id, String nombre, String version, List<RubricaCriterioDto> criterios) {}
 
-@Setter @Getter
-public class RubricaDto {
-    private Long id;
-    private String nombre;
-    private String version;
-    private List<RubricaCriterioDto> criterios;
-}

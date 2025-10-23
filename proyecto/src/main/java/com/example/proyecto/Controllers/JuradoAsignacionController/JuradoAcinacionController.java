@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.proyecto.Models.Entity.JuradoAsignacion;
 import com.example.proyecto.Models.IService.IActividadService;
+import com.example.proyecto.Models.IService.ICategoriaActividadService;
 import com.example.proyecto.Models.IService.IJuradoAsignacionService;
 import com.example.proyecto.Models.IService.IJuradoService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -25,6 +25,7 @@ public class JuradoAcinacionController {
     private final IJuradoAsignacionService juradoAsignacionService;
     private final IActividadService actividadService;
     private final IJuradoService juradoService;
+    private final ICategoriaActividadService categoriaActividadService;
 
     @GetMapping("/vista")
     public String vista() {
@@ -40,6 +41,7 @@ public class JuradoAcinacionController {
     @PostMapping("/formulario")
     public String formulario(Model model, JuradoAsignacion juradoAsignacion) {
         model.addAttribute("listarActividades", actividadService.listarActividades());
+        model.addAttribute("listarCategorias", categoriaActividadService.listarActividades());
         model.addAttribute("listarJurados", juradoService.listarParticipantes());
         return "vista/juradoAsignacion/formulario";
     }
@@ -49,23 +51,63 @@ public class JuradoAcinacionController {
             throws Exception {
         model.addAttribute("juradoAsignacion", juradoAsignacionService.findById(idJuradoAsignacion));
         model.addAttribute("edit", "true");
+        model.addAttribute("listarActividades", actividadService.listarActividades());
+        model.addAttribute("listarCategorias", categoriaActividadService.listarActividades()); // <-- NUEVO
+        model.addAttribute("listarJurados", juradoService.listarParticipantes());
         return "vista/juradoAsignacion/formulario";
     }
 
     @PostMapping("/registrar-juradoAsignacion")
-    public ResponseEntity<String> registro(HttpServletRequest request,
-            @ModelAttribute JuradoAsignacion juradoAsignacion) {
+    public ResponseEntity<String> registro(@ModelAttribute JuradoAsignacion ja) {
 
-        juradoAsignacion.setEstado("A");
-        juradoAsignacionService.save(juradoAsignacion);
+        // XOR: exactamente una de las dos
+        Long idAct = (ja.getActividad() != null && ja.getActividad().getIdActividad() != null)
+                      ? ja.getActividad().getIdActividad() : null;
+        Long idCat = (ja.getCategoriaActividad() != null && ja.getCategoriaActividad().getIdCategoriaActividad() != null)
+                      ? ja.getCategoriaActividad().getIdCategoriaActividad() : null;
+
+        if ((idAct == null && idCat == null) || (idAct != null && idCat != null)) {
+            return ResponseEntity.badRequest().body("Debe seleccionar exactamente una opción: Actividad o Categoría (no ambas).");
+        }
+
+        // Normalizar: si viene categoría, actividad = null; si viene actividad, categoría = null.
+        if (idCat != null) ja.setActividad(null);
+        if (idAct != null) ja.setCategoriaActividad(null);
+
+        if (ja.getJurado() == null || ja.getJurado().getIdJurado() == null) {
+            return ResponseEntity.badRequest().body("Debe seleccionar un Jurado.");
+        }
+
+        ja.setEstado("A");
+        juradoAsignacionService.save(ja);
         return ResponseEntity.ok("Se realizó el registro correctamente");
     }
 
     @PostMapping("/modificar-juradoAsignacion")
-    public ResponseEntity<String> modificar(HttpServletRequest request,
-            @ModelAttribute JuradoAsignacion juradoAsignacion) {
-        juradoAsignacion.setEstado("A");
-        juradoAsignacionService.save(juradoAsignacion);
+    public ResponseEntity<String> modificar(@ModelAttribute JuradoAsignacion ja) {
+
+        if (ja.getIdJuradoAsignacion() == null) {
+            return ResponseEntity.badRequest().body("ID inválido");
+        }
+
+        Long idAct = (ja.getActividad() != null && ja.getActividad().getIdActividad() != null)
+                      ? ja.getActividad().getIdActividad() : null;
+        Long idCat = (ja.getCategoriaActividad() != null && ja.getCategoriaActividad().getIdCategoriaActividad() != null)
+                      ? ja.getCategoriaActividad().getIdCategoriaActividad() : null;
+
+        if ((idAct == null && idCat == null) || (idAct != null && idCat != null)) {
+            return ResponseEntity.badRequest().body("Debe seleccionar exactamente una opción: Actividad o Categoría (no ambas).");
+        }
+
+        if (idCat != null) ja.setActividad(null);
+        if (idAct != null) ja.setCategoriaActividad(null);
+
+        if (ja.getJurado() == null || ja.getJurado().getIdJurado() == null) {
+            return ResponseEntity.badRequest().body("Debe seleccionar un Jurado.");
+        }
+
+        ja.setEstado("A");
+        juradoAsignacionService.save(ja);
         return ResponseEntity.ok("Se realizó la modificación correctamente");
     }
 
