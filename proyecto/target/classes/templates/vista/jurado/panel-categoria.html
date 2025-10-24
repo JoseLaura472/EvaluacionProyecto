@@ -5,25 +5,55 @@
 <link rel="stylesheet" href="/assets/css/style-vista-evaluador-ctg.css">
 
 <body>
-    <div class="container-xxl py-3" id="app">
-        <div class="d-flex align-items-center flex-wrap gap-2 mb-3">
-            <h4 class="me-auto mb-0">Panel del Jurado – por Categoría</h4>
-            <span class="chip" id="lbl-jurado"
-                th:text="${session.persona != null ? session.persona.nombres : 'Jurado'}">Jurado</span>
-        </div>
+    <nav class="navbar navbar-light u-navbar sticky-top">
+        <div class="container-xxl d-flex align-items-center">
 
+            <a class="navbar-brand d-flex align-items-center u-brand m-0" href="/jurado/panel-categoria">
+                <span class="u-brand-logos d-flex align-items-center mr-2">
+                    <img src="/assets/images/logo_dicyt.png" alt="Universidad" class="logo-1">
+                    <span class="u-sep d-none d-sm-inline-block"></span>
+                    <img src="/assets/images/logo_uap.png" alt="Feria" class="logo-2">
+                </span>
+                <span class="u-brand-title">
+                    <span class="title">Panel del Jurado</span>
+                    <span class="subtitle">Evaluación por Categorías</span>
+                </span>
+            </a>
+            
+            <!-- DERECHA -->
+            <div class="u-right dropdown">
+                <button class="btn u-userbtn d-flex align-items-center" type="button" id="userMenuBtn"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="avatar-circle mr-2"
+                        th:text="${#strings.substring((session.persona != null ? session.persona.nombres : 'U'),0,1)}">U</span>
+                    <span class="u-username d-none d-sm-inline"
+                        th:text="${session.persona != null ? session.persona.nombres : 'Invitado'}">Usuario</span>
+                    <span class="navbar-toggler-icon d-inline-block d-sm-none ml-2"></span>
+                </button>
+
+                <div class="dropdown-menu dropdown-menu-right u-dropdown" aria-labelledby="userMenuBtn">
+                    <h6 class="dropdown-header"
+                        th:text="${session.persona != null ? session.persona.nombres : 'Usuario'}">Usuario</h6>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item text-danger" href="/cerrar_sesionAdm">
+                        <i class="fa fa-sign-out mr-2"></i> Cerrar sesión
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </nav>
+
+    <div class="container-xxl py-3" id="app">
         <div class="card p-3 mb-3">
             <div class="row g-2 align-items-end">
                 <div class="col-12 col-md-4">
                     <div class="kpi">Categoría: <span id="lbl-categoria">—</span></div>
                 </div>
-                <div class="col-6 col-md-2">
-                    <div class="kpi">Participantes: <span id="kpi-part">—</span></div>
+                <div class="col-6 col-md-6">
+                    <div>Proyectos a evaluar: <span id="kpi-part">—</span></div>
                 </div>
-                <div class="col-6 col-md-2">
-                    <div class="kpi">Rúbricas: <span id="kpi-rub">—</span></div>
-                </div>
-                <div class="col-12 col-md-4">
+                <div class="col-12 col-md-4"><br>
                     <input id="inp-buscar" class="form-control" placeholder="Buscar participante…">
                 </div>
             </div>
@@ -57,7 +87,7 @@
                     </div>
 
                     <div id="carouselRubricas" class="carousel slide" data-interval="false" data-wrap="false"
-                        data-keyboard="false">
+                        data-keyboard="false" data-touch="false">
                         <div class="carousel-inner" id="rub-slides"></div>
                     </div>
                 </div>
@@ -217,8 +247,6 @@
                         setProgreso();
                     });
 
-                $('#carouselRubricas').on('touchstart', e => e.preventDefault());
-
                 $('#btn-prev').prop('disabled', true);
                 const first = rubricas[0];
                 $('#btn-next').prop('disabled', !valores[first.id]?.critId);
@@ -244,7 +272,7 @@
                         const sel = valores[r.id];
                         const body = {
                             categoriaId: Number(categoria.id),
-                            participanteId: getParticipanteId(participanteSel), 
+                            participanteId: getParticipanteId(participanteSel),
                             rubricaId: Number(r.id),
                             detalles: [{ criterioId: Number(sel.critId), puntaje: Number(sel.puntaje) }]
                         };
@@ -297,7 +325,7 @@
             function cargarRubricas() { return $.getJSON('/jurado/api/rubricas', { categoriaId: categoria.id }).then(list => { rubricas = list || []; $('#kpi-rub').text(rubricas.length); }); }
 
             function cargarParticipantes() {
-                return $.getJSON('/jurado/api/participantes', { categoriaId: categoria.id , soloPendientes: true })
+                return $.getJSON('/jurado/api/participantes', { categoriaId: categoria.id, soloPendientes: true })
                     .done(list => { participantes = Array.isArray(list) ? list : []; renderGrid(); })
                     .fail(() => { participantes = []; renderGrid(); Swal.fire('Error', 'No se pudo cargar la lista de participantes', 'error'); });
             }

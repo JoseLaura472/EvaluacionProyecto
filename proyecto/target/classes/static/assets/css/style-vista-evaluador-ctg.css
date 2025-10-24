@@ -187,3 +187,127 @@
     gap: 16px;
     flex-wrap: wrap
 }
+
+:root {
+    --u-blue: #0D47A1;
+    --u-red: #C62828;
+}
+
+/* Cinta superior */
+.u-topbar-accent {
+    height: 4px;
+    background: linear-gradient(90deg, var(--u-blue), var(--u-red));
+}
+
+/* Barra */
+.u-navbar {
+    background: linear-gradient(90deg, rgba(13, 71, 161, .96), rgba(198, 40, 40, .96));
+    backdrop-filter: saturate(1.2) blur(3px);
+    -webkit-backdrop-filter: saturate(1.2) blur(3px);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, .12);
+    padding: .65rem 0;
+}
+
+/* Marca */
+.u-brand-logos img {
+    height: 45px;
+    width: auto;
+    object-fit: contain;
+}
+
+.u-sep {
+    width: 1px;
+    height: 24px;
+    background: rgba(255, 255, 255, .25);
+    margin: 0 .6rem;
+}
+
+.u-brand-title {
+    line-height: 1;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+}
+
+.u-brand-title .title {
+    font-weight: 800;
+    letter-spacing: .2px;
+}
+
+.u-brand-title .subtitle {
+    font-size: .78rem;
+    opacity: .9;
+    font-weight: 600
+}
+
+
+/* Botón usuario (sirve de hamburguesa en móviles) */
+.u-userbtn {
+    color: #fff;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, .35);
+    border-radius: 999px;
+    padding: .25rem .55rem;
+    line-height: 1;
+}
+
+.u-userbtn:hover {
+    background: rgba(255, 255, 255, .12);
+    color: #fff;
+}
+
+/* Avatar */
+.avatar-circle {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    background: rgba(255, 255, 255, .15);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .25);
+}
+
+/* Nombre de usuario (se oculta en xs) */
+.u-username {
+    max-width: 220px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Dropdown con tema y posición flotante (no expande la barra) */
+.u-dropdown {
+    border: 0;
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, .15);
+    min-width: 220px;
+}
+
+.u-dropdown .dropdown-item {
+    color: #0f172a !important;
+}
+
+.u-dropdown .dropdown-item:hover {
+    background: rgba(13, 71, 161, .08);
+}
+
+.u-dropdown .dropdown-item.text-danger:hover {
+    background: rgba(198, 40, 40, .08);
+}
+
+/* Toggler icon blanco */
+.navbar-light .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255,.85)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}
+
+/* Alineaciones */
+.navbar .container-xxl {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}

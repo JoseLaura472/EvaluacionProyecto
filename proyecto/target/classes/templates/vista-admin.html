@@ -19,14 +19,10 @@
                         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
                             <div class="d-flex align-items-center gap-2">
                                 <h5 class="mb-0">Progreso del Concurso</h5>
-
                                 <select id="sel-actividad" class="form-select form-select-sm" style="min-width:260px">
                                     <option value="">Seleccione una actividad…</option>
                                 </select>
-
-                                <!-- <<< agrega esto -->
                                 <span class="small text-muted">Actividad: <strong id="act-nombre">—</strong></span>
-                                <!-- >>> -->
                             </div>
                             <div class="d-flex gap-2 align-items-center">
                                 <span class="badge text-bg-light">Actualiza: <span id="last-update">—</span></span>
@@ -39,14 +35,11 @@
                             Seleccione una actividad para ver el progreso.
                         </div>
 
-
-                        <!-- Chips categorías -->
                         <div class="mb-3" id="categorias-wrap" style="display:none;">
                             <div id="categorias-chips" class="d-inline-flex overflow-auto"
                                 style="white-space:nowrap;gap:.5rem;max-width:100%"></div>
                         </div>
 
-                        <!-- Barra de progreso global -->
                         <div class="mb-3" id="resumen-wrap" style="display:none;">
                             <div class="d-flex justify-content-between small">
                                 <div>Total evaluaciones</div>
@@ -60,7 +53,6 @@
                             </div>
                         </div>
 
-                        <!-- Tabla por categoría -->
                         <div class="card">
                             <div class="card-body p-2 p-sm-3">
                                 <div class="table-responsive">
@@ -84,12 +76,10 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                <!-- Paginación si la necesitas después -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Template para chip de categoría -->
                     <template id="tpl-chip">
                         <button class="btn btn-sm">
                             <span class="chip-nombre"></span>
@@ -97,7 +87,6 @@
                         </button>
                     </template>
 
-                    <!-- Template para una fila -->
                     <template id="tpl-row">
                         <tr>
                             <td class="text-center">
@@ -125,14 +114,12 @@
             const root = document.getElementById('concurso-dashboard');
             if (!root) return;
 
-            // Estado
             let actividadId = null;
             let categoriaId = null;
             let jurados = [];
             let filasFull = [];
             let sse = null, polling = null;
 
-            // DOM
             const selAct = document.getElementById('sel-actividad');
             const sinActividad = document.getElementById('sin-actividad');
             const elActNombre = document.getElementById('act-nombre');
@@ -155,10 +142,8 @@
             const tplChip = document.getElementById('tpl-chip');
             const tplRow = document.getElementById('tpl-row');
 
-            // Init: primero cargamos actividades
             cargarActividades();
 
-            // Eventos
             selAct.addEventListener('change', onActividadChange);
             elBtnRefrescar.addEventListener('click', () => cargarSnapshot(false));
             window.addEventListener('beforeunload', () => { if (polling) clearInterval(polling); if (sse) sse.close(); });
@@ -169,7 +154,6 @@
                     if (r.status === 401) { window.location.href = '/LoginR'; return; }
                     const list = await r.json();
 
-                    // Poblar select
                     selAct.innerHTML = '<option value="">Seleccione una actividad…</option>';
                     for (const a of list) {
                         const opt = document.createElement('option');
@@ -179,7 +163,6 @@
                         selAct.appendChild(opt);
                     }
 
-                    // Autoselección: última usada (localStorage) o la primera
                     const last = localStorage.getItem('dash.actId');
                     if (last && list.some(a => String(a.id) === last)) {
                         selAct.value = last;
@@ -188,7 +171,7 @@
                     }
 
                     if (selAct.value) {
-                        onActividadChange(); // dispara carga/sse
+                        onActividadChange();
                     } else {
                         sinActividad.style.display = '';
                         elBtnRefrescar.disabled = true;
@@ -200,7 +183,7 @@
             function onActividadChange() {
                 actividadId = selAct.value ? Number(selAct.value) : null;
                 localStorage.setItem('dash.actId', actividadId ? String(actividadId) : '');
-                categoriaId = null; // reset filtro
+                categoriaId = null;
                 if (!actividadId) {
                     sinActividad.style.display = '';
                     elBtnRefrescar.disabled = true;
@@ -212,7 +195,7 @@
                 elBtnRefrescar.disabled = false;
                 stopLive();
                 cargarSnapshot(false);
-                startLive(); // SSE + polling
+                startLive();
             }
 
             async function cargarSnapshot(silencioso) {
@@ -245,10 +228,10 @@
             }
 
             function renderThead() {
-                while (theadRow.children.length > 5) { // ahora hay columna "Reporte" extra
+                while (theadRow.children.length > 5) {
                     theadRow.removeChild(theadRow.children[2]);
                 }
-                const anchor = theadRow.children[theadRow.children.length - 3]; // antes de Promedio
+                const anchor = theadRow.children[theadRow.children.length - 3];
                 jurados.forEach(j => {
                     const th = document.createElement('th');
                     th.className = 'text-center';
@@ -282,10 +265,9 @@
             }
 
             function renderTbody() {
-                // Limpia filas actuales (menos la vacía)
+
                 tbodyRows.querySelectorAll('tr:not(#fila-empty)').forEach(tr => tr.remove());
 
-                // Filtra por categoría (si aplica)
                 const base = categoriaId ? filasFull.filter(f => f.categoriaId === categoriaId) : filasFull;
 
                 if (!base.length) {
@@ -294,7 +276,6 @@
                 }
                 filaEmpty.style.display = 'none';
 
-                // Ordena por puntos desc (luego por promedio desc si quieres un desempate estable)
                 const ordenado = base.slice().sort((a, b) => {
                     const diff = getPuntos(b) - getPuntos(a);
                     if (diff !== 0) return diff;
@@ -303,7 +284,6 @@
                     return pb - pa;
                 });
 
-                // Asigna ranking con empates (1,1,3)
                 let lastPts = null, lastRank = 0, i = 0;
                 const ranked = ordenado.map(f => {
                     i += 1;
@@ -319,24 +299,19 @@
                 ranked.forEach(f => {
                     const tr = tplRow.content.firstElementChild.cloneNode(true);
 
-                    // Puesto / Medalla
                     const medallaEl = tr.querySelector('.row-medalla');
                     const puestoEl = tr.querySelector('.row-puesto');
                     puestoEl.textContent = `#${f.__rank}`;
                     medallaEl.textContent = (f.__rank === 1) ? '🥇' : (f.__rank === 2) ? '🥈' : (f.__rank === 3) ? '🥉' : '';
 
-                    // Participante / Institución
                     tr.querySelector('.row-participante').textContent = f.participante ?? '—';
                     tr.querySelector('.row-institucion').textContent = f.institucion ?? '—';
 
-                    // Quita las celdas "Promedio" y "Estado" del template para reinsertarlas luego,
-                    // pero búscalas por clase (no por índice).
                     const promCell = tr.querySelector('.row-promedio')?.closest('td');
                     const estadoCell = tr.querySelector('.row-estado')?.closest('td');
                     if (promCell) promCell.remove();
                     if (estadoCell) estadoCell.remove();
 
-                    // Inserta columnas de cada jurado (en el orden del thead)
                     jurados.forEach(j => {
                         const td = document.createElement('td');
                         td.className = 'text-center';
@@ -345,24 +320,20 @@
                         tr.appendChild(td);
                     });
 
-                    // Promedio (o puntos) mostrado
                     const tdProm = document.createElement('td');
                     tdProm.className = 'text-end';
-                    // Muestra el total de puntos si existe; caso contrario, el promedio
+
                     const toShow = (typeof f.puntos === 'number') ? f.puntos : (typeof f.promedio === 'number' ? f.promedio : 0);
                     const fmt = Number.isInteger(toShow) ? toShow : toShow.toFixed(2);
                     tdProm.innerHTML = `<span class="fw-bold">${fmt}</span>`;
                     tr.appendChild(tdProm);
 
-                    // Estado
                     const tdEstado = document.createElement('td');
                     tdEstado.className = 'text-center';
                     tdEstado.innerHTML = `<span class="badge ${f.completado ? 'text-bg-success' : 'text-bg-secondary'}">
                         ${f.completado ? 'Completo' : 'Pendiente'}
                         </span>`;
                                         tr.appendChild(tdEstado);
-
-                                        // Reporte PDF
                                         const tdPdf = document.createElement('td');
                                         tdPdf.className = 'text-center';
                                         tdPdf.innerHTML = `
@@ -372,13 +343,10 @@
                             <i class="bi bi-file-earmark-pdf"></i> PDF
                         </a>`;
                     tr.appendChild(tdPdf);
-
                     frag.appendChild(tr);
                 });
-
                 tbodyRows.appendChild(frag);
             }
-
 
             function marcarActualizado() {
                 elLastUpdate.textContent = new Date().toLocaleTimeString();
@@ -398,7 +366,7 @@
                             marcarActualizado();
                         } catch (e) { console.error(e); }
                     };
-                    sse.onerror = () => { /* silencioso */ };
+                    sse.onerror = () => { /* silencioso uwu */ };
                 } catch (e) { console.warn('SSE no disponible'); }
                 polling = setInterval(() => cargarSnapshot(true), 15000);
             }
@@ -424,9 +392,6 @@
             if (typeof f.promedio === 'number') return f.promedio;
             return 0;
         }
-
     </script>
-
 </body>
-
 </html>
