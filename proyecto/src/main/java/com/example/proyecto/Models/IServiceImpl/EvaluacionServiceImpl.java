@@ -65,4 +65,11 @@ public class EvaluacionServiceImpl implements IEvaluacionService {
         return evaluacionDao.existsByActividad_IdActividadAndInscripcion_IdInscripcionAndJurado_IdJuradoAndRubrica_IdRubrica(
             actividadId, inscripcionId, juradoId, rubricaId);
     }
+
+    /* para evaluacion entrada univeristaria */
+
+    @Override
+    public boolean existsByInscripcionAndJurado(Long idInscripcion, Long idJurado) {
+        return evaluacionDao.existsByInscripcionIdInscripcionAndJuradoIdJurado(idInscripcion, idJurado);
+    }
 }

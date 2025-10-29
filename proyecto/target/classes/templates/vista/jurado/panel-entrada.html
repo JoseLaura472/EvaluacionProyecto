@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación de Danzas</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container-custom {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .fase-tabs {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .fase-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            background: white;
+            transition: all 0.3s;
+            margin: 0 5px;
+        }
+
+        .fase-tab:hover {
+            border-color: #667eea;
+        }
+
+        .fase-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .fase-tab i {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .lista-participantes {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .participante-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .participante-item:hover {
+            background: #f8f9fa;
+            border-color: #667eea;
+        }
+
+        .participante-item.selected {
+            background: #e3f2fd;
+            border-color: #2196F3;
+        }
+
+        .participante-item.evaluado {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+        }
+
+        .participante-nombre {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .badge-status {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-pendiente {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-evaluado {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .modal-evaluacion {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-evaluacion.show {
+            display: flex;
+        }
+
+        .modal-content-custom {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .modal-body-custom {
+            padding: 25px;
+        }
+
+        .criterio-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .criterio-nombre {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .criterio-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .puntos-max {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        .input-puntaje {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.5rem;
+            text-align: center;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .input-puntaje:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .total-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .total-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .total-puntos {
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .btn-custom {
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-guardar {
+            background: #4caf50;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-guardar:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-cerrar {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-cerrar:hover {
+            background: #da190b;
+        }
+
+        .resumen-box {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .progress-custom {
+            height: 30px;
+            border-radius: 15px;
+            background: #e0e0e0;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .progress-bar-custom {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50 0%, #8bc34a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            transition: width 0.5s ease;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #95a5a6;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .fase-tab {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+            
+            .fase-tab i {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-custom">
+        <!-- Header -->
+        <div class="header-box">
+            <h1 class="header-title">
+                <i class="fas fa-music"></i> Evaluación de Danzas
+            </h1>
+            <small class="text-muted">
+                Jurado: <strong th:text="${jurado.persona.nombre}">Juan Pérez</strong>
+            </small>
+        </div>
+
+        <!-- Selector de Fase -->
+        <div class="fase-tabs">
+            <div class="d-flex">
+                <div class="fase-tab active" data-fase="recorrido" onclick="cambiarFase('recorrido')">
+                    <i class="fas fa-route"></i>
+                    <div><strong>RECORRIDO</strong></div>
+                    <small>50 pts</small>
+                </div>
+                <div class="fase-tab" data-fase="palco" onclick="cambiarFase('palco')">
+                    <i class="fas fa-theater-masks"></i>
+                    <div><strong>PALCO</strong></div>
+                    <small>50 pts</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Participantes -->
+        <div class="lista-participantes">
+            <h5 class="mb-3"><i class="fas fa-list"></i> Selecciona un participante para evaluar:</h5>
+            <div id="listaParticipantes">
+                <!-- Se carga dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Resumen -->
+        <div class="resumen-box">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Progreso:</strong>
+                    <span id="textoProgreso">0 de 0 evaluados</span>
+                </div>
+                <button class="btn btn-success btn-custom" onclick="finalizarTodo()">
+                    <i class="fas fa-check-circle"></i> Finalizar
+                </button>
+            </div>
+            <div class="progress-custom">
+                <div class="progress-bar-custom" id="barraProgreso" style="width: 0%">0%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Evaluación -->
+    <div class="modal-evaluacion" id="modalEvaluacion">
+        <div class="modal-content-custom">
+            <div class="modal-header-custom">
+                <h3 style="margin: 0;">
+                    <i class="fas fa-edit"></i> <span id="nombreParticipanteModal">-</span>
+                </h3>
+                <small id="faseModal">-</small>
+            </div>
+            <div class="modal-body-custom">
+                <div id="criteriosContainer">
+                    <!-- Se carga dinámicamente -->
+                </div>
+
+                <div class="total-box">
+                    <div class="total-label">TOTAL</div>
+                    <div class="total-puntos">
+                        <span id="totalPuntos">0</span> / <span id="totalMax">50</span>
+                    </div>
+                </div>
+
+                <div class="d-flex" style="gap: 10px;">
+                    <button class="btn-custom btn-cerrar" onclick="cerrarModal()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button class="btn-custom btn-guardar" onclick="guardarEvaluacion()">
+                        <i class="fas fa-save"></i> Guardar Evaluación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script>
+        // Variables globales
+        let faseActual = 'recorrido';
+        let participanteSeleccionado = null;
+        let datosCompletos = {};
+
+        // Cargar datos al iniciar
+        $(document).ready(function() {
+            cargarDatos();
+        });
+
+        function cargarDatos() {
+            // En producción esto vendría del servidor
+            // $.getJSON('/jurado/evaluacion/datos/' + idActividad, function(data) { ... })
+            
+            datosCompletos = {
+                recorrido: {
+                    criterios: [
+                        { id: 1, nombre: "Puntualidad de salida y organización", maxPuntos: 10 },
+                        { id: 2, nombre: "Disciplina en el recorrido", maxPuntos: 10 },
+                        { id: 3, nombre: "Alegría y baile en el recorrido", maxPuntos: 30 }
+                    ],
+                    participantes: [
+                        { id: 1, nombre: "Morenada - Ballet Universitario", evaluado: false, puntajes: {} },
+                        { id: 2, nombre: "Caporales - Fraternidad Central", evaluado: false, puntajes: {} },
+                        { id: 3, nombre: "Tinku - Tradición Andina", evaluado: false, puntajes: {} },
+                        { id: 4, nombre: "Diablada - Espectáculo Boliviano", evaluado: false, puntajes: {} }
+                    ]
+                },
+                palco: {
+                    criterios: [
+                        { id: 4, nombre: "Coreografía en el palco", maxPuntos: 25 },
+                        { id: 5, nombre: "Demostración en el palco", maxPuntos: 10 },
+                        { id: 6, nombre: "Vestuario", maxPuntos: 10 },
+                        { id: 7, nombre: "Alegría e interpretación", maxPuntos: 5 }
+                    ],
+                    participantes: [
+                        { id: 1, nombre: "Morenada - Ballet Universitario", evaluado: false, puntajes: {} },
+                        { id: 2, nombre: "Caporales - Fraternidad Central", evaluado: false, puntajes: {} },
+                        { id: 3, nombre: "Tinku - Tradición Andina", evaluado: false, puntajes: {} },
+                        { id: 4, nombre: "Diablada - Espectáculo Boliviano", evaluado: false, puntajes: {} }
+                    ]
+                }
+            };
+
+            renderizarParticipantes();
+            actualizarProgreso();
+        }
+
+        function cambiarFase(fase) {
+            faseActual = fase;
+            
+            $('.fase-tab').removeClass('active');
+            $(`.fase-tab[data-fase="${fase}"]`).addClass('active');
+            
+            renderizarParticipantes();
+            actualizarProgreso();
+        }
+
+        function renderizarParticipantes() {
+            const datos = datosCompletos[faseActual];
+            const container = $('#listaParticipantes');
+            
+            if (!datos || datos.participantes.length === 0) {
+                container.html(`
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <div>No hay participantes en esta fase</div>
+                    </div>
+                `);
+                return;
+            }
+
+            let html = '';
+            datos.participantes.forEach(p => {
+                html += `
+                    <div class="participante-item ${p.evaluado ? 'evaluado' : ''}" 
+                         onclick="abrirModalEvaluacion(${p.id})">
+                        <div>
+                            <div class="participante-nombre">${p.nombre}</div>
+                        </div>
+                        <span class="badge-status ${p.evaluado ? 'badge-evaluado' : 'badge-pendiente'}">
+                            ${p.evaluado ? '<i class="fas fa-check"></i> Evaluado' : '<i class="fas fa-clock"></i> Pendiente'}
+                        </span>
+                    </div>
+                `;
+            });
+
+            container.html(html);
+        }
+
+        function abrirModalEvaluacion(idParticipante) {
+            const datos = datosCompletos[faseActual];
+            const participante = datos.participantes.find(p => p.id === idParticipante);
+            
+            if (participante.evaluado) {
+                alert('Este participante ya fue evaluado en esta fase');
+                return;
+            }
+
+            participanteSeleccionado = participante;
+            
+            $('#nombreParticipanteModal').text(participante.nombre);
+            $('#faseModal').text(faseActual === 'recorrido' ? 'Evaluación en Recorrido' : 'Evaluación en Palco');
+
+            let html = '';
+            let totalMax = 0;
+
+            datos.criterios.forEach(criterio => {
+                totalMax += criterio.maxPuntos;
+                const valor = participante.puntajes[criterio.id] || 0;
+                
+                html += `
+                    <div class="criterio-box">
+                        <div class="criterio-nombre">${criterio.nombre}</div>
+                        <div class="criterio-info">
+                            <span>Puntaje:</span>
+                            <span class="puntos-max">Máx: ${criterio.maxPuntos} pts</span>
+                        </div>
+                        <input type="number" 
+                               class="input-puntaje" 
+                               id="criterio_${criterio.id}"
+                               min="0" 
+                               max="${criterio.maxPuntos}" 
+                               step="0.5"
+                               value="${valor}"
+                               onchange="calcularTotal()"
+                               placeholder="0.0">
+                    </div>
+                `;
+            });
+
+            $('#criteriosContainer').html(html);
+            $('#totalMax').text(totalMax);
+            calcularTotal();
+            
+            $('#modalEvaluacion').addClass('show');
+        }
+
+        function calcularTotal() {
+            const datos = datosCompletos[faseActual];
+            let total = 0;
+
+            datos.criterios.forEach(criterio => {
+                const valor = parseFloat($('#criterio_' + criterio.id).val()) || 0;
+                
+                // Validar que no exceda el máximo
+                if (valor > criterio.maxPuntos) {
+                    $('#criterio_' + criterio.id).val(criterio.maxPuntos);
+                    total += criterio.maxPuntos;
+                } else {
+                    total += valor;
+                }
+            });
+
+            $('#totalPuntos').text(total.toFixed(1));
+        }
+
+        function cerrarModal() {
+            $('#modalEvaluacion').removeClass('show');
+            participanteSeleccionado = null;
+        }
+
+        function guardarEvaluacion() {
+            if (!participanteSeleccionado) return;
+
+            const datos = datosCompletos[faseActual];
+            const puntajes = {};
+
+            // Recopilar puntajes
+            datos.criterios.forEach(criterio => {
+                puntajes[criterio.id] = parseFloat($('#criterio_' + criterio.id).val()) || 0;
+            });
+
+            // Preparar datos para enviar
+            const evaluacionData = {
+                idParticipante: participanteSeleccionado.id,
+                fase: faseActual,
+                puntajes: puntajes,
+                total: parseFloat($('#totalPuntos').text())
+            };
+
+            // Enviar al servidor
+            $.ajax({
+                url: '/jurado/evaluacion/guardar',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(evaluacionData),
+                success: function(response) {
+                    if (response.success) {
+                        // Actualizar estado local
+                        participanteSeleccionado.evaluado = true;
+                        participanteSeleccionado.puntajes = puntajes;
+                        
+                        alert('✅ Evaluación guardada exitosamente');
+                        cerrarModal();
+                        renderizarParticipantes();
+                        actualizarProgreso();
+                    } else {
+                        alert('❌ Error: ' + response.message);
+                    }
+                },
+                error: function() {
+                    alert('❌ Error al guardar la evaluación');
+                }
+            });
+        }
+
+        function actualizarProgreso() {
+            const datos = datosCompletos[faseActual];
+            const total = datos.participantes.length;
+            const evaluados = datos.participantes.filter(p => p.evaluado).length;
+            const porcentaje = total > 0 ? Math.round((evaluados / total) * 100) : 0;
+
+            $('#textoProgreso').text(`${evaluados} de ${total} evaluados`);
+            $('#barraProgreso').css('width', porcentaje + '%').text(porcentaje + '%');
+        }
+
+        function finalizarTodo() {
+            const recorridoCompleto = datosCompletos.recorrido.participantes.every(p => p.evaluado);
+            const palcoCompleto = datosCompletos.palco.participantes.every(p => p.evaluado);
+
+            if (!recorridoCompleto || !palcoCompleto) {
+                alert('⚠️ Debes completar todas las evaluaciones en ambas fases antes de finalizar');
+                return;
+            }
+
+            if (confirm('¿Confirmas que deseas finalizar y enviar todas las evaluaciones?')) {
+                $.post('/jurado/evaluacion/finalizar', function(response) {
+                    if (response.success) {
+                        alert('✅ Evaluaciones finalizadas correctamente');
+                        window.location.href = '/jurado/dashboard';
+                    }
+                });
+            }
+        }
+
+        // Cerrar modal al hacer clic fuera
+        $(document).on('click', '.modal-evaluacion', function(e) {
+            if (e.target === this) {
+                cerrarModal();
+            }
+        });
+
+        // Prevenir cierre accidental
+        window.addEventListener('beforeunload', function(e) {
+            const hayPendientes = datosCompletos.recorrido.participantes.some(p => !p.evaluado) ||
+                                 datosCompletos.palco.participantes.some(p => !p.evaluado);
+            
+            if (hayPendientes) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    </script>
+</body>
+</html>

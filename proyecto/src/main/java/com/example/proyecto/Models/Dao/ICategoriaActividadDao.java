@@ -19,4 +19,7 @@ public interface ICategoriaActividadDao extends JpaRepository<CategoriaActividad
 
     @Query("select c from CategoriaActividad c where c.actividad.idActividad = :actId order by c.nombre asc")
     List<CategoriaActividad> findByActividad(@Param("actId") Long actId);
+
+    /* para enetrada universitaria */
+    List<CategoriaActividad> findByActividadIdActividadAndFase(Long idActividad, String fase);
 }

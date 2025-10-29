@@ -63,5 +63,10 @@ public interface IInscripcionDao extends JpaRepository<Inscripcion, Long> {
     """)
     Optional<Inscripcion> findByCategoriaAndParticipante(@Param("categoriaId") Long categoriaId,
                                                         @Param("participanteId") Long participanteId);
+    /* para entrada univeristaria */
+        // Buscar por participante (id) y fase (campo en CategoriaActividad)
+    Optional<Inscripcion> findByParticipanteIdParticipanteAndCategoriaActividadFase(Long idParticipante, String fase);
 
+    // Buscar todas las inscripciones por id de categoría
+    List<Inscripcion> findByCategoriaActividadIdCategoriaActividad(Long idCategoriaActividad);
 }

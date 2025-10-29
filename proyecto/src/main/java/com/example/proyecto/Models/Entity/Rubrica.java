@@ -1,7 +1,11 @@
 package com.example.proyecto.Models.Entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.example.proyecto.config.AuditoriaConfig;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -9,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
@@ -36,4 +41,7 @@ public class Rubrica extends AuditoriaConfig{
 
     private String nombre;
     private String version;
+
+    @OneToMany(mappedBy = "rubrica", cascade = CascadeType.ALL, orphanRemoval = true) // necesario para entrada universitaria
+    private List<RubricaCriterio> criterios = new ArrayList<>();
 }

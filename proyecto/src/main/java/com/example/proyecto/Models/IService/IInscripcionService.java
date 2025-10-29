@@ -26,4 +26,8 @@ public interface IInscripcionService extends IServiceGenerico<Inscripcion, Long>
 
     Optional<Inscripcion> fetchFull(@Param("actId") Long actId,
                                     @Param("inscId") Long inscId);
+
+    /* para entrada universitaria */
+    Inscripcion findByParticipanteAndFase(Long idParticipante, String fase);
+    List<Inscripcion> findByCategoria(Long idCategoriaActividad);
 }

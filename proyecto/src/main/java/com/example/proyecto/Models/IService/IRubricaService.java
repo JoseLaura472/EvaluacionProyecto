@@ -33,4 +33,7 @@ public interface IRubricaService extends IServiceGenerico<Rubrica, Long> {
     List<RubricaDto> obtenerRubricasActivasPorCategoria(Long categoriaId);
 
     long countActivasByCategoria(Long categoriaId);
+
+    /* PARA ENTRADA UNIVERSITARIA */
+    Rubrica findByCategoria(Long idCategoriaActividad);
 }

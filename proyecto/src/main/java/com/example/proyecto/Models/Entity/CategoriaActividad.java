@@ -23,6 +23,8 @@ public class CategoriaActividad extends AuditoriaConfig{
 
     private String nombre;
     private String descripcion;
+    private String fase;
+    private String grupoDanza;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_actividad") 

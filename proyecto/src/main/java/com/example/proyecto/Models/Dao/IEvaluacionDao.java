@@ -58,4 +58,5 @@ public interface IEvaluacionDao extends JpaRepository<Evaluacion, Long>{
     long countRubricasEvaluadasPorJurado(@Param("inscId") Long inscId,
                                          @Param("juradoId") Long juradoId);
 
+  boolean existsByInscripcionIdInscripcionAndJuradoIdJurado(Long idInscripcion, Long idJurado);
 }

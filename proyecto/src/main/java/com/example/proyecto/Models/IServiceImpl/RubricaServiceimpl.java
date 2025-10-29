@@ -12,6 +12,7 @@ import com.example.proyecto.Models.Dto.RubricaDto;
 import com.example.proyecto.Models.Entity.Rubrica;
 import com.example.proyecto.Models.IService.IRubricaService;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -119,5 +120,13 @@ public class RubricaServiceimpl implements IRubricaService {
     @Override
     public long countActivasByCategoria(Long categoriaId) {
         return dao.countActivasByCategoria(categoriaId);
+    }
+
+    /* para entrada univeristaria */
+
+    @Override
+    public Rubrica findByCategoria(Long idCategoriaActividad) {
+        return dao.findByCategoriaActividadIdCategoriaActividad(idCategoriaActividad)
+                .orElseThrow(() -> new EntityNotFoundException("Rúbrica no encontrada para categoría " + idCategoriaActividad));
     }
 }

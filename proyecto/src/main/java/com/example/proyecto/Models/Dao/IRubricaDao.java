@@ -50,4 +50,8 @@ public interface IRubricaDao extends JpaRepository<Rubrica, Long> {
           and coalesce(r.estado,'A') = 'A'
     """)
     long countActivasByCategoria(@Param("categoriaId") Long categoriaId);
+
+    /* PARA ENTRADA UNIVERSITARIA */
+    // Obtener la rúbrica por id de categoría (asumiendo una versión activa)
+    Optional<Rubrica> findByCategoriaActividadIdCategoriaActividad(Long idCategoriaActividad);
 }

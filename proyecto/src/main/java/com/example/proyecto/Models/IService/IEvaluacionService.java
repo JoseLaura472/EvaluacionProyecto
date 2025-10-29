@@ -24,4 +24,7 @@ public interface IEvaluacionService extends IServiceGenerico<Evaluacion, Long>{
         @Param("idParticipante") Long idParticipante,
         @Param("idRubrica") Long idRubrica
     );
+
+    /* para entrada universitaria */
+    boolean existsByInscripcionAndJurado(Long idInscripcion, Long idJurado);
 }

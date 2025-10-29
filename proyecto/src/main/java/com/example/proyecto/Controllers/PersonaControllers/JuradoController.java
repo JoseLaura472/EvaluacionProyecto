@@ -24,6 +24,7 @@ import com.example.proyecto.Models.Entity.Actividad;
 import com.example.proyecto.Models.Entity.Jurado;
 import com.example.proyecto.Models.Entity.Persona;
 import com.example.proyecto.Models.Entity.Usuario;
+import com.example.proyecto.Models.IService.IEvaluacionService;
 import com.example.proyecto.Models.IService.IJuradoAsignacionService;
 import com.example.proyecto.Models.IService.IJuradoService;
 import com.example.proyecto.Models.IService.IParticipanteService;
@@ -51,6 +52,7 @@ public class JuradoController {
     private final IRubricaService rubricaService;
     private final EvaluacionCategoriaAdapterService evaluacionCategoriaAdapterService;
     private final JuradoLookupService juradoLookupService;
+    private final IEvaluacionService evaluacionService;
 
     @GetMapping("/vista")
     public String inicioJurado() {
@@ -236,5 +238,61 @@ public class JuradoController {
         Jurado jurado = juradoLookupService.cargarPorPersonaOrThrow(persona.getIdPersona());
         evaluacionCategoriaAdapterService.guardarEvaluacionCategoria(jurado, dto);
         return ResponseEntity.ok().build();
+    }
+
+    /* ENTRADA UNIVERSITARIA */
+    // Mostrar vista principal
+    @GetMapping("/{idActividad}")
+    public String mostrarEvaluacion(
+            @PathVariable Long idActividad,
+            HttpSession session,
+            Model model) {
+        
+        Long idJurado = (Long) session.getAttribute("idJurado");
+        Jurado jurado = juradoService.findById(idJurado);
+        
+        model.addAttribute("jurado", jurado);
+        model.addAttribute("idActividad", idActividad);
+        
+        return "jurado/evaluacion";
+    }
+    
+    // Obtener datos para evaluar
+    @GetMapping("/datos/{idActividad}")
+    @ResponseBody
+    public Map<String, Object> obtenerDatos(@PathVariable Long idActividad, HttpSession session) {
+        Long idJurado = (Long) session.getAttribute("idJurado");
+        return evaluacionService.obtenerDatosEvaluacion(idActividad, idJurado);
+    }
+    
+    // Guardar evaluación
+    @PostMapping("/guardar")
+    @ResponseBody
+    public Map<String, Object> guardarEvaluacion(
+            @RequestBody Map<String, Object> datos,
+            HttpSession session) {
+        
+        Long idJurado = (Long) session.getAttribute("idJurado");
+        
+        try {
+            evaluacionService.guardarEvaluacion(datos, idJurado);
+            return Map.of("success", true);
+        } catch (Exception e) {
+            return Map.of("success", false, "message", e.getMessage());
+        }
+    }
+    
+    // Finalizar todas las evaluaciones
+    @PostMapping("/finalizar")
+    @ResponseBody
+    public Map<String, Object> finalizarEvaluacion(HttpSession session) {
+        Long idJurado = (Long) session.getAttribute("idJurado");
+        
+        try {
+            evaluacionService.finalizarEvaluaciones(idJurado);
+            return Map.of("success", true);
+        } catch (Exception e) {
+            return Map.of("success", false, "message", e.getMessage());
+        }
     }
 }

@@ -9,6 +9,7 @@ import com.example.proyecto.Models.Dao.IInscripcionDao;
 import com.example.proyecto.Models.Entity.Inscripcion;
 import com.example.proyecto.Models.IService.IInscripcionService;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -68,5 +69,19 @@ public class InscripcionServiceImpl implements IInscripcionService{
     @Override
     public Optional<Inscripcion> fetchFull(Long actId, Long inscId) {
         return dao.fetchFull(actId, inscId);
+    }
+
+    /* para entrada universitaria */
+
+    @Override
+    public Inscripcion findByParticipanteAndFase(Long idParticipante, String fase) {
+        return dao.findByParticipanteIdParticipanteAndCategoriaActividadFase(idParticipante, fase)
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Inscripcion no encontrada para participante " + idParticipante + " y fase " + fase));
+    }
+
+    @Override
+    public List<Inscripcion> findByCategoria(Long idCategoriaActividad) {
+        return dao.findByCategoriaActividadIdCategoriaActividad(idCategoriaActividad);
     }
 }
