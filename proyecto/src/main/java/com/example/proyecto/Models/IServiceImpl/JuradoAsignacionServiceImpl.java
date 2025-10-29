@@ -1,6 +1,7 @@
 package com.example.proyecto.Models.IServiceImpl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -18,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class JuradoAsignacionServiceImpl implements IJuradoAsignacionService {
     
     private final IJuradoAsignacionDao dao;
+    private final IJuradoAsignacionDao asignacionDao;
 
     @Override
     public List<JuradoAsignacion> findAll() {
@@ -56,7 +58,7 @@ public class JuradoAsignacionServiceImpl implements IJuradoAsignacionService {
 
     @Override
     public boolean existsCategoriaAsignadaByPersona(Long idPersona) {
-        return dao.existsCategoriaAsignadaByPersona(idPersona);
+        return dao.existsByJurado_Persona_IdPersona(idPersona);
     }
 
     @Override
@@ -67,6 +69,22 @@ public class JuradoAsignacionServiceImpl implements IJuradoAsignacionService {
     @Override
     public List<Jurado> findJuradosByActividadAndCategoriaOrdenAsignacion(Long actividadId, Long categoriaId) {
         return dao.findJuradosByActividadAndCategoriaOrdenAsignacion(actividadId, categoriaId);
+    }
+
+    @Override
+    public JuradoAsignacion findFirstByJuradoId(Long idJurado) {
+        return dao.findFirstByJurado_IdJurado(idJurado);
+    }
+
+    @Override
+    public List<Actividad> findActividadesAsignadasByJurado(Long idJurado) {
+        List<JuradoAsignacion> asignaciones = asignacionDao
+            .findByJurado_IdJurado(idJurado);
+        
+        return asignaciones.stream()
+            .map(JuradoAsignacion::getActividad)
+            .distinct()
+            .collect(Collectors.toList());
     }
 
 }

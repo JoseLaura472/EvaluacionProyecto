@@ -3,6 +3,8 @@ package com.example.proyecto.Controllers.PersonaControllers;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,7 @@ import com.example.proyecto.Models.Dto.ParticipanteListadoDto;
 import com.example.proyecto.Models.Dto.RubricaDto;
 import com.example.proyecto.Models.Entity.Actividad;
 import com.example.proyecto.Models.Entity.Jurado;
+import com.example.proyecto.Models.Entity.JuradoAsignacion;
 import com.example.proyecto.Models.Entity.Persona;
 import com.example.proyecto.Models.Entity.Usuario;
 import com.example.proyecto.Models.IService.IEvaluacionService;
@@ -32,6 +35,7 @@ import com.example.proyecto.Models.IService.IPersonaService;
 import com.example.proyecto.Models.IService.IRubricaService;
 import com.example.proyecto.Models.IService.IUsuarioService;
 import com.example.proyecto.Models.IServiceImpl.EvaluacionCategoriaAdapterService;
+import com.example.proyecto.Models.Service.EvaluacionService;
 import com.example.proyecto.Models.Service.JuradoLookupService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,7 +56,7 @@ public class JuradoController {
     private final IRubricaService rubricaService;
     private final EvaluacionCategoriaAdapterService evaluacionCategoriaAdapterService;
     private final JuradoLookupService juradoLookupService;
-    private final IEvaluacionService evaluacionService;
+    private final EvaluacionService evaluacionService;
 
     @GetMapping("/vista")
     public String inicioJurado() {
@@ -208,10 +212,11 @@ public class JuradoController {
     @ResponseBody
     @GetMapping("/api/participantes")
     public List<ParticipanteListadoDto> participantes(@RequestParam Long categoriaId,
-                                                    HttpSession session,
-                                                    @RequestParam(name = "soloPendientes", defaultValue = "true") boolean soloPendientes) {
+            HttpSession session,
+            @RequestParam(name = "soloPendientes", defaultValue = "true") boolean soloPendientes) {
         Persona persona = (Persona) session.getAttribute("persona");
-        if (persona == null) return List.of();
+        if (persona == null)
+            return List.of();
         Jurado jurado = juradoLookupService.cargarPorPersonaOrThrow(persona.getIdPersona());
 
         if (soloPendientes) {
@@ -223,10 +228,10 @@ public class JuradoController {
                 ? participanteService.listarPendientesPorCategoria(categoriaId, jurado.getIdJurado())
                 : participanteService.listarPorCategoria(categoriaId);
 
-        System.out.println("[/api/participantes] cat=" + categoriaId + " soloPend=" + soloPendientes + " -> " + r.size() + " filas");
+        System.out.println("[/api/participantes] cat=" + categoriaId + " soloPend=" + soloPendientes + " -> " + r.size()
+                + " filas");
         return r;
     }
-
 
     // 4) Guardar evaluación (por rúbrica actual)
     @ResponseBody
@@ -242,38 +247,95 @@ public class JuradoController {
 
     /* ENTRADA UNIVERSITARIA */
     // Mostrar vista principal
-    @GetMapping("/{idActividad}")
-    public String mostrarEvaluacion(
-            @PathVariable Long idActividad,
-            HttpSession session,
-            Model model) {
-        
+
+    @GetMapping("/panel-entrada")
+    public String vistaPanelEntrada(HttpSession session, RedirectAttributes flash, Model model) {
+
+        // Verificar usuario logueado
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) {
+            flash.addFlashAttribute("error", "Debes iniciar sesión primero.");
+            return "redirect:/LoginR";
+        }
+
+        // Verificar que es jurado
+        String estado = (usuario.getEstado() != null) ? usuario.getEstado().trim().toUpperCase() : "";
+        if (!"J".equals(estado)) {
+            flash.addFlashAttribute("warn", "No tienes permiso para acceder a este panel.");
+            return "redirect:/inicio";
+        }
+
+        // Obtener idJurado de la sesión
         Long idJurado = (Long) session.getAttribute("idJurado");
-        Jurado jurado = juradoService.findById(idJurado);
-        
-        model.addAttribute("jurado", jurado);
-        model.addAttribute("idActividad", idActividad);
-        
-        return "jurado/evaluacion";
+        if (idJurado == null) {
+            flash.addFlashAttribute("error", "No se encontró información del jurado.");
+            return "redirect:/LoginR";
+        }
+
+        try {
+            // Buscar asignación del jurado
+            JuradoAsignacion asignacion = asignacionService.findFirstByJuradoId(idJurado);
+
+            if (asignacion == null || asignacion.getActividad() == null) {
+                flash.addFlashAttribute("warn", "No tienes actividades asignadas actualmente.");
+                return "redirect:/jurado/panel";
+            }
+
+            // Obtener datos para la vista
+            Jurado jurado = juradoService.findOne(idJurado);
+            Actividad actividad = asignacion.getActividad();
+
+            // Agregar al modelo
+            model.addAttribute("jurado", jurado);
+            model.addAttribute("idActividad", actividad.getIdActividad());
+            model.addAttribute("actividad", actividad);
+
+            System.out.println("[Panel] Jurado: " + jurado.getIdJurado() +
+                    " - Actividad: " + actividad.getIdActividad() +
+                    " - " + actividad.getNombre());
+
+            return "vista/jurado/panel-entrada";
+
+        } catch (Exception e) {
+            System.err.println("[Panel] Error: " + e.getMessage());
+            e.printStackTrace();
+            flash.addFlashAttribute("error", "Error al cargar la actividad: " + e.getMessage());
+            return "redirect:/jurado/panel";
+        }
     }
-    
+
     // Obtener datos para evaluar
-    @GetMapping("/datos/{idActividad}")
+    @GetMapping(value = "/datos/{idActividad}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Map<String, Object> obtenerDatos(@PathVariable Long idActividad, HttpSession session) {
+    public ResponseEntity<Map<String, Object>> obtenerDatos(
+            @PathVariable Long idActividad,
+            HttpSession session) {
+
         Long idJurado = (Long) session.getAttribute("idJurado");
-        return evaluacionService.obtenerDatosEvaluacion(idActividad, idJurado);
+        if (idJurado == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("success", false, "message", "No autorizado"));
+        }
+
+        try {
+            Map<String, Object> datos = evaluacionService.obtenerDatosEvaluacion(idActividad, idJurado);
+            return ResponseEntity.ok(datos);
+        } catch (Exception e) {
+            // log.error("Error al obtener datos de evaluación", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
-    
+
     // Guardar evaluación
     @PostMapping("/guardar")
     @ResponseBody
     public Map<String, Object> guardarEvaluacion(
             @RequestBody Map<String, Object> datos,
             HttpSession session) {
-        
+
         Long idJurado = (Long) session.getAttribute("idJurado");
-        
+
         try {
             evaluacionService.guardarEvaluacion(datos, idJurado);
             return Map.of("success", true);
@@ -281,16 +343,20 @@ public class JuradoController {
             return Map.of("success", false, "message", e.getMessage());
         }
     }
-    
-    // Finalizar todas las evaluaciones
+
     @PostMapping("/finalizar")
     @ResponseBody
     public Map<String, Object> finalizarEvaluacion(HttpSession session) {
         Long idJurado = (Long) session.getAttribute("idJurado");
-        
+
+        if (idJurado == null) {
+            return Map.of("success", false, "message", "No autorizado");
+        }
+
         try {
-            evaluacionService.finalizarEvaluaciones(idJurado);
-            return Map.of("success", true);
+            // Aquí puedes agregar lógica adicional si necesitas
+            // Por ejemplo: marcar como finalizadas, enviar notificaciones, etc.
+            return Map.of("success", true, "message", "Evaluaciones finalizadas correctamente");
         } catch (Exception e) {
             return Map.of("success", false, "message", e.getMessage());
         }

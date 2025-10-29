@@ -71,4 +71,9 @@ public class JuradoServiceImpl implements IJuradoService {
     public List<Actividad> findActividadesByJurado(Long juradoId) {
         return juradoDao.findActividadesByJurado(juradoId);
     }
+
+    @Override
+    public Jurado findByPersonaId(Long idPersona) {
+        return juradoDao.findByPersona_IdPersona(idPersona);
+    }
 }

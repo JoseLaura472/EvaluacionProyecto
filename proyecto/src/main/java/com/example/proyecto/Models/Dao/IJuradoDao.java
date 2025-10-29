@@ -39,4 +39,6 @@ public interface IJuradoDao  extends CrudRepository<Jurado, Long>{
     List<Actividad> findActividadesByJurado(@Param("juradoId") Long juradoId);
 
     Optional<Jurado> findFirstByPersona_IdPersonaAndEstado(Long idPersona, String estado);
+
+    Jurado findByPersona_IdPersona(Long idPersona);
 }

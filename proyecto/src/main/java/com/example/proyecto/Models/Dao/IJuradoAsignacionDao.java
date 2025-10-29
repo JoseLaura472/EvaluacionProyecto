@@ -73,4 +73,15 @@ public interface IJuradoAsignacionDao extends JpaRepository<JuradoAsignacion, Lo
     @Param("actividadId") Long actividadId,
     @Param("categoriaId") Long categoriaId
     );
+
+
+    JuradoAsignacion findFirstByJurado_IdJurado(Long idJurado);
+    
+    List<JuradoAsignacion> findByJurado_IdJurado(Long idJurado);
+    
+    boolean existsByJurado_Persona_IdPersona(Long idPersona);
+    
+    // Buscar por actividad y jurado
+    List<JuradoAsignacion> findByActividad_IdActividadAndJurado_IdJurado(
+        Long idActividad, Long idJurado);
 }

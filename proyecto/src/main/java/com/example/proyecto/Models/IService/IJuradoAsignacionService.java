@@ -20,4 +20,6 @@ public interface IJuradoAsignacionService extends IServiceGenerico<JuradoAsignac
     List<CategoriaDto> listarCategoriasDeJuradoPorPersona(Long idPersona);
 
     List<Jurado> findJuradosByActividadAndCategoriaOrdenAsignacion(Long actividadId, Long categoriaId);
+    JuradoAsignacion findFirstByJuradoId(Long idJurado);
+    List<Actividad> findActividadesAsignadasByJurado(Long idJurado);
 }

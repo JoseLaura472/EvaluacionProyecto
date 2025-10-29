@@ -31,4 +31,6 @@ public interface IJuradoService {
     Optional<Jurado> findActivoByPersonaId(@Param("idPersona") Long idPersona);
 
     List<Actividad> findActividadesByJurado(@Param("juradoId") Long juradoId);
+
+    Jurado findByPersonaId(Long idPersona);
 }
