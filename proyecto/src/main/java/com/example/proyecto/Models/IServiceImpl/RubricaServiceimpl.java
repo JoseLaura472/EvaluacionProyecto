@@ -129,4 +129,9 @@ public class RubricaServiceimpl implements IRubricaService {
         return dao.findByCategoriaActividadIdCategoriaActividad(idCategoriaActividad)
                 .orElseThrow(() -> new EntityNotFoundException("Rúbrica no encontrada para categoría " + idCategoriaActividad));
     }
+
+    @Override
+    public Rubrica findByActividadAndCategoria(Long idActividad, Long idCategoriaActividad) {
+        return dao.findByActividadIdActividadAndCategoriaActividadIdCategoriaActividad(idActividad, idCategoriaActividad);
+    }
 }

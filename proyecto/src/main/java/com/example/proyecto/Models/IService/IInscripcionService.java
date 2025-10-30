@@ -30,4 +30,11 @@ public interface IInscripcionService extends IServiceGenerico<Inscripcion, Long>
     /* para entrada universitaria */
     Inscripcion findByParticipanteAndFase(Long idParticipante, String fase);
     List<Inscripcion> findByCategoria(Long idCategoriaActividad);
+    List<Inscripcion> findByActividad(Long idActividad);
+    Inscripcion findByActividadAndParticipante(Long idActividad, Long idParticipante);
+    Inscripcion findByActividadParticipanteAndCategoria(
+        Long idActividad, 
+        Long idParticipante, 
+        Long idCategoriaActividad
+    );
 }

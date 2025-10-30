@@ -1,6 +1,5 @@
 package com.example.proyecto.Models.Service;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import com.example.proyecto.Models.Dao.ICategoriaActividadDao;
 import com.example.proyecto.Models.Dao.IEvaluacionDao;
-import com.example.proyecto.Models.Dao.IJuradoDao;
 import com.example.proyecto.Models.Dao.IRubricaCriterioDao;
 import com.example.proyecto.Models.Dto.EvaluacionGuardarDto;
 import com.example.proyecto.Models.Entity.CategoriaActividad;
@@ -21,9 +18,13 @@ import com.example.proyecto.Models.Entity.Evaluacion;
 import com.example.proyecto.Models.Entity.EvaluacionDetalle;
 import com.example.proyecto.Models.Entity.Inscripcion;
 import com.example.proyecto.Models.Entity.Jurado;
+import com.example.proyecto.Models.Entity.JuradoAsignacion;
+import com.example.proyecto.Models.Entity.Participante;
 import com.example.proyecto.Models.Entity.Rubrica;
 import com.example.proyecto.Models.Entity.RubricaCriterio;
+import com.example.proyecto.Models.IService.IEvaluacionService;
 import com.example.proyecto.Models.IService.IInscripcionService;
+import com.example.proyecto.Models.IService.IJuradoAsignacionService;
 import com.example.proyecto.Models.IService.IRubricaService;
 
 import jakarta.transaction.Transactional;
@@ -38,9 +39,10 @@ public class EvaluacionService {
     private final IRubricaCriterioDao criterioRepo;
     private final SseHub sseHub;
     private final ConcursoDashboardService dashService;
-    private final ICategoriaActividadDao categoriaActividadDao;
-    private final IJuradoDao juradoDao;
-    private final IRubricaCriterioDao rubricaCriterioDao;
+    private final IJuradoAsignacionService asignacionService;
+    private final IRubricaService rubricaService;
+    private final IInscripcionService inscripcionService;
+    private final IEvaluacionService evaluacionService;
 
     @Transactional
     public void guardarEvaluacion(Jurado jurado, EvaluacionGuardarDto dto) {
@@ -142,118 +144,263 @@ public class EvaluacionService {
     }
 
     /* PARA EVALUACIÓN DE ENTRADA UNIVERISTARIA */
-
+    /**
+     * Obtiene los datos necesarios para que el jurado evalúe
+     * Solo devuelve datos de LA CATEGORÍA asignada al jurado
+     */
     @Transactional
     public Map<String, Object> obtenerDatosEvaluacion(Long idActividad, Long idJurado) {
-
-        // Obtener categorías de recorrido y palco
-        List<CategoriaActividad> categoriasRecorrido = categoriaActividadDao
-                .findByActividadIdActividadAndFase(idActividad, "RECORRIDO");
-
-        List<CategoriaActividad> categoriasPalco = categoriaActividadDao
-                .findByActividadIdActividadAndFase(idActividad, "PALCO");
-
         Map<String, Object> resultado = new HashMap<>();
-
-        // Datos de recorrido
-        resultado.put("recorrido", construirDatosFase(
-                categoriasRecorrido, idJurado, "RECORRIDO"));
-
-        // Datos de palco
-        resultado.put("palco", construirDatosFase(
-                categoriasPalco, idJurado, "PALCO"));
-
-        return resultado;
-    }
-
-    private Map<String, Object> construirDatosFase(
-            List<CategoriaActividad> categorias,
-            Long idJurado,
-            String fase) {
-
-        Map<String, Object> datosFase = new HashMap<>();
-
-        // Obtener criterios (rúbrica)
-        if (!categorias.isEmpty()) {
-            CategoriaActividad categoria = categorias.get(0);
-            Rubrica rubrica = rubricaRepo.findByCategoria(categoria.getIdCategoriaActividad());
-
-            List<Map<String, Object>> criterios = new ArrayList<>();
-            for (RubricaCriterio criterio : rubrica.getCriterios()) {
-                criterios.add(Map.of(
-                        "id", criterio.getIdRubricaCriterio(),
-                        "nombre", criterio.getNombre(),
-                        "maxPuntos", criterio.getMaxPuntos()));
+        
+        try {
+            // 1. Obtener la asignación del jurado
+            JuradoAsignacion asignacion = asignacionService.findFirstByJuradoId(idJurado);
+            
+            if (asignacion == null) {
+                throw new RuntimeException("No se encontró asignación para el jurado");
             }
-            datosFase.put("criterios", criterios);
-        }
-
-        // Obtener participantes
-        List<Map<String, Object>> participantes = new ArrayList<>();
-        for (CategoriaActividad categoria : categorias) {
-            List<Inscripcion> inscripciones = inscripcionRepo
-                    .findByCategoria(categoria.getIdCategoriaActividad());
-
-            for (Inscripcion inscripcion : inscripciones) {
-                boolean evaluado = evaluacionRepo
-                        .existsByInscripcionIdInscripcionAndJuradoIdJurado(
-                                inscripcion.getIdInscripcion(), idJurado);
-
-                participantes.add(Map.of(
-                        "id", inscripcion.getParticipante().getIdParticipante(),
-                        "nombre", inscripcion.getParticipante().getNombre(),
-                        "evaluado", evaluado,
-                        "puntajes", new HashMap<>()));
+            
+            if (asignacion.getCategoriaActividad() == null) {
+                throw new RuntimeException("La asignación no tiene categoría definida");
             }
+            
+            CategoriaActividad categoria = asignacion.getCategoriaActividad();
+            Long idCategoria = categoria.getIdCategoriaActividad();
+            
+            System.out.println("══════════════════════════════════════════════════════");
+            System.out.println("[EvaluacionService] Obteniendo datos de evaluación");
+            System.out.println("Jurado ID: " + idJurado);
+            System.out.println("Categoría asignada: " + categoria.getNombre() + " (ID: " + idCategoria + ")");
+            
+            // 2. Obtener la rúbrica de esta categoría
+            Rubrica rubrica = rubricaService.findByActividadAndCategoria(idActividad, idCategoria);
+            
+            if (rubrica == null) {
+                throw new RuntimeException("No se encontró rúbrica para la categoría: " + categoria.getNombre());
+            }
+            
+            System.out.println("Rúbrica encontrada: " + rubrica.getNombre() + " (ID: " + rubrica.getIdRubrica() + ")");
+            
+            // 3. Obtener los criterios de evaluación
+            List<Map<String, Object>> criterios = rubrica.getCriterios().stream()
+                .filter(c -> "A".equals(c.getEstado()))
+                .map(criterio -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", criterio.getIdRubricaCriterio());
+                    map.put("nombre", criterio.getNombre());
+                    map.put("maxPuntos", criterio.getMaxPuntos() != null ? criterio.getMaxPuntos() : 0);
+                    map.put("descripcion", criterio.getDescripcion());
+                    return map;
+                })
+                .collect(Collectors.toList());
+            
+            System.out.println("Criterios encontrados: " + criterios.size());
+            
+            // 4. 🔥 AQUÍ ESTÁ EL CAMBIO CLAVE 🔥
+            // Obtener inscripciones SOLO de esta categoría específica
+            List<Inscripcion> inscripciones = inscripcionService.findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividad(
+                idActividad, 
+                idCategoria  // ← FILTRAR POR CATEGORÍA
+            );
+            
+            System.out.println("Inscripciones encontradas para esta categoría: " + inscripciones.size());
+            
+            // 5. Mapear participantes (ahora sin duplicados)
+            List<Map<String, Object>> participantes = inscripciones.stream()
+                .filter(i -> i.getParticipante() != null && "A".equals(i.getParticipante().getEstado()))
+                .map(inscripcion -> {
+                    Participante p = inscripcion.getParticipante();
+                    
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", p.getIdParticipante());
+                    map.put("nombre", p.getNombre());
+                    map.put("institucion", p.getInstitucion());
+                    
+                    // Verificar si este jurado ya evaluó a este participante en esta categoría
+                    boolean evaluado = evaluacionService.existeEvaluacion(
+                        idJurado, 
+                        p.getIdParticipante(), 
+                        idCategoria
+                    );
+                    map.put("evaluado", evaluado);
+                    
+                    System.out.println("  - Participante: " + p.getNombre() + " | Evaluado: " + evaluado);
+                    
+                    // Si ya fue evaluado, cargar puntajes
+                    if (evaluado) {
+                        Map<Long, Double> puntajes = obtenerPuntajesGuardados(
+                            idJurado, 
+                            p.getIdParticipante(), 
+                            idCategoria
+                        );
+                        map.put("puntajes", puntajes);
+                    } else {
+                        map.put("puntajes", new HashMap<>());
+                    }
+                    
+                    return map;
+                })
+                .collect(Collectors.toList());
+            
+            System.out.println("Participantes procesados: " + participantes.size());
+            System.out.println("══════════════════════════════════════════════════════");
+            
+            // 6. Construir respuesta
+            Map<String, Object> datosCategoria = new HashMap<>();
+            datosCategoria.put("idCategoria", idCategoria);
+            datosCategoria.put("nombreCategoria", categoria.getNombre());
+            datosCategoria.put("idRubrica", rubrica.getIdRubrica());
+            datosCategoria.put("criterios", criterios);
+            datosCategoria.put("participantes", participantes);
+            
+            resultado.put("categoria", datosCategoria);
+            resultado.put("nombreActividad", asignacion.getActividad().getNombre());
+            
+            return resultado;
+            
+        } catch (Exception e) {
+            System.err.println("══════════════════════════════════════════════════════");
+            System.err.println("[EvaluacionService] ERROR: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("══════════════════════════════════════════════════════");
+            throw new RuntimeException("Error al obtener datos de evaluación: " + e.getMessage());
         }
-        datosFase.put("participantes", participantes);
-
-        return datosFase;
     }
-
+    
+    /**
+     * Obtiene los puntajes guardados anteriormente
+     */
+    private Map<Long, Double> obtenerPuntajesGuardados(Long idJurado, Long idParticipante, Long idCategoria) {
+        Map<Long, Double> puntajes = new HashMap<>();
+        
+        try {
+            Evaluacion evaluacion = evaluacionService.findByJuradoAndParticipanteAndCategoria(
+                idJurado, idParticipante, idCategoria
+            );
+            
+            if (evaluacion != null && evaluacion.getDetalles() != null) {
+                evaluacion.getDetalles().forEach(detalle -> {
+                    if (detalle.getRubricaCriterio() != null) {
+                        puntajes.put(
+                            detalle.getRubricaCriterio().getIdRubricaCriterio(), 
+                            detalle.getPuntaje()
+                        );
+                    }
+                });
+            }
+        } catch (Exception e) {
+            System.err.println("[EvaluacionService] Error al obtener puntajes: " + e.getMessage());
+        }
+        
+        return puntajes;
+    }
+    
+    /**
+     * Guarda o actualiza la evaluación
+     */
     @Transactional
     public void guardarEvaluacion(Map<String, Object> datos, Long idJurado) {
-        Long idParticipante = ((Number) datos.get("idParticipante")).longValue();
-        String fase = (String) datos.get("fase");
-        Map<String, Double> puntajes = (Map<String, Double>) datos.get("puntajes");
-
-        // Buscar inscripción correspondiente
-        Inscripcion inscripcion = inscripcionRepo
-                .findByParticipanteAndFase(idParticipante, fase);
-
-        // Crear evaluación
-        Evaluacion evaluacion = new Evaluacion();
-        evaluacion.setInscripcion(inscripcion);
-        evaluacion.setJurado(juradoDao.findById(idJurado).orElseThrow());
-        evaluacion.setActividad(inscripcion.getActividad());
-        evaluacion.setCategoriaActividad(inscripcion.getCategoriaActividad());
-        evaluacion.setParticipante(inscripcion.getParticipante());
-        Rubrica rubrica = rubricaRepo.findByCategoria(
-                inscripcion.getCategoriaActividad().getIdCategoriaActividad());
-        evaluacion.setRubrica(rubrica);
-
-        double totalPonderacion = 0;
-
-        // Crear detalles
-        for (Map.Entry<String, Double> entry : puntajes.entrySet()) {
-            Long idCriterio = Long.parseLong(entry.getKey());
-            Double puntaje = entry.getValue();
-
-            RubricaCriterio criterio = rubricaCriterioDao
-                    .findById(idCriterio).orElseThrow();
-
-            EvaluacionDetalle detalle = new EvaluacionDetalle();
-            detalle.setEvaluacion(evaluacion);
-            detalle.setRubricaCriterio(criterio);
-            detalle.setPuntaje(puntaje);
-            detalle.setPorcentaje(0); // Si no usas porcentaje
-            detalle.setPonderado(puntaje);
-
-            evaluacion.getDetalles().add(detalle);
-            totalPonderacion += puntaje;
+        try {
+            Long idParticipante = Long.valueOf(datos.get("idParticipante").toString());
+            @SuppressWarnings("unchecked")
+            Map<String, Object> puntajes = (Map<String, Object>) datos.get("puntajes");
+            Double total = Double.valueOf(datos.get("total").toString());
+            
+            System.out.println("══════════════════════════════════════════════════════");
+            System.out.println("[GuardarEvaluacion] Guardando evaluación");
+            System.out.println("Jurado ID: " + idJurado);
+            System.out.println("Participante ID: " + idParticipante);
+            System.out.println("Total: " + total);
+            
+            // Obtener asignación del jurado
+            JuradoAsignacion asignacion = asignacionService.findFirstByJuradoId(idJurado);
+            if (asignacion == null) {
+                throw new RuntimeException("No se encontró asignación del jurado");
+            }
+            
+            Long idCategoria = asignacion.getCategoriaActividad().getIdCategoriaActividad();
+            Long idActividad = asignacion.getActividad().getIdActividad();
+            
+            System.out.println("Categoría: " + asignacion.getCategoriaActividad().getNombre() + " (ID: " + idCategoria + ")");
+            
+            // Obtener rúbrica
+            Rubrica rubrica = rubricaService.findByActividadAndCategoria(idActividad, idCategoria);
+            if (rubrica == null) {
+                throw new RuntimeException("No se encontró la rúbrica");
+            }
+            
+            // 🔥 Buscar inscripción del participante EN ESTA CATEGORÍA 🔥
+            Inscripcion inscripcion = inscripcionService.findByActividadParticipanteAndCategoria(
+                idActividad, 
+                idParticipante,
+                idCategoria  // ← FILTRAR POR CATEGORÍA
+            );
+            
+            if (inscripcion == null) {
+                throw new RuntimeException("El participante no está inscrito en esta categoría");
+            }
+            
+            // Verificar si ya existe evaluación
+            Evaluacion evaluacion = evaluacionService.findByJuradoAndParticipanteAndCategoria(
+                idJurado, idParticipante, idCategoria
+            );
+            
+            if (evaluacion == null) {
+                // CREAR nueva evaluación
+                evaluacion = new Evaluacion();
+                evaluacion.setActividad(asignacion.getActividad());
+                evaluacion.setJurado(asignacion.getJurado());
+                evaluacion.setParticipante(inscripcion.getParticipante());
+                evaluacion.setInscripcion(inscripcion);
+                evaluacion.setRubrica(rubrica);
+                evaluacion.setCategoriaActividad(asignacion.getCategoriaActividad());
+                evaluacion.setEstado("A");
+                
+                System.out.println("→ Creando NUEVA evaluación");
+            } else {
+                // ACTUALIZAR evaluación existente
+                evaluacion.getDetalles().clear();
+                System.out.println("→ Actualizando evaluación existente (ID: " + evaluacion.getIdEvaluacion() + ")");
+            }
+            
+            evaluacion.setTotalPonderacion(total);
+            
+            // Crear detalles por cada criterio
+            for (Map.Entry<String, Object> entry : puntajes.entrySet()) {
+                Long idCriterio = Long.valueOf(entry.getKey());
+                Double puntaje = Double.valueOf(entry.getValue().toString());
+                
+                RubricaCriterio criterio = rubrica.getCriterios().stream()
+                    .filter(c -> c.getIdRubricaCriterio().equals(idCriterio))
+                    .findFirst()
+                    .orElse(null);
+                
+                if (criterio != null) {
+                    EvaluacionDetalle detalle = new EvaluacionDetalle();
+                    detalle.setEvaluacion(evaluacion);
+                    detalle.setRubricaCriterio(criterio);
+                    detalle.setPuntaje(puntaje);
+                    detalle.setPonderado(puntaje);
+                    detalle.setEstado("A");
+                    
+                    evaluacion.getDetalles().add(detalle);
+                    
+                    System.out.println("  - Criterio: " + criterio.getNombre() + " = " + puntaje + " pts");
+                }
+            }
+            
+            // Guardar en BD
+            evaluacionService.save(evaluacion);
+            
+            System.out.println("✅ Evaluación guardada exitosamente");
+            System.out.println("══════════════════════════════════════════════════════");
+            
+        } catch (Exception e) {
+            System.err.println("══════════════════════════════════════════════════════");
+            System.err.println("[GuardarEvaluacion] ERROR: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("══════════════════════════════════════════════════════");
+            throw new RuntimeException("Error al guardar la evaluación: " + e.getMessage());
         }
-
-        evaluacion.setTotalPonderacion(totalPonderacion);
-        evaluacionRepo.save(evaluacion);
     }
 }

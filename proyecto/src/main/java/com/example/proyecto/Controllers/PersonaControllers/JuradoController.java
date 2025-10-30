@@ -23,11 +23,11 @@ import com.example.proyecto.Models.Dto.EvaluacionGuardarCategoriaDto;
 import com.example.proyecto.Models.Dto.ParticipanteListadoDto;
 import com.example.proyecto.Models.Dto.RubricaDto;
 import com.example.proyecto.Models.Entity.Actividad;
+import com.example.proyecto.Models.Entity.CategoriaActividad;
 import com.example.proyecto.Models.Entity.Jurado;
 import com.example.proyecto.Models.Entity.JuradoAsignacion;
 import com.example.proyecto.Models.Entity.Persona;
 import com.example.proyecto.Models.Entity.Usuario;
-import com.example.proyecto.Models.IService.IEvaluacionService;
 import com.example.proyecto.Models.IService.IJuradoAsignacionService;
 import com.example.proyecto.Models.IService.IJuradoService;
 import com.example.proyecto.Models.IService.IParticipanteService;
@@ -248,6 +248,9 @@ public class JuradoController {
     /* ENTRADA UNIVERSITARIA */
     // Mostrar vista principal
 
+    /**
+     * Vista principal del panel de evaluación
+     */
     @GetMapping("/panel-entrada")
     public String vistaPanelEntrada(HttpSession session, RedirectAttributes flash, Model model) {
 
@@ -280,19 +283,29 @@ public class JuradoController {
                 flash.addFlashAttribute("warn", "No tienes actividades asignadas actualmente.");
                 return "redirect:/jurado/panel";
             }
+            
+            if (asignacion.getCategoriaActividad() == null) {
+                flash.addFlashAttribute("error", "Tu asignación no tiene categoría definida.");
+                return "redirect:/jurado/panel";
+            }
 
             // Obtener datos para la vista
             Jurado jurado = juradoService.findOne(idJurado);
             Actividad actividad = asignacion.getActividad();
+            CategoriaActividad categoria = asignacion.getCategoriaActividad();
 
-            // Agregar al modelo
             model.addAttribute("jurado", jurado);
             model.addAttribute("idActividad", actividad.getIdActividad());
             model.addAttribute("actividad", actividad);
+            model.addAttribute("categoria", categoria);
+            model.addAttribute("nombreCategoria", categoria.getNombre());
 
-            System.out.println("[Panel] Jurado: " + jurado.getIdJurado() +
-                    " - Actividad: " + actividad.getIdActividad() +
-                    " - " + actividad.getNombre());
+            System.out.println("═══════════════════════════════════════════════");
+            System.out.println("[Panel Entrada] Cargando vista para jurado");
+            System.out.println("Jurado: " + jurado.getPersona().getNombreCompleto() + " (ID: " + jurado.getIdJurado() + ")");
+            System.out.println("Actividad: " + actividad.getNombre());
+            System.out.println("Categoría asignada: " + categoria.getNombre());
+            System.out.println("═══════════════════════════════════════════════");
 
             return "vista/jurado/panel-entrada";
 
@@ -304,7 +317,9 @@ public class JuradoController {
         }
     }
 
-    // Obtener datos para evaluar
+    /**
+     * Endpoint AJAX: Obtener datos para evaluar
+     */
     @GetMapping(value = "/datos/{idActividad}", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<Map<String, Object>> obtenerDatos(
@@ -319,15 +334,21 @@ public class JuradoController {
 
         try {
             Map<String, Object> datos = evaluacionService.obtenerDatosEvaluacion(idActividad, idJurado);
+            datos.put("success", true);
+            
             return ResponseEntity.ok(datos);
         } catch (Exception e) {
-            // log.error("Error al obtener datos de evaluación", e);
+            System.err.println("[Obtener Datos] Error: " + e.getMessage());
+            e.printStackTrace();
+            
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 
-    // Guardar evaluación
+    /**
+     * Endpoint AJAX: Guardar evaluación
+     */
     @PostMapping("/guardar")
     @ResponseBody
     public Map<String, Object> guardarEvaluacion(
@@ -338,12 +359,17 @@ public class JuradoController {
 
         try {
             evaluacionService.guardarEvaluacion(datos, idJurado);
-            return Map.of("success", true);
+            return Map.of("success", true, "message", "Evaluación guardada correctamente");
         } catch (Exception e) {
+            System.err.println("[Guardar Evaluación] Error: " + e.getMessage());
+            e.printStackTrace();
             return Map.of("success", false, "message", e.getMessage());
         }
     }
 
+    /**
+     * Endpoint AJAX: Finalizar todas las evaluaciones
+     */
     @PostMapping("/finalizar")
     @ResponseBody
     public Map<String, Object> finalizarEvaluacion(HttpSession session) {

@@ -36,4 +36,5 @@ public interface IRubricaService extends IServiceGenerico<Rubrica, Long> {
 
     /* PARA ENTRADA UNIVERSITARIA */
     Rubrica findByCategoria(Long idCategoriaActividad);
+    Rubrica findByActividadAndCategoria(Long idActividad, Long idCategoriaActividad);
 }

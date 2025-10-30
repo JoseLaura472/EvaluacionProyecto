@@ -72,4 +72,14 @@ public class EvaluacionServiceImpl implements IEvaluacionService {
     public boolean existsByInscripcionAndJurado(Long idInscripcion, Long idJurado) {
         return evaluacionDao.existsByInscripcionIdInscripcionAndJuradoIdJurado(idInscripcion, idJurado);
     }
+
+    @Override
+    public boolean existeEvaluacion(Long idJurado, Long idParticipante, Long idCategoria) {
+        return evaluacionDao.existsByJuradoIdJuradoAndParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(idJurado, idParticipante, idCategoria);
+    }
+
+    @Override
+    public Evaluacion findByJuradoAndParticipanteAndCategoria(Long idJurado, Long idParticipante, Long idCategoria) {
+        return evaluacionDao.findByJuradoIdJuradoAndParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(idJurado, idParticipante, idCategoria);
+    }
 }

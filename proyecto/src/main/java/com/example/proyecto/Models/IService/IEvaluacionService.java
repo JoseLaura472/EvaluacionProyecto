@@ -27,4 +27,6 @@ public interface IEvaluacionService extends IServiceGenerico<Evaluacion, Long>{
 
     /* para entrada universitaria */
     boolean existsByInscripcionAndJurado(Long idInscripcion, Long idJurado);
+    boolean existeEvaluacion(Long idJurado, Long idParticipante, Long idCategoria);
+    Evaluacion findByJuradoAndParticipanteAndCategoria(Long idJurado, Long idParticipante, Long idCategoria);
 }
