@@ -306,7 +306,8 @@ public class ReportePdfService {
         // Logo izquierdo
         Cell cellLogoIzq = new Cell()
                 .setBorder(Border.NO_BORDER)
-                .setVerticalAlignment(VerticalAlignment.MIDDLE);
+                .setVerticalAlignment(VerticalAlignment.MIDDLE)
+                .setTextAlignment(TextAlignment.RIGHT);
         
         if (logoIzquierdoPath != null && !logoIzquierdoPath.isEmpty() && new File(logoIzquierdoPath).exists()) {
             try {
