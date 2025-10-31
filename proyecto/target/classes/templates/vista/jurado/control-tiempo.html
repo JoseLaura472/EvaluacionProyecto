@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control - Concurso</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container-custom {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header-box {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .header-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .categoria-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Lista de participantes */
+        .lista-participantes {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .lista-participantes h5 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .participante-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .participante-card:not(.bloqueado):hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .participante-card.bloqueado {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%);
+        }
+
+        .participante-card.activo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+            50% { box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
+        }
+
+        .participante-nombre {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .participante-info {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .participante-estado {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+        }
+
+        /* Modal de cronómetro */
+        .modal-timer {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 9999;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-timer.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .timer-content {
+            background: white;
+            border-radius: 30px;
+            padding: 2rem;
+            text-align: center;
+            max-width: 90%;
+            width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        .timer-participante {
+            font-size: 1.3rem;
+            color: #333;
+            margin-bottom: 2rem;
+            font-weight: bold;
+        }
+
+        .timer-display {
+            font-size: 5rem;
+            font-weight: bold;
+            margin: 2rem 0;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .timer-display.verde { color: #4caf50; }
+        .timer-display.amarillo { color: #ff9800; }
+        .timer-display.rojo { 
+            color: #f44336;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.5; }
+        }
+
+        .timer-mensaje {
+            font-size: 1.1rem;
+            margin: 1rem 0;
+            font-weight: 500;
+        }
+
+        .btn-finalizar {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .btn-finalizar:hover {
+            background: #d32f2f;
+            transform: scale(1.05);
+        }
+
+        /* Modal de confirmación */
+        .modal-confirm {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-confirm.active {
+            display: flex;
+        }
+
+        .confirm-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 90%;
+            width: 350px;
+            text-align: center;
+        }
+
+        .confirm-content h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-confirm {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-confirm.si {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-confirm.no {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-confirm:hover {
+            transform: scale(1.05);
+        }
+
+        /* Notificación de sincronización */
+        .sync-notification {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 50px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 9998;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .sync-notification.active {
+            display: flex;
+        }
+
+        .sync-icon {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .timer-display {
+                font-size: 3.5rem;
+            }
+
+            .timer-participante {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-custom">
+        <!-- Header -->
+        <div class="header-box">
+            <h1 class="header-title">
+                <i class="fas fa-clipboard-check"></i> Panel de Control
+            </h1>
+            <div style="margin-top: 1rem;">
+                <small style="color: #666;">Coordinador: <strong>Admin</strong></small>
+                <br>
+                <span class="categoria-badge">
+                    <i class="fas fa-tag"></i> Concurso de Baile
+                </span>
+            </div>
+        </div>
+
+        <!-- Lista de participantes -->
+        <div class="lista-participantes">
+            <h5>
+                <i class="fas fa-users"></i> Participantes
+            </h5>
+            <div id="listaParticipantes"></div>
+        </div>
+    </div>
+
+    <!-- Modal de Cronómetro -->
+    <div class="modal-timer" id="modalTimer">
+        <div class="timer-content">
+            <div class="timer-participante" id="timerParticipante">-</div>
+            <div class="timer-display verde" id="timerDisplay">15:00</div>
+            <div class="timer-mensaje" id="timerMensaje">Tiempo de presentación</div>
+            <button class="btn-finalizar" id="btnFinalizar">
+                <i class="fas fa-stop"></i> Finalizar Presentación
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div class="modal-confirm" id="modalConfirm">
+        <div class="confirm-content">
+            <h3><i class="fas fa-question-circle"></i> Confirmar inicio</h3>
+            <p id="confirmMensaje">¿Iniciar cronómetro para <strong></strong>?</p>
+            <div class="confirm-buttons">
+                <button class="btn-confirm no" onclick="cancelarInicio()">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button class="btn-confirm si" onclick="confirmarInicio()">
+                    <i class="fas fa-check"></i> Iniciar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificación de sincronización -->
+    <div class="sync-notification" id="syncNotification">
+        <i class="fas fa-sync sync-icon"></i>
+        <span>Sincronizando...</span>
+    </div>
+
+    <script>
+        // Estado global
+        const STATE = {
+            participantes: [
+                { id: 1, nombre: 'María González', institucion: 'Academia Dance', estado: 'pendiente' },
+                { id: 2, nombre: 'Carlos Ramírez', institucion: 'Ritmo Latino', estado: 'pendiente' },
+                { id: 3, nombre: 'Ana Martínez', institucion: 'Estudio Móvil', estado: 'pendiente' },
+                { id: 4, nombre: 'Luis Hernández', institucion: 'Danza Urbana', estado: 'pendiente' },
+                { id: 5, nombre: 'Sofia López', institucion: 'Ballet Clásico', estado: 'pendiente' }
+            ],
+            timerInterval: null,
+            tiempoRestante: 900, // 15 minutos en segundos
+            participanteActivo: null,
+            pendienteConfirmacion: null
+        };
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', () => {
+            renderParticipantes();
+            iniciarSSE();
+        });
+
+        // Renderizar lista de participantes
+        function renderParticipantes() {
+            const container = document.getElementById('listaParticipantes');
+            container.innerHTML = '';
+
+            STATE.participantes.forEach(p => {
+                const card = document.createElement('div');
+                card.className = `participante-card ${p.estado === 'completado' ? 'bloqueado' : ''} ${p.estado === 'activo' ? 'activo' : ''}`;
+                
+                const icono = p.estado === 'completado' ? '✅' : 
+                             p.estado === 'activo' ? '▶️' : '⏸️';
+
+                card.innerHTML = `
+                    <div class="participante-nombre">
+                        ${p.nombre}
+                    </div>
+                    <div class="participante-info">
+                        <i class="fas fa-school"></i> ${p.institucion}
+                    </div>
+                    <div class="participante-estado">${icono}</div>
+                `;
+
+                if (p.estado === 'pendiente') {
+                    card.onclick = () => mostrarConfirmacion(p);
+                }
+
+                container.appendChild(card);
+            });
+        }
+
+        // Mostrar modal de confirmación
+        function mostrarConfirmacion(participante) {
+            STATE.pendienteConfirmacion = participante;
+            document.getElementById('confirmMensaje').innerHTML = 
+                `¿Iniciar cronómetro para <strong>${participante.nombre}</strong>?`;
+            document.getElementById('modalConfirm').classList.add('active');
+        }
+
+        // Cancelar inicio
+        function cancelarInicio() {
+            STATE.pendienteConfirmacion = null;
+            document.getElementById('modalConfirm').classList.remove('active');
+        }
+
+        // Confirmar e iniciar cronómetro
+        function confirmarInicio() {
+            const participante = STATE.pendienteConfirmacion;
+            document.getElementById('modalConfirm').classList.remove('active');
+            
+            iniciarCronometro(participante);
+            notificarServidor('iniciar', participante.id);
+        }
+
+        // Iniciar cronómetro
+        function iniciarCronometro(participante) {
+            STATE.participanteActivo = participante;
+            STATE.tiempoRestante = 900; // Reset a 15 minutos
+            
+            // Actualizar estado
+            participante.estado = 'activo';
+            renderParticipantes();
+
+            // Mostrar modal de timer
+            document.getElementById('timerParticipante').textContent = participante.nombre;
+            document.getElementById('modalTimer').classList.add('active');
+            
+            // Vibración inicial (si está disponible)
+            if (navigator.vibrate) {
+                navigator.vibrate(200);
+            }
+
+            // Iniciar cuenta regresiva
+            actualizarDisplay();
+            STATE.timerInterval = setInterval(() => {
+                STATE.tiempoRestante--;
+                actualizarDisplay();
+
+                // Cambiar colores según tiempo restante
+                if (STATE.tiempoRestante === 180) { // 3 minutos
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                }
+
+                if (STATE.tiempoRestante <= 0) {
+                    finalizarCronometro();
+                }
+            }, 1000);
+        }
+
+        // Actualizar display del cronómetro
+        function actualizarDisplay() {
+            const minutos = Math.floor(STATE.tiempoRestante / 60);
+            const segundos = STATE.tiempoRestante % 60;
+            const display = `${minutos}:${segundos.toString().padStart(2, '0')}`;
+            
+            const displayEl = document.getElementById('timerDisplay');
+            const mensajeEl = document.getElementById('timerMensaje');
+            const btnFinalizar = document.getElementById('btnFinalizar');
+
+            displayEl.textContent = display;
+
+            // Cambiar colores y mensajes
+            if (STATE.tiempoRestante > 180) {
+                displayEl.className = 'timer-display verde';
+                mensajeEl.textContent = 'Tiempo de presentación';
+            } else if (STATE.tiempoRestante > 0) {
+                displayEl.className = 'timer-display amarillo';
+                mensajeEl.textContent = '⚠️ ¡Últimos 3 minutos!';
+            } else {
+                displayEl.className = 'timer-display rojo';
+                mensajeEl.textContent = '⏰ ¡Tiempo finalizado!';
+                btnFinalizar.style.display = 'block';
+                
+                // Vibración continua
+                if (navigator.vibrate) {
+                    navigator.vibrate([500, 200, 500]);
+                }
+            }
+
+            // Mostrar botón finalizar después de 1 minuto
+            if (STATE.tiempoRestante < 840) {
+                btnFinalizar.style.display = 'block';
+            }
+        }
+
+        // Finalizar cronómetro
+        function finalizarCronometro() {
+            clearInterval(STATE.timerInterval);
+            
+            if (STATE.participanteActivo) {
+                STATE.participanteActivo.estado = 'completado';
+                notificarServidor('finalizar', STATE.participanteActivo.id);
+            }
+
+            setTimeout(() => {
+                document.getElementById('modalTimer').classList.remove('active');
+                document.getElementById('btnFinalizar').style.display = 'none';
+                STATE.participanteActivo = null;
+                renderParticipantes();
+            }, 1000);
+        }
+
+        // Botón finalizar manual
+        document.getElementById('btnFinalizar').onclick = finalizarCronometro;
+
+        // Notificar al servidor (simulado)
+        function notificarServidor(accion, participanteId) {
+            mostrarSync();
+            
+            // Aquí iría tu llamada real al servidor
+            fetch('/api/concurso/cronometro', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    accion: accion,
+                    participanteId: participanteId,
+                    timestamp: Date.now()
+                })
+            }).catch(err => console.error('Error sincronizando:', err));
+
+            setTimeout(ocultarSync, 1000);
+        }
+
+        // Iniciar SSE para recibir actualizaciones
+        function iniciarSSE() {
+            const eventSource = new EventSource('/api/concurso/stream');
+            eventSource.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.accion === 'iniciar') {
+                    const participante = STATE.participantes.find(p => p.id === data.participanteId);
+                    if (participante && !STATE.participanteActivo) {
+                        iniciarCronometro(participante);
+                    }
+                }
+            };
+        }
+
+        // Mostrar notificación de sincronización
+        function mostrarSync() {
+            document.getElementById('syncNotification').classList.add('active');
+        }
+
+        function ocultarSync() {
+            document.getElementById('syncNotification').classList.remove('active');
+        }
+
+        // Prevenir cierre accidental durante cronómetro
+        window.addEventListener('beforeunload', (e) => {
+            if (STATE.participanteActivo) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    </script>
+</body>
+</html>

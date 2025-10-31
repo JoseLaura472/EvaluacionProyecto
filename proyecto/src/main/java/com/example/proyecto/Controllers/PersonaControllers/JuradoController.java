@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.proyecto.Models.Dto.CronometroDTO;
 import com.example.proyecto.Models.Dto.EvaluacionGuardarCategoriaDto;
 import com.example.proyecto.Models.Dto.ParticipanteListadoDto;
 import com.example.proyecto.Models.Dto.RubricaDto;
@@ -35,6 +37,7 @@ import com.example.proyecto.Models.IService.IPersonaService;
 import com.example.proyecto.Models.IService.IRubricaService;
 import com.example.proyecto.Models.IService.IUsuarioService;
 import com.example.proyecto.Models.IServiceImpl.EvaluacionCategoriaAdapterService;
+import com.example.proyecto.Models.Service.CronometroSseService;
 import com.example.proyecto.Models.Service.EvaluacionService;
 import com.example.proyecto.Models.Service.JuradoLookupService;
 
@@ -57,6 +60,8 @@ public class JuradoController {
     private final EvaluacionCategoriaAdapterService evaluacionCategoriaAdapterService;
     private final JuradoLookupService juradoLookupService;
     private final EvaluacionService evaluacionService;
+
+    private final CronometroSseService cronometroSseService;
 
     @GetMapping("/vista")
     public String inicioJurado() {
@@ -378,6 +383,62 @@ public class JuradoController {
             return Map.of("success", true, "message", "Evaluaciones finalizadas correctamente");
         } catch (Exception e) {
             return Map.of("success", false, "message", e.getMessage());
+        }
+    }
+
+    /**
+     * Endpoint SSE para recibir actualizaciones del cronómetro
+     */
+    @GetMapping(value = "/cronometro/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamCronometro(HttpSession session) {
+        Long idJurado = (Long) session.getAttribute("idJurado");
+        
+        if (idJurado == null) {
+            SseEmitter emitter = new SseEmitter();
+            try {
+                emitter.completeWithError(new RuntimeException("No autorizado"));
+            } catch (Exception e) {
+                // ignore
+            }
+            return emitter;
+        }
+        
+        return cronometroSseService.crearEmitter();
+    }
+
+    /**
+     * Endpoint para actualizar el cronómetro (lo llama el coordinador)
+     */
+    @PostMapping("/cronometro/actualizar")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> actualizarCronometro(
+            @RequestBody CronometroDTO data,
+            HttpSession session) {
+        
+        // Verificar autorización (solo admin o coordinador)
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) {
+            return ResponseEntity.status(401)
+                    .body(Map.of("success", false, "message", "No autorizado"));
+        }
+
+        try {
+            // Agregar timestamp si no viene
+            if (data.getTimestamp() == null) {
+                data.setTimestamp(System.currentTimeMillis());
+            }
+            
+            // Broadcast a todos los jurados
+            cronometroSseService.broadcast(data);
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Cronómetro actualizado",
+                    "clientesNotificados", cronometroSseService.getClientesConectados()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.status(500)
+                    .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 }
