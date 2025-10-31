@@ -2,7 +2,93 @@
 <html lang="en">
 
 <head th:replace="~{layout/head :: head}"></head>
-
+<style>
+    /* Estilos para chips de categorías */
+    .chip-categoria {
+        transition: all 0.3s;
+    }
+    .chip-categoria:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    /* Estilos para tabla */
+    .medalla {
+        font-size: 1.2em;
+    }
+    .tabla-puntajes {
+        font-size: 0.95rem;
+    }
+    .badge-completado {
+        animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.7; }
+    }
+    
+    /* ✅ ESTILOS PARA BOTONES DE REPORTE */
+    .btn-reporte-header {
+        background: white;
+        color: #0d6efd;
+        border: 2px solid #0d6efd;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .btn-reporte-header:hover {
+        background: #0d6efd;
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .btn-reporte-header.btn-success-custom {
+        background: white;
+        color: #198754;
+        border-color: #198754;
+    }
+    
+    .btn-reporte-header.btn-success-custom:hover {
+        background: #198754;
+        color: white;
+    }
+    
+    .btn-reporte-header.btn-primary-custom {
+        background: white;
+        color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .btn-reporte-header.btn-primary-custom:hover {
+        background: #0d6efd;
+        color: white;
+    }
+    
+    /* Dropdown de reportes */
+    .dropdown-reportes .dropdown-toggle {
+        background: white !important;
+        color: #0d6efd !important;
+        border: 2px solid #0d6efd !important;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .dropdown-reportes .dropdown-toggle:hover {
+        background: #0d6efd !important;
+        color: white !important;
+    }
+    
+    .desglose-categoria {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+</style>
 <body class="fixed-left">
     <div id="preloader">
         <div id="status">
@@ -14,63 +100,88 @@
         <div class="content-page">
             <div class="content">
                 <div th:replace="~{layout/topbar :: topbar}"></div>
-                <div class="container-xxl flex-grow-1 container-p-y" id="contenido">
-                    <div id="concurso-dashboard" class="py-2">
-                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-                            <div class="d-flex align-items-center gap-2">
-                                <h5 class="mb-0">Progreso del Concurso</h5>
-                                <select id="sel-actividad" class="form-select form-select-sm" style="min-width:260px">
+                <div class="container-xxl flex-grow-1 container-p-y">
+                    <div id="concurso-dashboard" class="py-3">
+                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <h4 class="mb-0"><i class="bi bi-trophy"></i> Dashboard de Evaluación</h4>
+                                <select id="sel-actividad" class="form-select" style="min-width:300px">
                                     <option value="">Seleccione una actividad…</option>
                                 </select>
-                                <span class="small text-muted">Actividad: <strong id="act-nombre">—</strong></span>
                             </div>
                             <div class="d-flex gap-2 align-items-center">
-                                <span class="badge text-bg-light">Actualiza: <span id="last-update">—</span></span>
-                                <button id="btn-refrescar" class="btn btn-sm btn-outline-primary"
-                                    disabled>Refrescar</button>
+                                <span class="badge bg-light text-dark">
+                                    <i class="bi bi-clock"></i> <span id="last-update">—</span>
+                                </span>
+                                <button id="btn-refrescar" class="btn btn-sm btn-outline-primary" disabled>
+                                    <i class="bi bi-arrow-clockwise"></i> Refrescar
+                                </button>
                             </div>
                         </div>
-
-                        <div id="sin-actividad" class="alert alert-secondary py-2" role="alert" style="display:none;">
-                            Seleccione una actividad para ver el progreso.
+                        <div class="mb-3" id="vista-selector" style="display:none;">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn-vista btn btn-outline-primary" data-vista="completo">
+                                    <i class="bi bi-grid"></i> Por Categoría
+                                </button>
+                                <button type="button" class="btn-vista btn btn-outline-success" data-vista="total">
+                                    <i class="bi bi-calculator"></i> Vista TOTAL
+                                </button>
+                            </div>
                         </div>
-
+                        <div id="sin-actividad" class="alert alert-info" style="display:none;">
+                            <i class="bi bi-info-circle"></i> Seleccione una actividad para ver el progreso.
+                        </div>
                         <div class="mb-3" id="categorias-wrap" style="display:none;">
-                            <div id="categorias-chips" class="d-inline-flex overflow-auto"
-                                style="white-space:nowrap;gap:.5rem;max-width:100%"></div>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <strong><i class="bi bi-tags"></i> Categorías:</strong>
+                                <button id="btn-limpiar-filtro" class="btn btn-sm btn-outline-secondary"
+                                    style="display:none;">
+                                    <i class="bi bi-x"></i> Limpiar filtro
+                                </button>
+                            </div>
+                            <div id="categorias-chips" class="d-flex flex-wrap gap-2"></div>
                         </div>
-
                         <div class="mb-3" id="resumen-wrap" style="display:none;">
-                            <div class="d-flex justify-content-between small">
-                                <div>Total evaluaciones</div>
-                                <div><span id="rg-completadas">0</span> /
-                                    <span id="rg-total">0</span>
-                                    (<span id="rg-porcentaje">0.0</span>%)
+                            <div class="card">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span><i class="bi bi-check-circle"></i> <strong>Progreso Global</strong></span>
+                                        <span>
+                                            <strong id="rg-completadas">0</strong> / <span id="rg-total">0</span>
+                                            (<strong id="rg-porcentaje">0.0</strong>%)
+                                        </span>
+                                    </div>
+                                    <div class="progress" style="height: 20px;">
+                                        <div id="rg-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+                                            role="progressbar" style="width:0%"></div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="progress">
-                                <div id="rg-bar" class="progress-bar" role="progressbar" style="width:0%"></div>
-                            </div>
                         </div>
-
-                        <div class="card">
-                            <div class="card-body p-2 p-sm-3">
+                        <div class="card shadow-sm">
+                            <div
+                                class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-table"></i> <strong id="titulo-tabla">Resultados</strong></span>
+                                <div id="reportes-btn" style="display:none;"></div>
+                            </div>
+                            <div class="card-body p-0">
                                 <div class="table-responsive">
-                                    <table class="table table-sm align-middle" id="tabla">
-                                        <thead>
+                                    <table class="table table-hover tabla-puntajes mb-0" id="tabla">
+                                        <thead class="table-light">
                                             <tr id="thead-row">
-                                                <th class="text-center" style="width:80px;min-width:80px">Puesto</th>
+                                                <th class="text-center" style="width:100px">Puesto</th>
                                                 <th style="min-width:220px">Participante</th>
-                                                <!-- columnas de jurados se insertan aquí -->
-                                                <th class="text-end" style="min-width:120px">Promedio</th>
+                                                <!-- columnas dinámicas -->
+                                                <th class="text-end" style="min-width:120px">Puntaje</th>
                                                 <th class="text-center">Estado</th>
-                                                <th class="text-center" style="min-width:110px">Reporte</th>
+                                                <th class="text-center" style="min-width:100px">Acciones</th>
                                             </tr>
                                         </thead>
                                         <tbody id="tbody-rows">
                                             <tr id="fila-empty" style="display:none;">
-                                                <td colspan="999" class="text-center text-muted py-4">
-                                                    No hay registros para esta categoría.
+                                                <td colspan="999" class="text-center text-muted py-5">
+                                                    <i class="bi bi-inbox" style="font-size: 3rem;"></i>
+                                                    <div class="mt-2">No hay registros disponibles</div>
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -79,319 +190,672 @@
                             </div>
                         </div>
                     </div>
-
-                    <template id="tpl-chip">
-                        <button class="btn btn-sm">
-                            <span class="chip-nombre"></span>
-                            <span class="badge bg-white text-primary ms-1 chip-progreso"></span>
-                        </button>
-                    </template>
-
-                    <template id="tpl-row">
-                        <tr>
-                            <td class="text-center">
-                                <span class="row-medalla me-1"></span>
-                                <span class="row-puesto small text-muted"></span>
-                            </td>
-                            <td>
-                                <div class="fw-semibold row-participante"></div>
-                                <div class="small text-muted row-institucion"></div>
-                            </td>
-                            <!-- celdas por jurado se agregan dinámicamente -->
-                            <td class="text-end"><span class="fw-bold row-promedio"></span></td>
-                            <td class="text-center"><span class="badge row-estado"></span></td>
-                        </tr>
-                    </template>
-
                 </div>
-            </div><br><br>
-            <footer th:replace="~{layout/footer :: footer}"></footer>
+                <footer th:replace="~{layout/footer :: footer}"></footer>
+            </div>
         </div>
     </div>
     <div th:replace="~{layout/script :: script}"></div>
     <script>
         (function () {
+            'use strict';
+
             const root = document.getElementById('concurso-dashboard');
             if (!root) return;
 
-            let actividadId = null;
-            let categoriaId = null;
-            let jurados = [];
-            let filasFull = [];
-            let sse = null, polling = null;
+            // Estado global
+            let state = {
+                actividadId: null,
+                categoriaId: null,
+                vistaActual: 'completo', // 'completo', 'categoria', 'total'
+                jurados: [],
+                categorias: [],
+                filas: [],
+                sse: null,
+                polling: null
+            };
 
-            const selAct = document.getElementById('sel-actividad');
-            const sinActividad = document.getElementById('sin-actividad');
-            const elActNombre = document.getElementById('act-nombre');
-            const elLastUpdate = document.getElementById('last-update');
-            const elBtnRefrescar = document.getElementById('btn-refrescar');
+            // Elementos DOM
+            const DOM = {
+                selActividad: document.getElementById('sel-actividad'),
+                sinActividad: document.getElementById('sin-actividad'),
+                lastUpdate: document.getElementById('last-update'),
+                btnRefrescar: document.getElementById('btn-refrescar'),
+                vistaSelector: document.getElementById('vista-selector'),
+                btnVista: document.querySelectorAll('.btn-vista'),
+                categoriasWrap: document.getElementById('categorias-wrap'),
+                categoriasChips: document.getElementById('categorias-chips'),
+                btnLimpiarFiltro: document.getElementById('btn-limpiar-filtro'),
+                resumenWrap: document.getElementById('resumen-wrap'),
+                rgCompletadas: document.getElementById('rg-completadas'),
+                rgTotal: document.getElementById('rg-total'),
+                rgPorcentaje: document.getElementById('rg-porcentaje'),
+                rgBar: document.getElementById('rg-bar'),
+                tituloTabla: document.getElementById('titulo-tabla'),
+                reportesBtn: document.getElementById('reportes-btn'),
+                theadRow: document.getElementById('thead-row'),
+                tbodyRows: document.getElementById('tbody-rows'),
+                filaEmpty: document.getElementById('fila-empty')
+            };
 
-            const wrapCategorias = document.getElementById('categorias-wrap');
-            const contChips = document.getElementById('categorias-chips');
+            // Inicialización
+            init();
 
-            const wrapResumen = document.getElementById('resumen-wrap');
-            const elRgComp = document.getElementById('rg-completadas');
-            const elRgTotal = document.getElementById('rg-total');
-            const elRgPct = document.getElementById('rg-porcentaje');
-            const elRgBar = document.getElementById('rg-bar');
+            async function init() {
+                await cargarActividades();
+                setupEventListeners();
+            }
 
-            const theadRow = document.getElementById('thead-row');
-            const tbodyRows = document.getElementById('tbody-rows');
-            const filaEmpty = document.getElementById('fila-empty');
+            function setupEventListeners() {
+                DOM.selActividad.addEventListener('change', onActividadChange);
+                DOM.btnRefrescar.addEventListener('change', () => cargarSnapshot(false));
+                DOM.btnLimpiarFiltro.addEventListener('click', limpiarFiltroCategoria);
 
-            const tplChip = document.getElementById('tpl-chip');
-            const tplRow = document.getElementById('tpl-row');
-
-            cargarActividades();
-
-            selAct.addEventListener('change', onActividadChange);
-            elBtnRefrescar.addEventListener('click', () => cargarSnapshot(false));
-            window.addEventListener('beforeunload', () => { if (polling) clearInterval(polling); if (sse) sse.close(); });
+                DOM.btnVista.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const vista = btn.dataset.vista;
+                        cambiarVista(vista);
+                    });
+                });
+                window.addEventListener('beforeunload', cleanup);
+            }
 
             async function cargarActividades() {
                 try {
                     const r = await fetch('/api/admin/actividades');
-                    if (r.status === 401) { window.location.href = '/LoginR'; return; }
-                    const list = await r.json();
+                    if (r.status === 401) {
+                        window.location.href = '/LoginR';
+                        return;
+                    }
 
-                    selAct.innerHTML = '<option value="">Seleccione una actividad…</option>';
-                    for (const a of list) {
+                    const actividades = await r.json();
+                    DOM.selActividad.innerHTML = '<option value="">Seleccione una actividad…</option>';
+
+                    actividades.forEach(a => {
                         const opt = document.createElement('option');
                         opt.value = a.id;
                         const fecha = a.fecha ? new Date(a.fecha).toLocaleDateString() : '';
                         opt.textContent = `${a.nombre}${fecha ? ' — ' + fecha : ''}`;
-                        selAct.appendChild(opt);
-                    }
+                        DOM.selActividad.appendChild(opt);
+                    });
 
-                    const last = localStorage.getItem('dash.actId');
-                    if (last && list.some(a => String(a.id) === last)) {
-                        selAct.value = last;
-                    } else if (list.length === 1) {
-                        selAct.value = list[0].id;
-                    }
-
-                    if (selAct.value) {
+                    // Restaurar última actividad seleccionada
+                    const ultimaId = localStorage.getItem('dash.actividadId');
+                    if (ultimaId && actividades.some(a => String(a.id) === ultimaId)) {
+                        DOM.selActividad.value = ultimaId;
                         onActividadChange();
-                    } else {
-                        sinActividad.style.display = '';
-                        elBtnRefrescar.disabled = true;
                     }
-
-                } catch (e) { console.error(e); }
+                } catch (error) {
+                    console.error('Error cargando actividades:', error);
+                    mostrarError('Error al cargar actividades');
+                }
             }
 
             function onActividadChange() {
-                actividadId = selAct.value ? Number(selAct.value) : null;
-                localStorage.setItem('dash.actId', actividadId ? String(actividadId) : '');
-                categoriaId = null;
-                if (!actividadId) {
-                    sinActividad.style.display = '';
-                    elBtnRefrescar.disabled = true;
-                    stopLive();
-                    clearDashboard();
+                const id = DOM.selActividad.value;
+
+                if (!id) {
+                    mostrarSinActividad();
                     return;
                 }
-                sinActividad.style.display = 'none';
-                elBtnRefrescar.disabled = false;
-                stopLive();
+
+                state.actividadId = Number(id);
+                state.categoriaId = null;
+                state.vistaActual = 'completo';
+
+                localStorage.setItem('dash.actividadId', String(state.actividadId));
+
+                mostrarConActividad();
+                stopLiveUpdates();
                 cargarSnapshot(false);
-                startLive();
+                startLiveUpdates();
+            }
+
+            function cambiarVista(vista) {
+                state.vistaActual = vista;
+
+                // Actualizar botones
+                DOM.btnVista.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.vista === vista);
+                    if (btn.dataset.vista === vista) {
+                        btn.classList.remove('btn-outline-primary', 'btn-outline-success');
+                        btn.classList.add(vista === 'total' ? 'btn-success' : 'btn-primary');
+                    } else {
+                        btn.classList.remove('btn-primary', 'btn-success');
+                        btn.classList.add(vista === 'total' ? 'btn-outline-primary' : 'btn-outline-success');
+                    }
+                });
+
+                cargarSnapshot(true);
             }
 
             async function cargarSnapshot(silencioso) {
-                if (!actividadId) return;
+                if (!state.actividadId) return;
+
                 try {
-                    const url = `/api/admin/concurso/${actividadId}/snapshot` + (categoriaId ? `?categoriaId=${categoriaId}` : '');
-                    const r = await fetch(url);
-                    if (r.status === 401) { window.location.href = '/LoginR'; return; }
-                    if (!r.ok) throw new Error('HTTP ' + r.status);
-                    const data = await r.json();
+                    let url = `/api/admin/concurso/${state.actividadId}/snapshot`;
+
+                    const params = new URLSearchParams();
+                    if (state.vistaActual === 'total') {
+                        params.append('vistaTotal', 'true');
+                    } else if (state.categoriaId) {
+                        params.append('categoriaId', state.categoriaId);
+                    }
+
+                    if (params.toString()) {
+                        url += '?' + params.toString();
+                    }
+
+                    const response = await fetch(url);
+
+                    if (response.status === 401) {
+                        window.location.href = '/LoginR';
+                        return;
+                    }
+
+                    if (!response.ok) {throw new Error(`HTTP ${response.status}`);}
+
+                    const data = await response.json();
                     renderSnapshot(data);
-                    if (!silencioso) marcarActualizado();
-                } catch (e) { console.error(e); }
+
+                    if (!silencioso) {marcarActualizado();}
+
+                } catch (error) {
+                    console.error('Error cargando snapshot:', error);
+                    if (!silencioso) {
+                        mostrarError('Error al cargar datos');
+                    }
+                }
             }
 
             function renderSnapshot(data) {
-                if (elActNombre) elActNombre.textContent = data.actividad?.nombre ?? '—';
+                // Guardar jurados
+                const juradosChanged = JSON.stringify(data.jurados || []) !== JSON.stringify(state.jurados);
+                state.jurados = data.jurados || [];
 
-                const jNew = JSON.stringify(data.jurados || []);
-                const jOld = JSON.stringify(jurados);
-                const juradosChanged = (jNew !== jOld);
-                jurados = data.jurados || [];
-                if (juradosChanged) renderThead();
+                if (juradosChanged) {renderThead();}
 
-                renderCategorias(data.categorias || []);
-                renderResumen(data.resumenGlobal || null);
+                state.categorias = data.categorias || [];
 
-                filasFull = data.filas || [];
+                if (state.vistaActual !== 'total') {
+                    renderCategorias(data.categorias || []);
+                } else {
+                    DOM.categoriasWrap.style.display = 'none';
+                }
+
+                renderResumen(data.resumenGlobal);
+
+                state.filas = data.filas || [];
+
                 renderTbody();
+                renderBotonesReporte();
+                actualizarTituloTabla();
             }
 
             function renderThead() {
-                while (theadRow.children.length > 5) {
-                    theadRow.removeChild(theadRow.children[2]);
+                // Limpiar columnas dinámicas (jurados)
+                while (DOM.theadRow.children.length > 4) {
+                    DOM.theadRow.removeChild(DOM.theadRow.children[2]);
                 }
-                const anchor = theadRow.children[theadRow.children.length - 3];
-                jurados.forEach(j => {
+
+                if (state.vistaActual === 'total') {
+                    // En vista total, agregar columna de desglose
                     const th = document.createElement('th');
                     th.className = 'text-center';
-                    th.innerHTML = `<div class="small text-muted">Jurado</div><div class="fw-semibold">${j.nombre}</div>`;
-                    theadRow.insertBefore(th, anchor);
-                });
+                    th.style.minWidth = '200px';
+                    th.innerHTML = '<i class="bi bi-pie-chart"></i> Desglose';
+                    DOM.theadRow.insertBefore(th, DOM.theadRow.children[2]);
+                } else {
+                    // En vista por categoría, agregar columnas de jurados
+                    const anchor = DOM.theadRow.children[DOM.theadRow.children.length - 2];
+
+                    state.jurados.forEach(j => {
+                        const th = document.createElement('th');
+                        th.className = 'text-center';
+                        th.style.minWidth = '120px';
+                        th.innerHTML = `
+                            <div class="small text-muted">Jurado</div>
+                            <div class="fw-semibold">${j.nombre}</div>
+                        `;
+                        DOM.theadRow.insertBefore(th, anchor);
+                    });
+                }
             }
 
             function renderCategorias(categorias) {
-                contChips.innerHTML = '';
-                if (!categorias.length) { wrapCategorias.style.display = 'none'; return; }
-                wrapCategorias.style.display = '';
-                categorias.forEach(c => {
-                    const chip = tplChip.content.firstElementChild.cloneNode(true);
-                    chip.className = 'btn btn-sm ' + (categoriaId === c.id ? 'btn-primary' : 'btn-outline-primary');
-                    chip.querySelector('.chip-nombre').textContent = c.nombre;
-                    const prog = c.progreso || { total: 0, completadas: 0 };
-                    chip.querySelector('.chip-progreso').textContent = `${prog.completadas}/${prog.total}`;
-                    chip.addEventListener('click', () => { categoriaId = c.id; cargarSnapshot(true); renderCategorias(categorias); });
-                    contChips.appendChild(chip);
+                DOM.categoriasChips.innerHTML = '';
+
+                if (!categorias || categorias.length === 0) {
+                    DOM.categoriasWrap.style.display = 'none';
+                    return;
+                }
+
+                DOM.categoriasWrap.style.display = 'block';
+
+                categorias.forEach(cat => {
+                    const isActive = state.categoriaId === cat.id;
+                    const prog = cat.progreso || { total: 0, completadas: 0, porcentaje: 0 };
+
+                    const chip = document.createElement('button');
+                    chip.className = `chip-categoria btn ${isActive ? 'btn-primary' : 'btn-outline-primary'}`;
+                    chip.innerHTML = `
+                        <i class="bi bi-tag"></i> ${cat.nombre}
+                        <span class="badge ${isActive ? 'bg-white text-primary' : 'bg-primary'} ms-2">
+                            ${prog.completadas}/${prog.total}
+                        </span>
+                    `;
+
+                    chip.addEventListener('click', () => {
+                        state.categoriaId = cat.id;
+                        state.vistaActual = 'categoria';
+                        cargarSnapshot(true);
+                        DOM.btnLimpiarFiltro.style.display = 'inline-block';
+                    });
+
+                    DOM.categoriasChips.appendChild(chip);
                 });
             }
 
-            function renderResumen(rg) {
-                if (!rg) { wrapResumen.style.display = 'none'; return; }
-                wrapResumen.style.display = '';
-                elRgComp.textContent = rg.completadas ?? 0;
-                elRgTotal.textContent = rg.total ?? 0;
-                elRgPct.textContent = (rg.porcentaje ?? 0).toFixed(1);
-                elRgBar.style.width = `${rg.porcentaje ?? 0}%`;
+            function limpiarFiltroCategoria() {
+                state.categoriaId = null;
+                state.vistaActual = 'completo';
+                DOM.btnLimpiarFiltro.style.display = 'none';
+                cargarSnapshot(true);
+            }
+
+            function renderResumen(resumen) {
+                if (!resumen) {
+                    DOM.resumenWrap.style.display = 'none';
+                    return;
+                }
+
+                DOM.resumenWrap.style.display = 'block';
+
+                const completadas = resumen.completadas || 0;
+                const total = resumen.total || 0;
+                const porcentaje = resumen.porcentaje || 0;
+
+                DOM.rgCompletadas.textContent = completadas;
+                DOM.rgTotal.textContent = total;
+                DOM.rgPorcentaje.textContent = porcentaje.toFixed(1);
+                DOM.rgBar.style.width = `${porcentaje}%`;
+
+                // Cambiar color según progreso
+                DOM.rgBar.className = 'progress-bar progress-bar-striped progress-bar-animated';
+                if (porcentaje === 100) {
+                    DOM.rgBar.classList.add('bg-success');
+                } else if (porcentaje >= 50) {
+                    DOM.rgBar.classList.add('bg-info');
+                } else {
+                    DOM.rgBar.classList.add('bg-warning');
+                }
             }
 
             function renderTbody() {
 
-                tbodyRows.querySelectorAll('tr:not(#fila-empty)').forEach(tr => tr.remove());
+                // Limpiar filas existentes
+                DOM.tbodyRows.querySelectorAll('tr:not(#fila-empty)').forEach(tr => tr.remove());
 
-                const base = categoriaId ? filasFull.filter(f => f.categoriaId === categoriaId) : filasFull;
-
-                if (!base.length) {
-                    filaEmpty.style.display = '';
+                if (!state.filas || state.filas.length === 0) {
+                    DOM.filaEmpty.style.display = '';
                     return;
                 }
-                filaEmpty.style.display = 'none';
 
-                const ordenado = base.slice().sort((a, b) => {
-                    const diff = getPuntos(b) - getPuntos(a);
-                    if (diff !== 0) return diff;
-                    const pa = typeof a.promedio === 'number' ? a.promedio : 0;
-                    const pb = typeof b.promedio === 'number' ? b.promedio : 0;
-                    return pb - pa;
+                DOM.filaEmpty.style.display = 'none';
+
+                // Ordenar por puntaje/promedio
+                const ordenado = [...state.filas].sort((a, b) => {
+                    const puntosA = getPuntaje(a);
+                    const puntosB = getPuntaje(b);
+                    return puntosB - puntosA;
                 });
 
-                let lastPts = null, lastRank = 0, i = 0;
-                const ranked = ordenado.map(f => {
-                    i += 1;
-                    const pts = getPuntos(f);
-                    const rank = (pts === lastPts) ? lastRank : i;
-                    lastPts = pts;
+                // Calcular rankings
+                let lastPuntos = null;
+                let lastRank = 0;
+                const ranked = ordenado.map((fila, i) => {
+                    const puntos = getPuntaje(fila);
+                    const rank = (puntos === lastPuntos) ? lastRank : (i + 1);
+                    lastPuntos = puntos;
                     lastRank = rank;
-                    return { ...f, __rank: rank, __pts: pts };
+                    return { ...fila, __rank: rank, __puntos: puntos };
                 });
 
-                const frag = document.createDocumentFragment();
+                // Renderizar filas
+                const fragment = document.createDocumentFragment();
 
-                ranked.forEach(f => {
-                    const tr = tplRow.content.firstElementChild.cloneNode(true);
+                ranked.forEach(fila => {
+                    const tr = document.createElement('tr');
+                    tr.className = fila.completado ? 'table-success' : '';
 
-                    const medallaEl = tr.querySelector('.row-medalla');
-                    const puestoEl = tr.querySelector('.row-puesto');
-                    puestoEl.textContent = `#${f.__rank}`;
-                    medallaEl.textContent = (f.__rank === 1) ? '🥇' : (f.__rank === 2) ? '🥈' : (f.__rank === 3) ? '🥉' : '';
+                    // Columna Puesto
+                    const tdPuesto = document.createElement('td');
+                    tdPuesto.className = 'text-center';
+                    const medalla = getMedalla(fila.__rank);
+                    tdPuesto.innerHTML = `
+                        ${medalla ? `<span class="medalla">${medalla}</span>` : ''}
+                        <span class="small text-muted">#${fila.__rank}</span>
+                    `;
+                    tr.appendChild(tdPuesto);
 
-                    tr.querySelector('.row-participante').textContent = f.participante ?? '—';
-                    tr.querySelector('.row-institucion').textContent = f.institucion ?? '—';
+                    // Columna Participante
+                    const tdParticipante = document.createElement('td');
+                    tdParticipante.innerHTML = `
+                        <div class="fw-semibold">${fila.participante || '—'}</div>
+                        <div class="small text-muted">${fila.institucion || ''}</div>
+                    `;
+                    tr.appendChild(tdParticipante);
 
-                    const promCell = tr.querySelector('.row-promedio')?.closest('td');
-                    const estadoCell = tr.querySelector('.row-estado')?.closest('td');
-                    if (promCell) promCell.remove();
-                    if (estadoCell) estadoCell.remove();
+                    // Columnas dinámicas según vista
+                    if (state.vistaActual === 'total') {
+                        const tdDesglose = document.createElement('td');
+                        tdDesglose.className = 'desglose-categoria';
 
-                    jurados.forEach(j => {
-                        const td = document.createElement('td');
-                        td.className = 'text-center';
-                        const val = f.scores && f.scores[j.id] !== undefined ? Number(f.scores[j.id]).toFixed(2) : '—';
-                        td.innerHTML = (val === '—') ? '<span class="text-muted">—</span>' : `<span class="fw-semibold">${val}</span>`;
-                        tr.appendChild(td);
-                    });
+                        const desglose = fila.desglose || {};
+                        let html = '<div>';
+                        Object.entries(desglose).forEach(([cat, puntos]) => {
+                            html += `<div><strong>${cat}:</strong> ${Number(puntos).toFixed(2)}</div>`;
+                        });
+                        html += '</div>';
 
-                    const tdProm = document.createElement('td');
-                    tdProm.className = 'text-end';
+                        tdDesglose.innerHTML = html;
+                        tr.appendChild(tdDesglose);
 
-                    const toShow = (typeof f.puntos === 'number') ? f.puntos : (typeof f.promedio === 'number' ? f.promedio : 0);
-                    const fmt = Number.isInteger(toShow) ? toShow : toShow.toFixed(2);
-                    tdProm.innerHTML = `<span class="fw-bold">${fmt}</span>`;
-                    tr.appendChild(tdProm);
+                    } else {
+                        // Columnas de Jurados
+                        state.jurados.forEach(jurado => {
+                            const td = document.createElement('td');
+                            td.className = 'text-center';
 
+                            const scores = fila.scores || {};
+                            const puntaje = scores[jurado.id];
+
+                            if (puntaje !== undefined) {
+                                td.innerHTML = `<span class="fw-semibold">${Number(puntaje).toFixed(2)}</span>`;
+                            } else {
+                                td.innerHTML = '<span class="text-muted">—</span>';
+                            }
+
+                            tr.appendChild(td);
+                        });
+                    }
+
+                    // Columna Puntaje Total
+                    const tdPuntaje = document.createElement('td');
+                    tdPuntaje.className = 'text-end';
+                    const puntaje = fila.__puntos;
+                    const formato = Number.isInteger(puntaje) ? puntaje : puntaje.toFixed(2);
+                    tdPuntaje.innerHTML = `<span class="fw-bold fs-5 text-primary">${formato}</span>`;
+                    tr.appendChild(tdPuntaje);
+
+                    // Columna Estado
                     const tdEstado = document.createElement('td');
                     tdEstado.className = 'text-center';
-                    tdEstado.innerHTML = `<span class="badge ${f.completado ? 'text-bg-success' : 'text-bg-secondary'}">
-                        ${f.completado ? 'Completo' : 'Pendiente'}
-                        </span>`;
-                                        tr.appendChild(tdEstado);
-                                        const tdPdf = document.createElement('td');
-                                        tdPdf.className = 'text-center';
-                                        tdPdf.innerHTML = `
-                        <a class="btn btn-sm btn-outline-secondary"
-                            href="/api/admin/concurso/${actividadId}/reporte/inscripcion/${f.inscripcionId}.pdf"
-                            target="_blank" rel="noopener">
-                            <i class="bi bi-file-earmark-pdf"></i> PDF
-                        </a>`;
-                    tr.appendChild(tdPdf);
-                    frag.appendChild(tr);
+                    tdEstado.innerHTML = `
+                        <span class="badge ${fila.completado ? 'bg-success badge-completado' : 'bg-secondary'}">
+                            <i class="bi bi-${fila.completado ? 'check-circle' : 'clock'}"></i>
+                            ${fila.completado ? 'Completo' : 'Pendiente'}
+                        </span>
+                    `;
+                    tr.appendChild(tdEstado);
+
+                    // COLUMNA DE ACCIONES
+                    const tdAcciones = document.createElement('td');
+                    tdAcciones.className = 'text-center';
+                    const participanteId = fila.participanteId || fila.idParticipante;
+
+                    if (!participanteId) {
+                        tdAcciones.innerHTML = '<span class="text-muted">—</span>';
+                    } else if (state.categoriaId) {
+                        // ═══════════════════════════════════════════════════════
+                        // VISTA POR CATEGORÍA (Recorrido o Palco)
+                        // Botón: Reporte individual de evaluaciones en ESA categoría
+                        // ═══════════════════════════════════════════════════════
+                        const btnReporte = document.createElement('a');
+                        btnReporte.className = 'btn btn-sm btn-outline-primary';
+                        btnReporte.href = `/api/admin/concurso/${state.actividadId}/reporte/participante/${participanteId}/categoria/${state.categoriaId}.pdf`;
+                        btnReporte.target = '_blank';
+                        btnReporte.innerHTML = '<i class="bi bi-file-earmark-pdf"></i> Evaluaciones';
+                        btnReporte.title = `Descargar evaluaciones individuales de ${fila.participante}`;
+                        tdAcciones.appendChild(btnReporte);
+                        
+                    } else if (state.vistaActual === 'total') {
+                        // ═══════════════════════════════════════════════════════
+                        // VISTA TOTAL
+                        // Botón: Reporte completo del participante (ambas categorías)
+                        // ═══════════════════════════════════════════════════════
+                        const btnReporteCompleto = document.createElement('a');
+                        btnReporteCompleto.className = 'btn btn-sm btn-outline-success';
+                        btnReporteCompleto.href = `/api/admin/concurso/${state.actividadId}/reporte/participante/${participanteId}/completo.pdf`;
+                        btnReporteCompleto.target = '_blank';
+                        btnReporteCompleto.innerHTML = '<i class="bi bi-file-earmark-pdf-fill"></i> Completo';
+                        btnReporteCompleto.title = `Descargar reporte completo de ${fila.participante}`;
+                        tdAcciones.appendChild(btnReporteCompleto);
+                        
+                    } else {
+                        // Vista "completo" sin filtro - no mostrar botones individuales
+                        tdAcciones.innerHTML = '<span class="text-muted">Selecciona una categoría</span>';
+                    }
+                    tr.appendChild(tdAcciones);
+                    fragment.appendChild(tr);
                 });
-                tbodyRows.appendChild(frag);
+                DOM.tbodyRows.appendChild(fragment);
+            }
+
+            // Helper para obtener ID de categoría por nombre
+            function obtenerIdCategoriaPorNombre(nombre) {
+                if (!state.filas || state.filas.length === 0) return null;
+                const fila = state.filas.find(f => f.categoriaNombre === nombre);
+                if (fila && fila.categoriaId) {return fila.categoriaId;}
+                return null;
+            }
+
+            function renderBotonesReporte() {
+                DOM.reportesBtn.innerHTML = '';
+
+                if (!state.actividadId) {
+                    DOM.reportesBtn.style.display = 'none';
+                    return;
+                }
+
+                DOM.reportesBtn.style.display = 'block';
+
+                // ═══════════════════════════════════════════════════════
+                // VISTA TOTAL
+                // ═══════════════════════════════════════════════════════
+                if (state.vistaActual === 'total') {
+                    const btn = document.createElement('a');
+                    btn.className = 'btn-reporte-header btn-success-custom';
+                    btn.href = `/api/admin/concurso/${state.actividadId}/reporte/total.pdf`;
+                    btn.target = '_blank';
+                    btn.innerHTML = '<i class="bi bi-file-pdf-fill"></i> Reporte General Total';
+                    btn.title = 'Descargar tabla resumen con suma de ambas categorías';
+                    DOM.reportesBtn.appendChild(btn);
+
+                // ═══════════════════════════════════════════════════════
+                // VISTA POR CATEGORÍA
+                // ═══════════════════════════════════════════════════════
+                } else if (state.categoriaId) {
+                    const categoriaSeleccionada = state.categorias.find(c => c.id === state.categoriaId);
+                    const nombreCategoria = categoriaSeleccionada ? categoriaSeleccionada.nombre : 'Categoría';
+                    
+                    const btn = document.createElement('a');
+                    btn.className = 'btn-reporte-header btn-primary-custom';
+                    btn.href = `/api/admin/concurso/${state.actividadId}/reporte/categoria/${state.categoriaId}.pdf`;
+                    btn.target = '_blank';
+                    btn.innerHTML = `<i class="bi bi-file-pdf"></i> Reporte de ${nombreCategoria}`;
+                    btn.title = `Descargar tabla resumen de ${nombreCategoria}`;
+                    DOM.reportesBtn.appendChild(btn);
+
+                // ═══════════════════════════════════════════════════════
+                // VISTA COMPLETO (sin filtro) - DROPDOWN
+                // ═══════════════════════════════════════════════════════
+                } else {
+                    const btnGroup = document.createElement('div');
+                    btnGroup.className = 'btn-group dropdown-reportes';
+
+                    const btnDropdown = document.createElement('button');
+                    btnDropdown.className = 'btn dropdown-toggle';
+                    btnDropdown.setAttribute('data-bs-toggle', 'dropdown');
+                    btnDropdown.setAttribute('aria-expanded', 'false');
+                    btnDropdown.innerHTML = '<i class="bi bi-file-pdf"></i> Reportes Generales';
+
+                    const menu = document.createElement('ul');
+                    menu.className = 'dropdown-menu dropdown-menu-end';
+
+                    // Opción: Reporte Total
+                    const liTotal = document.createElement('li');
+                    const aTotal = document.createElement('a');
+                    aTotal.className = 'dropdown-item';
+                    aTotal.href = `/api/admin/concurso/${state.actividadId}/reporte/total.pdf`;
+                    aTotal.target = '_blank';
+                    aTotal.innerHTML = '<i class="bi bi-calculator"></i> <strong>Reporte Total</strong>';
+                    liTotal.appendChild(aTotal);
+                    menu.appendChild(liTotal);
+
+                    // Separador
+                    if (state.categorias.length > 0) {
+                        const divider = document.createElement('li');
+                        const hr = document.createElement('hr');
+                        hr.className = 'dropdown-divider';
+                        divider.appendChild(hr);
+                        menu.appendChild(divider);
+                    }
+
+                    // Opciones: Por cada categoría
+                    state.categorias.forEach(categoria => {
+                        const li = document.createElement('li');
+                        const a = document.createElement('a');
+                        a.className = 'dropdown-item';
+                        a.href = `/api/admin/concurso/${state.actividadId}/reporte/categoria/${categoria.id}.pdf`;
+                        a.target = '_blank';
+                        a.innerHTML = `<i class="bi bi-tag"></i> ${categoria.nombre}`;
+                        li.appendChild(a);
+                        menu.appendChild(li);
+                    });
+
+                    btnGroup.appendChild(btnDropdown);
+                    btnGroup.appendChild(menu);
+                    DOM.reportesBtn.appendChild(btnGroup);
+                }
+            }
+
+            function actualizarTituloTabla() {
+                let titulo = 'Resultados';
+
+                if (state.vistaActual === 'total') {
+                    titulo = '<i class="bi bi-calculator"></i> Resultados Totales';
+                } else if (state.categoriaId) {
+                    const cat = state.filas.find(fila => fila.categoriaId === state.categoriaId);
+                    if (cat) {
+                        titulo = `<i class="bi bi-tag"></i> ${cat.categoriaNombre}`;
+                    }
+                }
+
+                DOM.tituloTabla.innerHTML = titulo;
+            }
+
+            function startLiveUpdates() {
+                stopLiveUpdates();
+
+                if (!state.actividadId) return;
+
+                try {
+                    state.sse = new EventSource(`/api/admin/concurso/${state.actividadId}/stream`);
+                    state.sse.onmessage = (event) => {
+                        try {
+                            const data = JSON.parse(event.data);
+                            if (data.filas) {state.filas = data.filas;renderTbody();}
+                            if (data.categorias) {renderCategorias(data.categorias);}
+                            if (data.resumenGlobal) {renderResumen(data.resumenGlobal);}
+                            marcarActualizado();
+                        } catch (error) {
+                            console.error('Error procesando SSE:', error);
+                        }
+                    };
+                    state.sse.onerror = () => {
+                        console.warn('Error en SSE, usando polling');
+                    };
+
+                } catch (error) {
+                    console.warn('SSE no disponible, usando polling');
+                }
+
+                // Polling de respaldo
+                state.polling = setInterval(() => {cargarSnapshot(true);}, 15000);
+            }
+
+            function stopLiveUpdates() {
+                if (state.sse) {
+                    try {
+                        state.sse.close();
+                    } catch (error) {
+                        console.error('Error cerrando SSE:', error);
+                    }
+                    state.sse = null;
+                }
+
+                if (state.polling) {
+                    clearInterval(state.polling);
+                    state.polling = null;
+                }
+            }
+
+            function mostrarSinActividad() {
+                state.actividadId = null;
+                DOM.sinActividad.style.display = 'block';
+                DOM.vistaSelector.style.display = 'none';
+                DOM.categoriasWrap.style.display = 'none';
+                DOM.resumenWrap.style.display = 'none';
+                DOM.btnRefrescar.disabled = true;
+                DOM.reportesBtn.style.display = 'none';
+                stopLiveUpdates();
+                limpiarTabla();
+            }
+
+            function mostrarConActividad() {
+                DOM.sinActividad.style.display = 'none';
+                DOM.vistaSelector.style.display = 'block';
+                DOM.btnRefrescar.disabled = false;
+            }
+
+            function limpiarTabla() {
+                DOM.tbodyRows.querySelectorAll('tr:not(#fila-empty)').forEach(tr => tr.remove());
+                DOM.filaEmpty.style.display = '';
+                state.jurados = [];
+                renderThead();
             }
 
             function marcarActualizado() {
-                elLastUpdate.textContent = new Date().toLocaleTimeString();
+                const ahora = new Date();
+                const hora = ahora.toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                DOM.lastUpdate.textContent = hora;
             }
 
-            function startLive() {
-                stopLive();
-                if (!actividadId) return;
-                try {
-                    sse = new EventSource(`/api/admin/concurso/${actividadId}/stream`);
-                    sse.onmessage = (ev) => {
-                        try {
-                            const p = JSON.parse(ev.data);
-                            if (p.filas) { filasFull = p.filas; renderTbody(); }
-                            if (p.categorias) { renderCategorias(p.categorias); }
-                            if (p.resumenGlobal) { renderResumen(p.resumenGlobal); }
-                            marcarActualizado();
-                        } catch (e) { console.error(e); }
-                    };
-                    sse.onerror = () => { /* silencioso uwu */ };
-                } catch (e) { console.warn('SSE no disponible'); }
-                polling = setInterval(() => cargarSnapshot(true), 15000);
+            function mostrarError(mensaje) {console.error(mensaje);}
+
+            function getPuntaje(fila) {
+                if (typeof fila.puntos === 'number') return fila.puntos;
+                if (typeof fila.promedio === 'number') return fila.promedio;
+                return 0;
             }
 
-            function stopLive() {
-                if (sse) { try { sse.close(); } catch (e) { } sse = null; }
-                if (polling) { clearInterval(polling); polling = null; }
+            function getMedalla(puesto) {
+                switch (puesto) {
+                    case 1: return '🥇';
+                    case 2: return '🥈';
+                    case 3: return '🥉';
+                    default: return '';
+                }
             }
 
-            function clearDashboard() {
-                elActNombre.textContent = '—';
-                contChips.innerHTML = ''; wrapCategorias.style.display = 'none';
-                renderResumen(null);
-                jurados = []; renderThead();
-                filasFull = []; tbodyRows.querySelectorAll('tr:not(#fila-empty)').forEach(tr => tr.remove());
-                filaEmpty.style.display = '';
-                elLastUpdate.textContent = '—';
-            }
+            function cleanup() {stopLiveUpdates();}
         })();
-
-        function getPuntos(f) {
-            if (typeof f.puntos === 'number') return f.puntos;
-            if (typeof f.promedio === 'number') return f.promedio;
-            return 0;
-        }
     </script>
 </body>
+
 </html>

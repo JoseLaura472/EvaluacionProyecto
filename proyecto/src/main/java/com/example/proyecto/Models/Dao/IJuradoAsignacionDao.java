@@ -84,4 +84,9 @@ public interface IJuradoAsignacionDao extends JpaRepository<JuradoAsignacion, Lo
     // Buscar por actividad y jurado
     List<JuradoAsignacion> findByActividad_IdActividadAndJurado_IdJurado(
         Long idActividad, Long idJurado);
+
+    List<JuradoAsignacion> findByActividadIdActividad(Long idActividad);
+    List<JuradoAsignacion> findByActividadIdActividadAndCategoriaActividadIdCategoriaActividad(Long idActividad, Long idCategoria);
+    int countByActividadIdActividadAndCategoriaActividadIdCategoriaActividad(Long idActividad, Long idCategoria);
+    List<JuradoAsignacion> findByCategoriaActividadIdCategoriaActividad(Long idCategoriaActividad);
 }

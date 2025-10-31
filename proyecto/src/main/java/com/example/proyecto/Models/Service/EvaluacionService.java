@@ -29,9 +29,11 @@ import com.example.proyecto.Models.IService.IRubricaService;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class EvaluacionService {
     private final IEvaluacionDao evaluacionRepo;
     private final IInscripcionService inscripcionRepo;
@@ -43,6 +45,8 @@ public class EvaluacionService {
     private final IRubricaService rubricaService;
     private final IInscripcionService inscripcionService;
     private final IEvaluacionService evaluacionService;
+
+    private final ConcursoDashboardService dashboardService;
 
     @Transactional
     public void guardarEvaluacion(Jurado jurado, EvaluacionGuardarDto dto) {
@@ -167,19 +171,12 @@ public class EvaluacionService {
             CategoriaActividad categoria = asignacion.getCategoriaActividad();
             Long idCategoria = categoria.getIdCategoriaActividad();
             
-            System.out.println("══════════════════════════════════════════════════════");
-            System.out.println("[EvaluacionService] Obteniendo datos de evaluación");
-            System.out.println("Jurado ID: " + idJurado);
-            System.out.println("Categoría asignada: " + categoria.getNombre() + " (ID: " + idCategoria + ")");
-            
             // 2. Obtener la rúbrica de esta categoría
             Rubrica rubrica = rubricaService.findByActividadAndCategoria(idActividad, idCategoria);
             
             if (rubrica == null) {
                 throw new RuntimeException("No se encontró rúbrica para la categoría: " + categoria.getNombre());
             }
-            
-            System.out.println("Rúbrica encontrada: " + rubrica.getNombre() + " (ID: " + rubrica.getIdRubrica() + ")");
             
             // 3. Obtener los criterios de evaluación
             List<Map<String, Object>> criterios = rubrica.getCriterios().stream()
@@ -194,16 +191,12 @@ public class EvaluacionService {
                 })
                 .collect(Collectors.toList());
             
-            System.out.println("Criterios encontrados: " + criterios.size());
-            
             // 4. 🔥 AQUÍ ESTÁ EL CAMBIO CLAVE 🔥
             // Obtener inscripciones SOLO de esta categoría específica
             List<Inscripcion> inscripciones = inscripcionService.findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividad(
                 idActividad, 
                 idCategoria  // ← FILTRAR POR CATEGORÍA
             );
-            
-            System.out.println("Inscripciones encontradas para esta categoría: " + inscripciones.size());
             
             // 5. Mapear participantes (ahora sin duplicados)
             List<Map<String, Object>> participantes = inscripciones.stream()
@@ -224,8 +217,6 @@ public class EvaluacionService {
                     );
                     map.put("evaluado", evaluado);
                     
-                    System.out.println("  - Participante: " + p.getNombre() + " | Evaluado: " + evaluado);
-                    
                     // Si ya fue evaluado, cargar puntajes
                     if (evaluado) {
                         Map<Long, Double> puntajes = obtenerPuntajesGuardados(
@@ -241,9 +232,6 @@ public class EvaluacionService {
                     return map;
                 })
                 .collect(Collectors.toList());
-            
-            System.out.println("Participantes procesados: " + participantes.size());
-            System.out.println("══════════════════════════════════════════════════════");
             
             // 6. Construir respuesta
             Map<String, Object> datosCategoria = new HashMap<>();
@@ -329,11 +317,11 @@ public class EvaluacionService {
                 throw new RuntimeException("No se encontró la rúbrica");
             }
             
-            // 🔥 Buscar inscripción del participante EN ESTA CATEGORÍA 🔥
+            // Buscar inscripción del participante EN ESTA CATEGORÍA
             Inscripcion inscripcion = inscripcionService.findByActividadParticipanteAndCategoria(
                 idActividad, 
                 idParticipante,
-                idCategoria  // ← FILTRAR POR CATEGORÍA
+                idCategoria
             );
             
             if (inscripcion == null) {
@@ -394,6 +382,21 @@ public class EvaluacionService {
             
             System.out.println("✅ Evaluación guardada exitosamente");
             System.out.println("══════════════════════════════════════════════════════");
+            
+            // 🔥 EMITIR ACTUALIZACIÓN VIA SSE 🔥
+            try {
+                // Obtener snapshot actualizado
+                Map<String, Object> snapshot = dashboardService.getSnapshotCompleto(idActividad);
+                
+                // Broadcast a todos los clientes conectados a esta actividad
+                sseHub.broadcast(idActividad, snapshot);
+                
+                log.info("📡 Broadcast enviado para actividad {}", idActividad);
+                
+            } catch (Exception e) {
+                log.warn("Error enviando broadcast SSE: {}", e.getMessage());
+                // No lanzar excepción, el guardado ya se realizó exitosamente
+            }
             
         } catch (Exception e) {
             System.err.println("══════════════════════════════════════════════════════");

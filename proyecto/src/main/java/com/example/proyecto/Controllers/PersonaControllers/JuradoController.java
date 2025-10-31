@@ -300,13 +300,6 @@ public class JuradoController {
             model.addAttribute("categoria", categoria);
             model.addAttribute("nombreCategoria", categoria.getNombre());
 
-            System.out.println("═══════════════════════════════════════════════");
-            System.out.println("[Panel Entrada] Cargando vista para jurado");
-            System.out.println("Jurado: " + jurado.getPersona().getNombreCompleto() + " (ID: " + jurado.getIdJurado() + ")");
-            System.out.println("Actividad: " + actividad.getNombre());
-            System.out.println("Categoría asignada: " + categoria.getNombre());
-            System.out.println("═══════════════════════════════════════════════");
-
             return "vista/jurado/panel-entrada";
 
         } catch (Exception e) {

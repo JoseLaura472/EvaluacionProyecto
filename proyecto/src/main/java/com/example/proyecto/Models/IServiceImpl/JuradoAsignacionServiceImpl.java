@@ -87,4 +87,24 @@ public class JuradoAsignacionServiceImpl implements IJuradoAsignacionService {
             .collect(Collectors.toList());
     }
 
+    @Override
+    public List<JuradoAsignacion> findByActividad(Long idActividad) {
+        return dao.findByActividadIdActividad(idActividad);
+    }
+
+    @Override
+    public List<JuradoAsignacion> findByActividadAndCategoria(Long idActividad, Long idCategoria) {
+        return dao.findByActividadIdActividadAndCategoriaActividadIdCategoriaActividad(idActividad, idCategoria);
+    }
+
+    @Override
+    public int countByActividadAndCategoria(Long idActividad, Long idCategoria) {
+        return dao.countByActividadIdActividadAndCategoriaActividadIdCategoriaActividad(idActividad, idCategoria);
+    }
+
+    @Override
+    public List<JuradoAsignacion> findByCategoriaActividad(Long idCategoriaActividad) {
+        return dao.findByCategoriaActividadIdCategoriaActividad(idCategoriaActividad);
+    }
+
 }

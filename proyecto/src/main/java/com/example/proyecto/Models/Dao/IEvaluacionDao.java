@@ -66,4 +66,6 @@ public interface IEvaluacionDao extends JpaRepository<Evaluacion, Long>{
     );
 
     Evaluacion findByJuradoIdJuradoAndParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(Long idJurado, Long idParticipante, Long idCategoria);
+    List<Evaluacion> findByParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(Long idParticipante, Long idCategoria);
+    int countByParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(Long idParticipante, Long idCategoria);
 }

@@ -70,7 +70,14 @@ public interface IInscripcionDao extends JpaRepository<Inscripcion, Long> {
     // Buscar todas las inscripciones por id de categoría
     List<Inscripcion> findByCategoriaActividadIdCategoriaActividad(Long idCategoriaActividad);
 
-    List<Inscripcion> findByActividadIdActividad(Long idActividad);
+    @Query("SELECT i FROM Inscripcion i " +
+        "LEFT JOIN FETCH i.participante p " +
+        "LEFT JOIN FETCH i.categoriaActividad c " +
+        "WHERE i.actividad.idActividad = :idActividad " +
+        "AND i.estado = 'A' " +
+        "ORDER BY c.idCategoriaActividad, p.nombre")
+    List<Inscripcion> findByActividad(@Param("idActividad") Long idActividad);
+
     Inscripcion findByActividadIdActividadAndParticipanteIdParticipante(Long idActividad, Long idParticipante);
     Inscripcion findByActividadIdActividadAndParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(
         Long idActividad, 

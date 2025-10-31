@@ -82,4 +82,14 @@ public class EvaluacionServiceImpl implements IEvaluacionService {
     public Evaluacion findByJuradoAndParticipanteAndCategoria(Long idJurado, Long idParticipante, Long idCategoria) {
         return evaluacionDao.findByJuradoIdJuradoAndParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(idJurado, idParticipante, idCategoria);
     }
+
+    @Override
+    public List<Evaluacion> findByParticipanteAndCategoria(Long idParticipante, Long idCategoria) {
+        return evaluacionDao.findByParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(idParticipante, idCategoria);
+    }
+
+    @Override
+    public int countByParticipanteAndCategoria(Long idParticipante, Long idCategoria) {
+        return evaluacionDao.countByParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(idParticipante, idCategoria);
+    }
 }

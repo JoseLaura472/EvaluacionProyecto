@@ -206,6 +206,47 @@
             font-size: 48px;
             margin-bottom: 15px;
         }
+        /* Participante bloqueado */
+        .participante-item.bloqueado {
+            background: #f8f9fa !important;
+            border-left: 4px solid #28a745;
+            cursor: not-allowed !important;
+        }
+
+        .participante-item.bloqueado:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Mensaje de completado */
+        #mensajeCompleto {
+            animation: slideIn 0.5s ease-out;
+            border-left: 5px solid #28a745;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Modal header con estado */
+        .modal-header-custom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #estadoEvaluacion {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -236,20 +277,28 @@
             </div>
         </div>
 
-        <!-- Progreso y botón finalizar -->
+        <!-- Progreso (sin botón finalizar) -->
         <div class="resumen-box">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <div>
                     <strong>Progreso:</strong>
                     <span id="textoProgreso">0 de 0 evaluados</span>
                 </div>
-                <button class="btn btn-success btn-custom" onclick="finalizarTodo()">
-                    <i class="fas fa-check-circle"></i> Finalizar
-                </button>
+                <!-- ✅ Badge de estado en lugar de botón -->
+                <span id="estadoGeneral" class="badge bg-secondary">
+                    <i class="fas fa-hourglass-half"></i> En progreso
+                </span>
             </div>
             <div class="progress-custom">
                 <div class="progress-bar-custom" id="barraProgreso" style="width: 0%">0%</div>
             </div>
+        </div>
+
+        <!-- ✅ Mensaje de completado (oculto por defecto) -->
+        <div id="mensajeCompleto" class="alert alert-success" style="display: none;">
+            <i class="fas fa-check-circle"></i>
+            <strong>¡Evaluaciones completadas!</strong>
+            <p class="mb-0">Has evaluado a todos los participantes. Las evaluaciones han sido guardadas automáticamente.</p>
         </div>
     </div>
 
@@ -260,6 +309,8 @@
                 <h3 style="margin: 0;">
                     <i class="fas fa-edit"></i> <span id="nombreParticipanteModal">-</span>
                 </h3>
+                <!-- ✅ Indicador de bloqueo -->
+                <span id="estadoEvaluacion" class="badge badge-status" style="display: none;"></span>
             </div>
             <div class="modal-body-custom">
                 <div id="criteriosContainer"></div>
@@ -273,7 +324,7 @@
                 
                 <div class="d-flex" style="gap: 10px;">
                     <button class="btn-custom btn-cerrar" onclick="cerrarModal()">
-                        <i class="fas fa-times"></i> Cancelar
+                        <i class="fas fa-times"></i> Cerrar
                     </button>
                     <button class="btn-custom btn-guardar" onclick="guardarEvaluacion()">
                         <i class="fas fa-save"></i> Guardar
@@ -290,41 +341,20 @@
         let datosCompletos = {};
         const idActividad = /*[[${idActividad}]]*/ null;
 
-        $(document).ready(function() {
-            console.log('══════════════════════════════════════');
-            console.log('Iniciando panel de evaluación');
-            console.log('ID Actividad:', idActividad);
-            console.log('══════════════════════════════════════');
-            
-            if (!idActividad) {
-                alert('❌ No se encontró la actividad asignada');
-                return;
-            }
-            
-            cargarDatos();
-        });
+        $(document).ready(function() {cargarDatos();});
 
         function cargarDatos() {
-            console.log('Cargando datos para actividad:', idActividad);
-            
             $.ajax({
                 url: '/jurado/datos/' + idActividad,
                 method: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    console.log('✅ Datos recibidos:', response);
-                    
                     if (!response.success) {
                         alert('❌ Error: ' + (response.message || 'Error desconocido'));
                         return;
                     }
                     
                     datosCompletos = response.categoria;
-                    
-                    console.log('Categoría:', datosCompletos.nombreCategoria);
-                    console.log('Participantes:', datosCompletos.participantes.length);
-                    console.log('Criterios:', datosCompletos.criterios.length);
-                    
                     renderizarParticipantes();
                     actualizarProgreso();
                 },
@@ -351,15 +381,22 @@
             
             let html = '';
             datosCompletos.participantes.forEach(function(p) {
+                const claseItem = p.evaluado ? 'evaluado bloqueado' : '';
+                const cursor = p.evaluado ? 'cursor: not-allowed; opacity: 0.7;' : 'cursor: pointer;';
+                
                 html += `
-                    <div class="participante-item ${p.evaluado ? 'evaluado' : ''}" 
-                        onclick="abrirModalEvaluacion(${p.id})">
+                    <div class="participante-item ${claseItem}" 
+                         style="${cursor}"
+                         onclick="${p.evaluado ? '' : 'abrirModalEvaluacion(' + p.id + ')'}">
                         <div>
-                            <div class="participante-nombre">${p.nombre}</div>
+                            <div class="participante-nombre">
+                                ${p.evaluado ? '<i class="fas fa-lock"></i> ' : ''}
+                                ${p.nombre}
+                            </div>
                             <small class="text-muted">${p.institucion || ''}</small>
                         </div>
                         <span class="badge-status ${p.evaluado ? 'badge-evaluado' : 'badge-pendiente'}">
-                            ${p.evaluado ? '<i class="fas fa-check"></i> Evaluado' : '<i class="fas fa-clock"></i> Pendiente'}
+                            ${p.evaluado ? '<i class="fas fa-check-circle"></i> Evaluado y Bloqueado' : '<i class="fas fa-clock"></i> Pendiente'}
                         </span>
                     </div>
                 `;
@@ -377,14 +414,14 @@
             }
             
             if (participante.evaluado) {
-                if (!confirm('⚠️ Este participante ya fue evaluado. ¿Deseas modificar la evaluación?')) {
-                    return;
-                }
+                mostrarEvaluacionBloqueada(participante);
+                return;
             }
             
             participanteSeleccionado = participante;
             
             $('#nombreParticipanteModal').text(participante.nombre);
+            $('#estadoEvaluacion').hide();
             
             // Renderizar criterios
             let html = '';
@@ -417,8 +454,58 @@
             
             $('#criteriosContainer').html(html);
             $('#totalMax').text(totalMax);
+
+            $('.btn-guardar').show().prop('disabled', false);
+            $('.btn-cerrar').text('Cancelar');
             
             calcularTotal();
+            
+            $('#modalEvaluacion').addClass('show');
+        }
+        
+        function mostrarEvaluacionBloqueada(participante) {
+            $('#nombreParticipanteModal').text(participante.nombre);
+            $('#estadoEvaluacion')
+                .removeClass('badge-pendiente')
+                .addClass('badge-evaluado')
+                .html('<i class="fas fa-lock"></i> Bloqueado')
+                .show();
+            
+            // Renderizar criterios en modo solo lectura
+            let html = '';
+            let totalMax = 0;
+            let totalObtenido = 0;
+            
+            datosCompletos.criterios.forEach(function(criterio) {
+                totalMax += criterio.maxPuntos;
+                const valor = participante.puntajes[criterio.id] || 0;
+                totalObtenido += valor;
+                
+                html += `
+                    <div class="criterio-box" style="background: #f8f9fa; opacity: 0.8;">
+                        <div class="criterio-nombre">
+                            <i class="fas fa-lock"></i> ${criterio.nombre}
+                        </div>
+                        ${criterio.descripcion ? `<small class="text-muted">${criterio.descripcion}</small>` : ''}
+                        <div class="criterio-info mt-2">
+                            <span>Puntaje máximo: <strong>${criterio.maxPuntos} pts</strong></span>
+                        </div>
+                        <input type="number" 
+                            class="input-puntaje" 
+                            value="${valor}"
+                            disabled
+                            style="background: #e9ecef; cursor: not-allowed;">
+                    </div>
+                `;
+            });
+            
+            $('#criteriosContainer').html(html);
+            $('#totalMax').text(totalMax);
+            $('#totalPuntos').text(totalObtenido.toFixed(1));
+            
+            // Ocultar botón guardar
+            $('.btn-guardar').hide();
+            $('.btn-cerrar').text('Cerrar');
             
             $('#modalEvaluacion').addClass('show');
         }
@@ -479,14 +566,16 @@
             }
             
             const total = parseFloat($('#totalPuntos').text());
+
+            // if (!confirm('⚠️ Una vez guardada, esta evaluación quedará BLOQUEADA y no podrás modificarla.\n\n¿Confirmas que deseas guardar?')) {
+            //     return;
+            // }
             
             const evaluacionData = {
                 idParticipante: participanteSeleccionado.id,
                 puntajes: puntajes,
                 total: total
             };
-            
-            console.log('💾 Guardando evaluación:', evaluacionData);
             
             // Deshabilitar botón mientras se guarda
             $('.btn-guardar').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Guardando...');
@@ -497,14 +586,11 @@
                 contentType: 'application/json',
                 data: JSON.stringify(evaluacionData),
                 success: function(response) {
-                    console.log('✅ Respuesta del servidor:', response);
                     
                     if (response.success) {
                         // Actualizar estado del participante
                         participanteSeleccionado.evaluado = true;
                         participanteSeleccionado.puntajes = puntajes;
-                        
-                        alert('✅ Evaluación guardada exitosamente');
                         
                         cerrarModal();
                         renderizarParticipantes();
@@ -516,9 +602,6 @@
                 error: function(xhr, status, error) {
                     console.error('❌ Error al guardar:', xhr.responseText);
                     alert('❌ Error al guardar la evaluación. Por favor, intenta nuevamente.');
-                },
-                complete: function() {
-                    // Rehabilitar botón
                     $('.btn-guardar').prop('disabled', false).html('<i class="fas fa-save"></i> Guardar');
                 }
             });
@@ -533,38 +616,38 @@
             
             $('#textoProgreso').text(evaluados + ' de ' + total + ' evaluados');
             $('#barraProgreso').css('width', porcentaje + '%').text(porcentaje + '%');
+            
+            // Actualizar badge de estado
+            const estadoBadge = $('#estadoGeneral');
+            if (porcentaje === 100) {
+                estadoBadge
+                    .removeClass('bg-secondary bg-warning')
+                    .addClass('bg-success')
+                    .html('<i class="fas fa-check-circle"></i> Completado');
+            } else if (porcentaje > 0) {
+                estadoBadge
+                    .removeClass('bg-secondary bg-success')
+                    .addClass('bg-warning')
+                    .html('<i class="fas fa-hourglass-half"></i> ' + porcentaje + '% completado');
+            }
         }
 
-        function finalizarTodo() {
-            if (!datosCompletos || !datosCompletos.participantes) {
-                alert('❌ No se han cargado los datos correctamente');
-                return;
-            }
+        function verificarCompletitud() {
+            if (!datosCompletos || !datosCompletos.participantes) return;
             
             const total = datosCompletos.participantes.length;
             const evaluados = datosCompletos.participantes.filter(p => p.evaluado).length;
             
-            if (evaluados < total) {
-                alert('⚠️ Debes completar todas las evaluaciones antes de finalizar.\n\n' +
-                    'Evaluados: ' + evaluados + ' de ' + total);
-                return;
-            }
-            
-            if (confirm('✅ Has completado todas las evaluaciones.\n\n¿Confirmas que deseas finalizar y enviar?')) {
+            if (evaluados === total) {
+                // ✅ Todas las evaluaciones completadas
+                $('#mensajeCompleto').slideDown();
                 
+                // Opcional: Auto-notificar al backend
                 $.ajax({
-                    url: '/jurado/finalizar',
+                    url: '/jurado/notificar-completado',
                     method: 'POST',
                     success: function(response) {
-                        if (response.success) {
-                            alert('✅ ' + response.message);
-                            window.location.href = '/jurado/panel';
-                        } else {
-                            alert('❌ Error: ' + response.message);
-                        }
-                    },
-                    error: function() {
-                        alert('❌ Error al finalizar las evaluaciones');
+                        console.log('✅ Notificación enviada:', response);
                     }
                 });
             }
