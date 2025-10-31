@@ -107,107 +107,363 @@
             };
         }
 
+        // ============================================
+        // SCRIPT DE NAVEGACIÓN DEL SIDEBAR - CORREGIDO
+        // ============================================
+
         (function () {
-            let $contenido = $("#contenido");
+            'use strict';
+            
+            // Esperar a que el DOM y jQuery estén listos
+            if (typeof jQuery === 'undefined') {
+                console.error('jQuery no está cargado');
+                return;
+            }
+
+            // Variables globales
+            let $contenido = null;
             let $currentActive = null;
 
-            // ===== CONFIG opcional: endpoint de "pre-carga" al estilo de tu primer ejemplo =====
-            const USE_PREFETCH = false; // cambia a false si no lo necesitas
-            const PREFETCH_URL = "/adm/cargar-datos";
+            // Configuración
+            const CONFIG = {
+                USE_PREFETCH: false,
+                PREFETCH_URL: "/adm/cargar-datos",
+                CONTENIDO_SELECTOR: "#contenido", // Asegúrate que este ID existe en tu HTML
+                DEBUG: true // Cambia a false en producción
+            };
 
-            // ===== CARGA ASÍNCRONA DEL CONTENIDO =====
+            // Función de log para debug
+            function log(...args) {
+                if (CONFIG.DEBUG) {
+                    console.log('[SIDEBAR NAV]', ...args);
+                }
+            }
+
+            // ===== INICIALIZACIÓN =====
+            function init() {
+                log('Inicializando navegación del sidebar...');
+                
+                // Buscar el contenedor de contenido
+                $contenido = $(CONFIG.CONTENIDO_SELECTOR);
+                
+                if (!$contenido.length) {
+                    console.error(`No se encontró el contenedor ${CONFIG.CONTENIDO_SELECTOR}`);
+                    return;
+                }
+
+                log('Contenedor encontrado:', $contenido);
+
+                // Configurar event listeners
+                setupEventListeners();
+
+                // Cargar vista por defecto
+                cargarVistaPorDefecto();
+
+                log('Navegación inicializada correctamente');
+            }
+
+            // ===== CONFIGURAR EVENT LISTENERS =====
+            function setupEventListeners() {
+                // IMPORTANTE: Usar delegación de eventos para elementos dinámicos
+                $(document).off('click', 'a.menu-ajax'); // Limpiar listeners previos
+                $(document).on('click', 'a.menu-ajax', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation(); // Prevenir propagación
+                    
+                    const $link = $(this);
+                    log('Click en enlace:', $link.data('url'));
+                    
+                    handleMenuClick($link);
+                });
+
+                // Soporte para navegación del navegador (atrás/adelante)
+                window.addEventListener('popstate', handlePopState);
+
+                log('Event listeners configurados');
+            }
+
+            // ===== MANEJAR CLICK EN MENÚ =====
+            function handleMenuClick($link) {
+                const url = $link.data('url');
+                
+                if (!url) {
+                    log('Enlace sin URL configurada');
+                    return;
+                }
+
+                log('Cargando URL:', url);
+
+                // Marcar como activo
+                setActive($link);
+
+                // Cargar contenido
+                cargarContenido(url, true);
+
+                // Cerrar menú móvil si está abierto
+                cerrarMenuMovil();
+            }
+
+            // ===== CARGAR CONTENIDO =====
             function cargarContenido(url, pushHistory = true) {
-                if (!$contenido.length) return;
+                if (!$contenido || !$contenido.length) {
+                    console.error('No hay contenedor de contenido disponible');
+                    return;
+                }
 
-                // Spinner
-                $contenido.html(
-                    '<div class="d-flex justify-content-center">' +
-                    '  <div class="spinner-border m-5" role="status">' +
-                    '    <span class="visually-hidden">Cargando...</span>' +
-                    '  </div>' +
-                    '</div>'
-                );
+                log('Cargando contenido desde:', url);
+
+                // Mostrar spinner de carga
+                mostrarSpinner();
 
                 const doLoad = () => {
                     $.ajax({
-                        url,
+                        url: url,
                         method: "GET",
+                        dataType: "html",
+                        timeout: 30000, // 30 segundos timeout
                         success: function (html) {
+                            log('Contenido cargado exitosamente');
                             $contenido.html(html);
-                            const hrefToPush = $(`a.menu-ajax[data-url="${url}"]`).data('href') || url;
-                            if (pushHistory && window.history && window.history.pushState) {
-                                window.history.pushState({ url: hrefToPush }, "", hrefToPush);
+                            
+                            // Actualizar URL del navegador
+                            if (pushHistory) {
+                                actualizarHistorial(url);
                             }
+
+                            // Ejecutar scripts que puedan venir en el HTML
+                            ejecutarScriptsEnContenido();
                         },
-                        error: function (xhr) {
-                            if (xhr.status === 401) {
-                                Swal.fire({
-                                    title: 'Sesión expirada',
-                                    text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
-                                    icon: 'warning',
-                                    confirmButtonText: 'Ir al login'
-                                }).then(() => window.location.href = '/');
-                                return;
-                            }
-                            console.error('Error al cargar la vista:', xhr);
-                            $contenido.html('<div class="alert alert-danger m-3">Error al cargar la vista.</div>');
+                        error: function (xhr, status, error) {
+                            log('Error al cargar contenido:', status, error);
+                            manejarErrorCarga(xhr);
                         }
                     });
                 };
 
-                if (USE_PREFETCH) {
-                    // Igual que tu ejemplo: primero golpe corto para refrescar datos/estado
-                    $.get(PREFETCH_URL).always(doLoad);
+                // Pre-fetch opcional
+                if (CONFIG.USE_PREFETCH) {
+                    $.get(CONFIG.PREFETCH_URL).always(doLoad);
                 } else {
                     doLoad();
                 }
             }
 
-            // ===== MARCAR ACTIVO EN EL SIDEBAR =====
-            function setActive($a) {
-                if ($currentActive) $currentActive.removeClass('active');
-
-                // Activa el <li> contenedor del enlace
-                $currentActive = $a.closest('li');
-                $currentActive.addClass('active');
-
-                // Abre padres si tu plantilla colapsa submenús
-                $currentActive.parents('li.has_sub').addClass('active opened');
+            // ===== MOSTRAR SPINNER DE CARGA =====
+            function mostrarSpinner() {
+                $contenido.html(`
+                    <div class="d-flex justify-content-center align-items-center" style="min-height: 400px;">
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Cargando...</span>
+                            </div>
+                            <p class="mt-3 text-muted">Cargando contenido...</p>
+                        </div>
+                    </div>
+                `);
             }
 
-            // ===== CLICK DELEGADO PARA ENLACES ASÍNCRONOS =====
-            $(document).on('click', 'a.menu-ajax', function (e) {
-                e.preventDefault();
-                const $a = $(this);
-                const url = $a.data('url');
-                if (!url) return;
+            // ===== MANEJAR ERRORES =====
+            function manejarErrorCarga(xhr) {
+                if (xhr.status === 401) {
+                    // Sesión expirada
+                    Swal.fire({
+                        title: 'Sesión expirada',
+                        text: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
+                        icon: 'warning',
+                        confirmButtonText: 'Ir al login',
+                        allowOutsideClick: false
+                    }).then(() => {
+                        window.location.href = '/LoginR';
+                    });
+                    return;
+                }
 
-                setActive($a);
-                cargarContenido(url, true);
+                if (xhr.status === 404) {
+                    $contenido.html(`
+                        <div class="alert alert-warning m-4">
+                            <h4><i class="bi bi-exclamation-triangle"></i> Página no encontrada</h4>
+                            <p>La vista solicitada no existe.</p>
+                        </div>
+                    `);
+                    return;
+                }
 
-                // Si estás en móvil y deseas cerrar el menú lateral al click:
-                $('.button-menu-mobile.open-left').trigger('click');
-            });
+                // Error genérico
+                console.error('Error al cargar la vista:', xhr);
+                $contenido.html(`
+                    <div class="alert alert-danger m-4">
+                        <h4><i class="bi bi-x-circle"></i> Error al cargar</h4>
+                        <p>No se pudo cargar el contenido. Por favor, intenta nuevamente.</p>
+                        <button class="btn btn-primary btn-sm" onclick="location.reload()">
+                            <i class="bi bi-arrow-clockwise"></i> Recargar página
+                        </button>
+                    </div>
+                `);
+            }
 
-            // ===== SOPORTE PARA BOTÓN ATRÁS/DELANTE DEL NAVEGADOR =====
-            window.addEventListener('popstate', function (ev) {
+            // ===== MARCAR ENLACE ACTIVO =====
+            function setActive($link) {
+                // Remover clase activa del anterior
+                if ($currentActive) {
+                    $currentActive.removeClass('active');
+                    $currentActive.parents('li.has_sub').removeClass('active opened');
+                }
+
+                // Activar el nuevo enlace
+                $currentActive = $link.closest('li');
+                $currentActive.addClass('active');
+
+                // Abrir submenús padres si existen
+                $currentActive.parents('li.has_sub').addClass('active opened');
+
+                log('Enlace marcado como activo:', $link.data('url'));
+            }
+
+            // ===== ACTUALIZAR HISTORIAL DEL NAVEGADOR =====
+            function actualizarHistorial(url) {
+                const $link = $(`a.menu-ajax[data-url="${url}"]`);
+                const hrefToPush = $link.data('href') || url;
+                
+                if (window.history && window.history.pushState) {
+                    window.history.pushState({ url: url }, "", hrefToPush);
+                    log('Historial actualizado:', hrefToPush);
+                }
+            }
+
+            // ===== MANEJAR NAVEGACIÓN ATRÁS/ADELANTE =====
+            function handlePopState(ev) {
                 const state = ev.state || {};
                 if (state.url) {
+                    log('Navegación del historial:', state.url);
                     cargarContenido(state.url, false);
                 }
+            }
+
+            // ===== CERRAR MENÚ MÓVIL =====
+            function cerrarMenuMovil() {
+                const $menuBtn = $('.button-menu-mobile.open-left');
+                if ($menuBtn.length && $('body').hasClass('enlarged')) {
+                    $menuBtn.trigger('click');
+                    log('Menú móvil cerrado');
+                }
+            }
+
+            // ===== CARGAR VISTA POR DEFECTO =====
+            function cargarVistaPorDefecto() {
+                // Solo cargar si estamos en contexto de administración
+                if (document.body.dataset.ctx !== "A") {
+                    log('No es contexto de administración, saltando carga por defecto');
+                    return;
+                }
+
+                // Buscar enlace marcado como default
+                const $default = $('a.menu-ajax[data-default="true"]').first();
+                
+                if ($default.length) {
+                    log('Cargando vista por defecto:', $default.data('url'));
+                    setActive($default);
+                    cargarContenido($default.data('url'), true);
+                } else {
+                    log('No hay vista por defecto configurada');
+                }
+            }
+
+            // ===== EJECUTAR SCRIPTS EN CONTENIDO CARGADO =====
+            function ejecutarScriptsEnContenido() {
+                // Buscar y ejecutar scripts que vengan en el contenido cargado
+                $contenido.find('script').each(function() {
+                    try {
+                        if (this.src) {
+                            // Script externo
+                            const script = document.createElement('script');
+                            script.src = this.src;
+                            document.head.appendChild(script);
+                        } else {
+                            // Script inline
+                            eval(this.textContent);
+                        }
+                    } catch (e) {
+                        console.error('Error ejecutando script:', e);
+                    }
+                });
+            }
+
+            // ===== INICIALIZAR CUANDO EL DOM ESTÉ LISTO =====
+            $(document).ready(function() {
+                log('DOM listo, iniciando...');
+                init();
             });
 
-            // ===== CARGA POR DEFECTO (al entrar) =====
-            $(document).ready(function () {
-                if (document.body.dataset.ctx === "A" && $contenido.length) {
-                    // Busca un enlace marcado como data-default="true"
-                    const $default = $('a.menu-ajax[data-default="true"]').first();
-                    if ($default.length) {
-                        setActive($default);
-                        cargarContenido($default.data('url'), true);
-                    }
-                }
-            });
+            // Exposer funciones globales si son necesarias
+            window.sidebar_navigation = {
+                cargarContenido: cargarContenido,
+                setActive: setActive
+            };
+
         })();
+
+        // ============================================
+        // FUNCIONES GLOBALES DE UTILIDAD
+        // ============================================
+
+        if (typeof showGlobalLoader !== 'function') {
+            window.showGlobalLoader = function () {
+                console.log('showGlobalLoader llamado');
+            };
+        }
+
+        if (typeof hideGlobalLoader !== 'function') {
+            window.hideGlobalLoader = function () {
+                console.log('hideGlobalLoader llamado');
+            };
+        }
+
+        if (typeof cargarFormularioAlert !== 'function') {
+            window.cargarFormularioAlert = function (url, contenedorModal, selectorForm) {
+                $.post(url)
+                    .done(html => {
+                        $(contenedorModal).html(html);
+                        $('#modalFormularioPersona').modal('show');
+                    })
+                    .fail(() => {
+                        Swal.fire('Error', 'No se pudo cargar el formulario.', 'error');
+                    });
+            };
+        }
+
+        if (typeof cargarFormularioEditAlert !== 'function') {
+            window.cargarFormularioEditAlert = function (idEnc, baseUrl, contenedorModal, selectorForm) {
+                $.post(`${baseUrl}/${idEnc}`)
+                    .done(html => {
+                        $(contenedorModal).html(html);
+                        $('#modalFormularioPersona').modal('show');
+                    })
+                    .fail(() => {
+                        Swal.fire('Error', 'No se pudo cargar el formulario de edición.', 'error');
+                    });
+            };
+        }
+
+        if (typeof eliminarRegistroAlert !== 'function') {
+            window.eliminarRegistroAlert = function (nombre, idEnc, baseUrl, onOk) {
+                Swal.fire({
+                    title: 'Eliminar registro',
+                    text: `¿Deseas eliminar ${nombre}?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Eliminar',
+                    cancelButtonText: 'Cancelar'
+                }).then(res => {
+                    if (!res.isConfirmed) return;
+                    $.post(`${baseUrl}/${idEnc}`)
+                        .done(() => {
+                            if (typeof onOk === 'function') onOk();
+                        })
+                        .fail(() => {
+                            Swal.fire('Error', 'No se pudo eliminar.', 'error');
+                        });
+                });
+            };
+        }
     </script>
 </div>
