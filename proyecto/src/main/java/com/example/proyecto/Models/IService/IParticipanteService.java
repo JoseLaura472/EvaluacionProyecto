@@ -15,5 +15,4 @@ public interface IParticipanteService extends IServiceGenerico<Participante, Lon
     List<Participante> listarParticipantes();
     List<ParticipanteListadoDto> listarPorCategoria(Long categoriaId);
     List<ParticipanteListadoDto> listarPendientesPorCategoria(Long categoriaId, Long juradoId);
-
 }

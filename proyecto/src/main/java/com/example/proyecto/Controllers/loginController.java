@@ -95,6 +95,7 @@ public class loginController {
 
         boolean esAdmin = "A".equalsIgnoreCase(estado);
         boolean esJurado = "J".equalsIgnoreCase(estado);
+        boolean esCrono = "C".equalsIgnoreCase(estado);
 
         Long idPersona = (usuario.getPersona() != null) ? usuario.getPersona().getIdPersona() : null;
 
@@ -142,6 +143,12 @@ public class loginController {
                 flash.addFlashAttribute("error", "Error al cargar información del jurado");
                 return "redirect:/LoginR";
             }
+        }
+
+        if (esCrono) {
+            session.removeAttribute("juradoCategoria");
+            session.removeAttribute("idJurado");
+            return "redirect:/coordinador/panel-control";
         }
 
         // Fallback

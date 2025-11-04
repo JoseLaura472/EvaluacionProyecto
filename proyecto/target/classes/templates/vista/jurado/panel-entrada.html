@@ -14,6 +14,88 @@
             padding: 20px;
         }
 
+        /* CRONÓMETRO FLOTANTE */
+        .cronometro-flotante {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: white;
+            border-radius: 20px;
+            padding: 1rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            z-index: 9999;
+            min-width: 200px;
+            text-align: center;
+            display: none;
+            animation: slideInRight 0.5s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .cronometro-flotante.activo {
+            display: block;
+        }
+
+        .cronometro-participante {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .cronometro-tiempo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            margin: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .cronometro-tiempo.verde { color: #4caf50; }
+        .cronometro-tiempo.amarillo { color: #ff9800; }
+        .cronometro-tiempo.rojo { 
+            color: #f44336;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.5; }
+        }
+
+        .cronometro-estado {
+            font-size: 0.8rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 10px;
+            display: inline-block;
+        }
+
+        .cronometro-estado.verde {
+            background: #e8f5e9;
+            color: #4caf50;
+        }
+
+        .cronometro-estado.amarillo {
+            background: #fff3e0;
+            color: #ff9800;
+        }
+
+        .cronometro-estado.rojo {
+            background: #ffebee;
+            color: #f44336;
+        }
+
+       
+
         /* ═══════════════════════════════════════════════════════════
            NAVBAR
            ═══════════════════════════════════════════════════════════ */
@@ -359,6 +441,16 @@
             </div>
         </div>
     </nav>
+    <!-- CRONÓMETRO FLOTANTE -->
+    <div class="cronometro-flotante" id="cronometroFlotante">
+        <div class="cronometro-participante" id="cronometroParticipante">
+            <i class="fas fa-user"></i> -
+        </div>
+        <div class="cronometro-tiempo verde" id="cronometroTiempo">15:00</div>
+        <div class="cronometro-estado verde" id="cronometroEstado">
+            <i class="fas fa-play-circle"></i> En curso
+        </div>
+    </div>
     <div class="container-custom">
         <div class="header-box">
             <h1 class="header-title">
@@ -410,6 +502,15 @@
                 <span id="estadoEvaluacion" class="badge badge-status" style="display: none;"></span>
             </div>
             <div class="modal-body-custom">
+                <!-- Dentro de modal-body-custom, antes de #criteriosContainer -->
+                <div id="modalCronometro" style="display:none; margin-bottom: 1rem;">
+                    <div class="modal-cronometro">
+                        <div class="modal-cronometro-participante" id="modalCronometroParticipante"><i class="fas fa-user"></i> -</div>
+                        <div class="modal-cronometro-tiempo verde" id="modalCronometroTiempo">15:00</div>
+                        <div class="modal-cronometro-estado verde" id="modalCronometroEstado"><i class="fas fa-play-circle"></i> En curso</div>
+                    </div>
+                </div>
+
                 <div id="criteriosContainer"></div>
                 
                 <div class="total-box">
@@ -435,6 +536,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script th:inline="javascript">
         let faseActual = 'recorrido';
+        let eventSource = null;   // <- usar let, no const
+        let participanteEnPresentacion = null;
+
         let participanteSeleccionado = null;
         let datosCompletos = {};
         const idActividad = /*[[${idActividad}]]*/ null;
@@ -503,7 +607,7 @@
             }
         });
 
-        $(document).ready(function() {cargarDatos();});
+        $(document).ready(function() {cargarDatos(); console.log("Document ready -> iniciarSSE()"); iniciarSSE();});
 
         function cargarDatos() {
             $.ajax({
@@ -567,6 +671,125 @@
             container.html(html);
         }
 
+        // ========================================
+        // SSE - CRONÓMETRO EN TIEMPO REAL
+        // ========================================
+        function iniciarSSE() {
+            if (eventSource) {
+                console.log('🔌 Cerrando eventSource previo');
+                eventSource.close();
+            }
+
+            const SSE_URL = '/jurado/cronometro/stream';
+            console.log('🔌 Conectando SSE a', SSE_URL);
+            eventSource = new EventSource(SSE_URL);
+
+            eventSource.onopen = function() {
+                console.log('✅ SSE abierto');
+            };
+
+            eventSource.addEventListener('cronometro', function(event) {
+                // event.data viene como JSON del servidor (lastState o actualizaciones)
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('📡 Cronómetro actualizado (cliente):', data);
+
+                    // Mantener referencia global del participante en presentación
+                    if (data.participanteId || data.participanteNombre) {
+                        participanteEnPresentacion = {
+                            id: data.participanteId,
+                            nombre: data.participanteNombre
+                        };
+                    }
+
+                    // Llamar al actualizador con todo el objeto
+                    actualizarCronometro(data);
+                } catch (e) {
+                    console.warn('⚠️ No JSON en cronometro:', event.data);
+                }
+            });
+
+            eventSource.addEventListener('heartbeat', function(e) {
+                // opcional: console.log('heartbeat', e.data);
+            });
+
+            eventSource.onerror = function(err) {
+                console.error('❌ Error en SSE (cliente):', err);
+                // reintentar conexión si falla
+                setTimeout(iniciarSSE, 5000);
+            };
+        }
+
+
+
+
+        function actualizarCronometro(data) {
+            const $cronometro = $('#cronometroFlotante');
+            const $participante = $('#cronometroParticipante');
+            const $tiempo = $('#cronometroTiempo');
+            const $estado = $('#cronometroEstado');
+
+            // Si vienen campos de participante, actualizarlos
+            if (data.participanteId || data.participanteNombre) {
+                participanteEnPresentacion = {
+                    id: data.participanteId,
+                    nombre: data.participanteNombre
+                };
+            }
+
+            // Si es iniciar: mostrar cronómetro con participante y estado inicial
+            if (data.accion === 'iniciar') {
+                $participante.html(`<i class="fas fa-user"></i> ${data.participanteNombre || '-'}`);
+                $cronometro.addClass('activo');
+                // mostrar también dentro del modal si está abierto y es el mismo participante
+                sincronizarCronometroModal(data);
+                renderizarParticipantes();
+
+                if (navigator.vibrate) navigator.vibrate(200);
+                return;
+            }
+
+            // Si es actualizar: actualizar tiempo, estado y asegurarse de que el cronómetro esté visible
+            if (data.accion === 'actualizar') {
+                const minutos = Math.floor(data.tiempoRestante / 60);
+                const segundos = data.tiempoRestante % 60;
+                const display = `${minutos}:${segundos.toString().padStart(2, '0')}`;
+
+                $tiempo.text(display);
+
+                // Asegurarnos que el cronómetro esté visible (por reconexiones)
+                $cronometro.addClass('activo');
+
+                // Cambiar colores según estado
+                $tiempo.removeClass('verde amarillo rojo').addClass(data.estado || 'verde');
+                $estado.removeClass('verde amarillo rojo').addClass(data.estado || 'verde');
+
+                if (data.estado === 'verde') {
+                    $estado.html('<i class="fas fa-play-circle"></i> En curso');
+                } else if (data.estado === 'amarillo') {
+                    $estado.html('<i class="fas fa-exclamation-triangle"></i> ¡Últimos 3 min!');
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                } else if (data.estado === 'rojo') {
+                    $estado.html('<i class="fas fa-stop-circle"></i> ¡Tiempo finalizado!');
+                }
+
+                // Si el modal está abierto para este participante, sincronizar el modal
+                sincronizarCronometroModal(data);
+                return;
+            }
+
+            // Si es finalizar: ocultar
+            if (data.accion === 'finalizar') {
+                $cronometro.removeClass('activo');
+                participanteEnPresentacion = null;
+                renderizarParticipantes();
+                ocultarCronometroEnModal();
+            }
+
+            // Si es un ping/otro: ignorar o manejar según convenga
+        }
+
+
         function abrirModalEvaluacion(idParticipante) {
             const participante = datosCompletos.participantes.find(p => p.id === idParticipante);
             
@@ -619,6 +842,13 @@
             $('.btn-cerrar').text('Cancelar');
         
             calcularTotal();
+
+            if (participanteEnPresentacion && participanteEnPresentacion.id === participante.id) {
+                mostrarCronometroEnModal(participanteEnPresentacion);
+            } else {
+                ocultarCronometroEnModal();
+            }
+
             
             $('#modalEvaluacion').addClass('show');
         }
@@ -693,6 +923,7 @@
         function cerrarModal() {
             $('#modalEvaluacion').removeClass('show');
             participanteSeleccionado = null;
+            ocultarCronometroEnModal();
         }
 
         function guardarEvaluacion() {
@@ -796,13 +1027,67 @@
             }
         }
 
-        const eventSource = new EventSource('/api/concurso/stream');
-        eventSource.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.accion === 'iniciar') {
-                mostrarCronometroEnModal(data.participante);
+        function segundosToDisplay(t) {
+            const m = Math.floor(t / 60);
+            const s = t % 60;
+            return `${m}:${s.toString().padStart(2,'0')}`;
+        }
+
+        function sincronizarCronometroModal(data) {
+            // Si el modal NO está visible, no hacemos nada (lo mostramos al abrir si corresponde)
+            if (!$('#modalEvaluacion').hasClass('show')) return;
+
+            // Determinar si el participante del modal coincide con el participante en presentación
+            const modalParticipantName = $('#nombreParticipanteModal').text();
+            const modalMatches = participanteEnPresentacion && 
+                                (participanteEnPresentacion.id === data.participanteId ||
+                                participanteEnPresentacion.nombre === modalParticipantName);
+
+            if (!modalMatches) {
+                // Si el modal no corresponde al participante en presentación, ocultamos el cronómetro en modal
+                ocultarCronometroEnModal();
+                return;
             }
-        };
+
+            // Mostrar y sincronizar
+            const nombre = data.participanteNombre || (participanteEnPresentacion && participanteEnPresentacion.nombre) || '-';
+            $('#modalCronometroParticipante').html(`<i class="fas fa-user"></i> ${nombre}`);
+
+            if (typeof data.tiempoRestante !== 'undefined' && data.tiempoRestante !== null) {
+                $('#modalCronometroTiempo').text(segundosToDisplay(data.tiempoRestante));
+            } else {
+                // fallback: tomar del cronometro flotante
+                $('#modalCronometroTiempo').text($('#cronometroTiempo').text());
+            }
+
+            // copiar clases/estado del cronometro flotante
+            const clase = $('#cronometroTiempo').hasClass('amarillo') ? 'amarillo' :
+                        $('#cronometroTiempo').hasClass('rojo') ? 'rojo' : 'verde';
+            $('#modalCronometroTiempo').removeClass('verde amarillo rojo').addClass(clase);
+            $('#modalCronometroEstado').html($('#cronometroEstado').html());
+
+            $('#modalCronometro').show();
+        }
+
+        
+        function mostrarCronometroEnModal(participante) {
+            // llamada pública: abrir modal y mostrar cronometro basado en participanteEnPresentacion
+            if (!participante) participante = participanteEnPresentacion;
+            if (!participante) return;
+
+            $('#modalCronometroParticipante').html(`<i class="fas fa-user"></i> ${participante.nombre || '-'}`);
+            // sincronizar display del cronometro principal
+            $('#modalCronometroTiempo').text($('#cronometroTiempo').text());
+            const clase = $('#cronometroTiempo').hasClass('amarillo') ? 'amarillo' :
+                        $('#cronometroTiempo').hasClass('rojo') ? 'rojo' : 'verde';
+            $('#modalCronometroTiempo').removeClass('verde amarillo rojo').addClass(clase);
+            $('#modalCronometroEstado').html($('#cronometroEstado').html());
+            $('#modalCronometro').show();
+        }
+
+        function ocultarCronometroEnModal() {
+            $('#modalCronometro').hide();
+        }
 
         $(document).on('click', '.modal-evaluacion', function(e) {
             if (e.target === this) {

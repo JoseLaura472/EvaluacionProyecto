@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control - Concurso</title>
+    <title>Panel de Control - Coordinador</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -13,7 +13,7 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 1rem;
@@ -48,7 +48,6 @@
             margin-top: 0.5rem;
         }
 
-        /* Lista de participantes */
         .lista-participantes {
             background: white;
             border-radius: 20px;
@@ -60,7 +59,6 @@
         .lista-participantes h5 {
             color: #333;
             margin-bottom: 1rem;
-            font-size: 1.1rem;
         }
 
         .participante-card {
@@ -71,7 +69,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
-            overflow: hidden;
         }
 
         .participante-card:not(.bloqueado):hover {
@@ -122,7 +119,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             z-index: 9999;
             animation: fadeIn 0.3s ease;
         }
@@ -194,6 +191,10 @@
             display: none;
         }
 
+        .swal2-container {
+        z-index: 10000 !important;
+    }
+
         .btn-finalizar:hover {
             background: #d32f2f;
             transform: scale(1.05);
@@ -262,7 +263,7 @@
             transform: scale(1.05);
         }
 
-        /* Notificación de sincronización */
+        /* Notificación */
         .sync-notification {
             position: fixed;
             top: 1rem;
@@ -279,14 +280,8 @@
         }
 
         @keyframes slideIn {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         .sync-notification.active {
@@ -302,15 +297,47 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Responsive */
+        /* Estado vacío */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Loader */
+        .loader {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
         @media (max-width: 480px) {
             .timer-display {
                 font-size: 3.5rem;
             }
+        }
 
-            .timer-participante {
-                font-size: 1.1rem;
-            }
+        #uiLockOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.35);
+        z-index: 9998;
+        display: none;
         }
     </style>
 </head>
@@ -322,10 +349,13 @@
                 <i class="fas fa-clipboard-check"></i> Panel de Control
             </h1>
             <div style="margin-top: 1rem;">
-                <small style="color: #666;">Coordinador: <strong>Admin</strong></small>
+                <small style="color: #666;">
+                    Coordinador: <strong th:text="${usuario.persona.nombreCompleto}">Admin</strong>
+                </small>
                 <br>
                 <span class="categoria-badge">
-                    <i class="fas fa-tag"></i> Concurso de Baile
+                    <i class="fas fa-calendar"></i> 
+                    <span th:text="${actividad.nombre}">Concurso de Baile</span>
                 </span>
             </div>
         </div>
@@ -333,9 +363,14 @@
         <!-- Lista de participantes -->
         <div class="lista-participantes">
             <h5>
-                <i class="fas fa-users"></i> Participantes
+                <i class="fas fa-users"></i> Participantes Inscritos
             </h5>
-            <div id="listaParticipantes"></div>
+            <div id="listaParticipantes">
+                <div class="loader">
+                    <div class="spinner"></div>
+                    <p style="margin-top: 1rem; color: #666;">Cargando participantes...</p>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -346,7 +381,7 @@
             <div class="timer-display verde" id="timerDisplay">15:00</div>
             <div class="timer-mensaje" id="timerMensaje">Tiempo de presentación</div>
             <button class="btn-finalizar" id="btnFinalizar">
-                <i class="fas fa-stop"></i> Finalizar Presentación
+                <i class="fas fa-stop"></i> Finalizar presentación
             </button>
         </div>
     </div>
@@ -355,7 +390,7 @@
     <div class="modal-confirm" id="modalConfirm">
         <div class="confirm-content">
             <h3><i class="fas fa-question-circle"></i> Confirmar inicio</h3>
-            <p id="confirmMensaje">¿Iniciar cronómetro para <strong></strong>?</p>
+            <p id="confirmMensaje">¿Iniciar cronómetro?</p>
             <div class="confirm-buttons">
                 <button class="btn-confirm no" onclick="cancelarInicio()">
                     <i class="fas fa-times"></i> Cancelar
@@ -367,224 +402,587 @@
         </div>
     </div>
 
-    <!-- Notificación de sincronización -->
+    <!-- Overlay que bloquea la UI cuando hay cronómetro activo -->
+    <div id="uiLockOverlay" style="display:none;"></div>
+
+    <!-- Sonido para aviso final -->
+    <audio id="audioAlerta" preload="auto">
+        <source src="/assets/audio/010607649_prev.mp3" type="audio/mpeg">
+        <!-- Puedes cambiar el src por una ruta válida en tu proyecto -->
+    </audio>
+
+
+    <!-- Notificación -->
     <div class="sync-notification" id="syncNotification">
         <i class="fas fa-sync sync-icon"></i>
-        <span>Sincronizando...</span>
+        <span>Sincronizando con jurados...</span>
     </div>
 
-    <script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script th:inline="javascript">
+
+        let wakeLock = null;
         // Estado global
         const STATE = {
-            participantes: [
-                { id: 1, nombre: 'María González', institucion: 'Academia Dance', estado: 'pendiente' },
-                { id: 2, nombre: 'Carlos Ramírez', institucion: 'Ritmo Latino', estado: 'pendiente' },
-                { id: 3, nombre: 'Ana Martínez', institucion: 'Estudio Móvil', estado: 'pendiente' },
-                { id: 4, nombre: 'Luis Hernández', institucion: 'Danza Urbana', estado: 'pendiente' },
-                { id: 5, nombre: 'Sofia López', institucion: 'Ballet Clásico', estado: 'pendiente' }
-            ],
+            participantes: [],
             timerInterval: null,
-            tiempoRestante: 900, // 15 minutos en segundos
+            tiempoRestante: 900, // 15 minutos
             participanteActivo: null,
             pendienteConfirmacion: null
         };
 
-        // Inicializar
-        document.addEventListener('DOMContentLoaded', () => {
-            renderParticipantes();
-            iniciarSSE();
+        const idActividad = 1;
+
+        // ========================================
+        // INICIALIZACIÓN
+        // ========================================
+        $(document).ready(() => {
+            cargarParticipantes();
+            recuperarEstadoCronometro();
         });
 
-        // Renderizar lista de participantes
-        function renderParticipantes() {
-            const container = document.getElementById('listaParticipantes');
-            container.innerHTML = '';
-
-            STATE.participantes.forEach(p => {
-                const card = document.createElement('div');
-                card.className = `participante-card ${p.estado === 'completado' ? 'bloqueado' : ''} ${p.estado === 'activo' ? 'activo' : ''}`;
-                
-                const icono = p.estado === 'completado' ? '✅' : 
-                             p.estado === 'activo' ? '▶️' : '⏸️';
-
-                card.innerHTML = `
-                    <div class="participante-nombre">
-                        ${p.nombre}
-                    </div>
-                    <div class="participante-info">
-                        <i class="fas fa-school"></i> ${p.institucion}
-                    </div>
-                    <div class="participante-estado">${icono}</div>
-                `;
-
-                if (p.estado === 'pendiente') {
-                    card.onclick = () => mostrarConfirmacion(p);
+        // ⭐ RECUPERAR CRONÓMETRO ACTIVO AL CARGAR
+        function recuperarEstadoCronometro() {
+            $.ajax({
+                url: '/coordinador/cronometro/estado/' + idActividad,
+                method: 'GET',
+                dataType: 'json',
+                success: function(estadoServidor) {
+                    if (estadoServidor && estadoServidor.activo) {
+                        console.log('🔄 Recuperando cronómetro activo:', estadoServidor);
+                        
+                        // Calcular tiempo restante basado en servidor
+                        const tiempoTranscurrido = Math.floor((Date.now() - estadoServidor.inicioTimestamp) / 1000);
+                        const tiempoRestante = Math.max(0, 900 - tiempoTranscurrido);
+                        
+                        if (tiempoRestante > 0) {
+                            // Recrear estado
+                            STATE.participanteActivo = estadoServidor.participante;
+                            STATE.inicioTimestamp = estadoServidor.inicioTimestamp;
+                            STATE.tiempoRestante = tiempoRestante;
+                            
+                            // Reactivar cronómetro visualmente
+                            reanudarCronometro(STATE.participanteActivo, tiempoRestante);
+                        } else {
+                            // Ya expiró, finalizar
+                            finalizarCronometroSinParticipante(estadoServidor.participante);
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    console.log('No hay cronómetro activo o error al recuperar');
                 }
-
-                container.appendChild(card);
             });
         }
 
-        // Mostrar modal de confirmación
-        function mostrarConfirmacion(participante) {
-            STATE.pendienteConfirmacion = participante;
-            document.getElementById('confirmMensaje').innerHTML = 
-                `¿Iniciar cronómetro para <strong>${participante.nombre}</strong>?`;
-            document.getElementById('modalConfirm').classList.add('active');
-        }
-
-        // Cancelar inicio
-        function cancelarInicio() {
-            STATE.pendienteConfirmacion = null;
-            document.getElementById('modalConfirm').classList.remove('active');
-        }
-
-        // Confirmar e iniciar cronómetro
-        function confirmarInicio() {
-            const participante = STATE.pendienteConfirmacion;
-            document.getElementById('modalConfirm').classList.remove('active');
-            
-            iniciarCronometro(participante);
-            notificarServidor('iniciar', participante.id);
-        }
-
-        // Iniciar cronómetro
-        function iniciarCronometro(participante) {
+        // ⭐ REANUDAR CRONÓMETRO EXISTENTE
+        function reanudarCronometro(participante, tiempoRestante) {
             STATE.participanteActivo = participante;
-            STATE.tiempoRestante = 900; // Reset a 15 minutos
+            STATE.tiempoRestante = tiempoRestante;
             
-            // Actualizar estado
-            participante.estado = 'activo';
-            renderParticipantes();
-
-            // Mostrar modal de timer
-            document.getElementById('timerParticipante').textContent = participante.nombre;
-            document.getElementById('modalTimer').classList.add('active');
+            // Mostrar modal
+            $('#timerParticipante').text(participante.nombre);
+            $('#modalTimer').addClass('active');
+            $('#btnFinalizar').show();
             
-            // Vibración inicial (si está disponible)
-            if (navigator.vibrate) {
-                navigator.vibrate(200);
-            }
-
-            // Iniciar cuenta regresiva
+            lockUI();
+            solicitarWakeLock();
+            
+            // Actualizar vista inmediatamente
             actualizarDisplay();
+            
+            // Continuar conteo
+            let notifyCounter = 0;
             STATE.timerInterval = setInterval(() => {
-                STATE.tiempoRestante--;
+                // Calcular desde timestamp original
+                const tiempoTranscurrido = Math.floor((Date.now() - STATE.inicioTimestamp) / 1000);
+                STATE.tiempoRestante = Math.max(0, 900 - tiempoTranscurrido);
+                
+                notifyCounter++;
+
+                const estado = STATE.tiempoRestante > 180 ? 'verde' :
+                            STATE.tiempoRestante > 0 ? 'amarillo' : 'rojo';
+
                 actualizarDisplay();
 
-                // Cambiar colores según tiempo restante
-                if (STATE.tiempoRestante === 180) { // 3 minutos
-                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                if (notifyCounter % 2 === 0 || STATE.tiempoRestante <= 5) {
+                    notificarServidor({
+                        accion: 'actualizar',
+                        participanteId: participante.id,
+                        participanteNombre: participante.nombre,
+                        timestamp: Date.now(),
+                        tiempoRestante: STATE.tiempoRestante,
+                        estado: estado
+                    });
+                }
+
+                if (STATE.tiempoRestante === 180) {
+                    if (navigator.vibrate) navigator.vibrate([100,50,100]);
                 }
 
                 if (STATE.tiempoRestante <= 0) {
-                    finalizarCronometro();
+                    finalizarCronometro(false);
                 }
             }, 1000);
         }
 
-        // Actualizar display del cronómetro
+        // ========================================
+        // CARGAR PARTICIPANTES DESDE EL SERVIDOR
+        // ========================================
+        function cargarParticipantes() {
+            $.ajax({
+                url: '/coordinador/participantes/' + idActividad,
+                method: 'GET',
+                dataType: 'json',
+                success: function(participantes) {
+                    console.log('✅ Participantes cargados:', participantes);
+                    
+                    if (!participantes || participantes.length === 0) {
+                        mostrarEstadoVacio();
+                        return;
+                    }
+                    
+                    // Agregar estado "pendiente" por defecto
+                    STATE.participantes = participantes.map(p => ({
+                        ...p,
+                        estado: p.estado || 'pendiente'
+                    }));
+                    
+                    renderParticipantes();
+                },
+                error: function(xhr, status, error) {
+                    console.error('❌ Error cargando participantes:', error);
+                    mostrarError('Error al cargar participantes. Por favor, recarga la página.');
+                }
+            });
+        }
+
+        // ========================================
+        // RENDERIZAR LISTA DE PARTICIPANTES
+        // ========================================
+        function renderParticipantes() {
+            const container = $('#listaParticipantes');
+            container.empty();
+
+            STATE.participantes.forEach(p => {
+                const esActivo = p.estado === 'activo';
+                const esBloqueado = p.estado === 'completado';
+                
+                const clases = ['participante-card'];
+                if (esBloqueado) clases.push('bloqueado');
+                if (esActivo) clases.push('activo');
+                
+                const icono = esBloqueado ? '✅' : esActivo ? '▶️' : '⏸️';
+
+                const $card = $('<div>')
+                    .addClass(clases.join(' '))
+                    .html(`
+                        <div class="participante-nombre">${p.nombre}</div>
+                        <div class="participante-info">
+                            <i class="fas fa-school"></i> ${p.institucion || 'Sin institución'}
+                        </div>
+                        <div class="participante-estado">${icono}</div>
+                    `);
+
+                // Solo permitir click si está pendiente
+                if (p.estado === 'pendiente') {
+                    $card.on('click', () => mostrarConfirmacion(p));
+                }
+
+                container.append($card);
+            });
+        }
+
+        function mostrarEstadoVacio() {
+            $('#listaParticipantes').html(`
+                <div class="empty-state">
+                    <i class="fas fa-inbox"></i>
+                    <div>No hay participantes inscritos en esta actividad</div>
+                </div>
+            `);
+        }
+
+        function mostrarError(mensaje) {
+            $('#listaParticipantes').html(`
+                <div class="empty-state">
+                    <i class="fas fa-exclamation-triangle" style="color: #f44336;"></i>
+                    <div style="color: #f44336;">${mensaje}</div>
+                    <button onclick="cargarParticipantes()" 
+                            style="margin-top: 1rem; padding: 0.5rem 1rem; border: none; 
+                                   background: #667eea; color: white; border-radius: 10px; cursor: pointer;">
+                        <i class="fas fa-refresh"></i> Reintentar
+                    </button>
+                </div>
+            `);
+        }
+
+        // ========================================
+        // MODAL DE CONFIRMACIÓN
+        // ========================================
+        function mostrarConfirmacion(participante) {
+            STATE.pendienteConfirmacion = participante;
+            $('#confirmMensaje').html(`¿Iniciar cronómetro para <strong>${participante.nombre}</strong>?`);
+            $('#modalConfirm').addClass('active');
+        }
+
+        function cancelarInicio() {
+            STATE.pendienteConfirmacion = null;
+            $('#modalConfirm').removeClass('active');
+        }
+
+        function confirmarInicio() {
+            const participante = STATE.pendienteConfirmacion;
+            $('#modalConfirm').removeClass('active');
+            
+            iniciarCronometro(participante);
+        }
+
+        // ========================================
+        // CRONÓMETRO
+        // ========================================
+        function iniciarCronometro(participante) {
+            STATE.participanteActivo = participante;
+            STATE.tiempoRestante = 900; // Reset a 15 minutos
+
+            STATE.inicioTimestamp = Date.now();
+            
+            // Actualizar estado local
+            participante.estado = 'activo';
+            renderParticipantes();
+
+            // Mostrar modal de timer
+            $('#timerParticipante').text(participante.nombre);
+            $('#modalTimer').addClass('active');
+            
+            // Vibración inicial
+            if (navigator.vibrate) {
+                navigator.vibrate(200);
+            }
+
+            // Bloquear UI (evita que otras acciones se ejecuten)
+            lockUI();
+            // mostrar botón finalizar y asegurarnos visible
+            $('#btnFinalizar').show();
+
+            solicitarWakeLock();
+
+            // Notificar al servidor (INICIAR)
+            notificarServidor({
+                accion: 'iniciar',
+                participanteId: participante.id,
+                participanteNombre: participante.nombre,
+                timestamp: STATE.inicioTimestamp,
+                tiempoRestante: STATE.tiempoRestante,
+                estado: 'verde'
+            });
+
+            // enviar cada 2s (mejor performance)
+            let notifyCounter = 0;
+            STATE.timerInterval = setInterval(() => {
+                
+                const tiempoTranscurrido = Math.floor((Date.now() - STATE.inicioTimestamp) / 1000);
+                STATE.tiempoRestante = Math.max(0, 900 - tiempoTranscurrido);
+
+                notifyCounter++;
+
+                const estado = STATE.tiempoRestante > 180 ? 'verde' :
+                            STATE.tiempoRestante > 0 ? 'amarillo' : 'rojo';
+
+                // Actualizar display local cada segundo (para UX)
+                actualizarDisplay();
+
+                // Notificar solo cada 2 segundos (reduce tráfico a la mitad)
+                if (notifyCounter % 2 === 0 || STATE.tiempoRestante <= 5) {
+                    notificarServidor({
+                        accion: 'actualizar',
+                        participanteId: participante.id,
+                        participanteNombre: participante.nombre,
+                        timestamp: Date.now(),
+                        tiempoRestante: STATE.tiempoRestante,
+                        estado: estado
+                    });
+                }
+
+                if (STATE.tiempoRestante === 180) {
+                    if (navigator.vibrate) navigator.vibrate([100,50,100]);
+                }
+
+                if (STATE.tiempoRestante <= 0) {
+                    finalizarCronometro(false);
+                }
+            }, 1000);
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                console.log('📱 App visible de nuevo - verificando estado...');
+                
+                // Verificar si hay cronómetro activo en servidor
+                if (!STATE.participanteActivo) {
+                    recuperarEstadoCronometro();
+                } else {
+                    // Ya tenemos uno activo, solo resincronizar tiempo
+                    const tiempoTranscurrido = Math.floor((Date.now() - STATE.inicioTimestamp) / 1000);
+                    STATE.tiempoRestante = Math.max(0, 900 - tiempoTranscurrido);
+                    actualizarDisplay();
+                    solicitarWakeLock();
+                }
+            }
+        });
+
+        // Función para mantener pantalla activa
+        async function solicitarWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                    console.log('✅ Wake Lock activado - pantalla permanecerá encendida');
+                    
+                    wakeLock.addEventListener('release', () => {
+                        console.log('Wake Lock liberado');
+                    });
+                }
+            } catch (err) {
+                console.warn('No se pudo activar Wake Lock:', err);
+            }
+        }
+
+        // Liberar Wake Lock al finalizar
+        function closeTimerModalAndReset() {
+            if (STATE.timerInterval) {
+                clearInterval(STATE.timerInterval);
+                STATE.timerInterval = null;
+            }
+
+            // ⭐ LIBERAR WAKE LOCK
+            if (wakeLock !== null) {
+                wakeLock.release().then(() => {
+                    wakeLock = null;
+                    console.log('Wake Lock liberado manualmente');
+                });
+            }
+
+            $('#modalTimer').removeClass('active');
+            $('#btnFinalizar').hide();
+            unlockUI();
+
+            STATE.participanteActivo = null;
+            STATE.tiempoRestante = 900;
+            $('#timerDisplay').text('15:00').removeClass('amarillo rojo').addClass('verde');
+            $('#timerMensaje').text('Tiempo de presentación');
+
+            renderParticipantes();
+        }
+
         function actualizarDisplay() {
             const minutos = Math.floor(STATE.tiempoRestante / 60);
             const segundos = STATE.tiempoRestante % 60;
             const display = `${minutos}:${segundos.toString().padStart(2, '0')}`;
             
-            const displayEl = document.getElementById('timerDisplay');
-            const mensajeEl = document.getElementById('timerMensaje');
-            const btnFinalizar = document.getElementById('btnFinalizar');
+            const $display = $('#timerDisplay');
+            const $mensaje = $('#timerMensaje');
+            const $btnFinalizar = $('#btnFinalizar');
 
-            displayEl.textContent = display;
+            $display.text(display);
 
             // Cambiar colores y mensajes
             if (STATE.tiempoRestante > 180) {
-                displayEl.className = 'timer-display verde';
-                mensajeEl.textContent = 'Tiempo de presentación';
+                $display.removeClass().addClass('timer-display verde');
+                $mensaje.text('Tiempo de presentación');
             } else if (STATE.tiempoRestante > 0) {
-                displayEl.className = 'timer-display amarillo';
-                mensajeEl.textContent = '⚠️ ¡Últimos 3 minutos!';
+                $display.removeClass().addClass('timer-display amarillo');
+                $mensaje.text('⚠️ ¡Últimos 3 minutos!');
             } else {
-                displayEl.className = 'timer-display rojo';
-                mensajeEl.textContent = '⏰ ¡Tiempo finalizado!';
-                btnFinalizar.style.display = 'block';
-                
-                // Vibración continua
+                $display.removeClass().addClass('timer-display rojo');
+                $mensaje.text('⏰ ¡Tiempo finalizado!');
+
                 if (navigator.vibrate) {
                     navigator.vibrate([500, 200, 500]);
                 }
             }
 
-            // Mostrar botón finalizar después de 1 minuto
-            if (STATE.tiempoRestante < 840) {
-                btnFinalizar.style.display = 'block';
-            }
         }
 
-        // Finalizar cronómetro
-        function finalizarCronometro() {
-            clearInterval(STATE.timerInterval);
-            
+        // ---- Helpers UI lock ----
+        function lockUI() {
+            $('.participante-card').css('pointer-events', 'none').css('opacity', 0.6);
+        }
+
+        function unlockUI() {
+            $('#uiLockOverlay').hide();
+            $('.participante-card').css('pointer-events', '').css('opacity', '');
+        }
+
+        // ======= Función que limpia y cierra modal de forma segura =======
+        function closeTimerModalAndReset() {
+            // detener interval si existe
+            if (STATE.timerInterval) {
+                clearInterval(STATE.timerInterval);
+                STATE.timerInterval = null;
+            }
+
+            // ocultar modal y botones
+            $('#modalTimer').removeClass('active');
+            $('#btnFinalizar').hide();
+
+            // desbloquear UI
+            unlockUI();
+
+            // limpiar estado
+            STATE.participanteActivo = null;
+            STATE.tiempoRestante = 900;
+            // opcional: reset display (visual)
+            $('#timerDisplay').text('15:00').removeClass('amarillo rojo').addClass('verde');
+            $('#timerMensaje').text('Tiempo de presentación');
+
+            // refrescar lista y estado visual
+            renderParticipantes();
+        }
+
+        // ======= Confirmación segura con fallback (Swal opcional) =======
+        function solicitarFinalizarPorUsuario() {
+            // Si SweetAlert2 disponible, usarla
+            console.log("he llegado a antes de solicitar")
+                Swal.fire({
+                    title: 'Finalizar presentación',
+                    html: `<strong>${STATE.participanteActivo ? STATE.participanteActivo.nombre : ''}</strong><br>
+                        ¿Deseas finalizar la presentación ahora?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, finalizar',
+                    cancelButtonText: 'Cancelar',
+                    confirmButtonColor: '#d33'
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        finalizarCronometro(true);
+                    }
+                }).catch(err => {
+                    // fallback: si Swal falla por cualquier motivo, finalizar directamente
+                    console.warn('Swal fallo o cancelado:', err);
+                    finalizarCronometro(true);
+                });
+        }
+
+        // Cambiar binding: en lugar de direct onclick al btnFinalizar, usar este binding seguro
+        $(document).on('click', '#btnFinalizar', function(e) {
+            e.preventDefault();
+            console.log("he hehco click en finalizar")
+            if (!STATE.participanteActivo) return;
+            solicitarFinalizarPorUsuario();
+        });
+
+        // ======= finalizarCronometro robusta =======
+        function finalizarCronometro(porUsuario = false) {
+            // Parar timers inmediatamente
+            if (STATE.timerInterval) {
+                clearInterval(STATE.timerInterval);
+                STATE.timerInterval = null;
+            }
+
+            // Si no hay participante activo y no viene porUsuario, no hacemos nada
+            if (!STATE.participanteActivo && !porUsuario) {
+                // Asegurar estado consistente
+                closeTimerModalAndReset();
+                return;
+            }
+
+            // Marcar estado completado localmente (si existe participante)
             if (STATE.participanteActivo) {
                 STATE.participanteActivo.estado = 'completado';
-                notificarServidor('finalizar', STATE.participanteActivo.id);
             }
 
-            setTimeout(() => {
-                document.getElementById('modalTimer').classList.remove('active');
-                document.getElementById('btnFinalizar').style.display = 'none';
-                STATE.participanteActivo = null;
-                renderParticipantes();
-            }, 1000);
+            // Notificamos al servidor (intenta, pero no bloquea la UI)
+            try {
+                notificarServidor({
+                    accion: 'finalizar',
+                    participanteId: STATE.participanteActivo ? STATE.participanteActivo.id : null,
+                    participanteNombre: STATE.participanteActivo ? STATE.participanteActivo.nombre : null,
+                    timestamp: Date.now()
+                });
+            } catch(e) {
+                console.warn('Error notificando finalización:', e);
+            }
+
+            // Mostrar mensaje y efectos (sonido / vibración)
+            $('#timerMensaje').text('⏰ ¡Tiempo finalizado!');
+            $('#timerDisplay').removeClass('verde amarillo').addClass('rojo');
+            $('#btnFinalizar').hide();
+
+            try {
+                const audio = document.getElementById('audioAlerta');
+                if (audio) {
+                    audio.currentTime = 0;
+                    audio.play().catch(()=>{});
+                }
+            } catch (e) {}
+
+            if (navigator.vibrate) navigator.vibrate([500, 200, 500]);
+
+            if (porUsuario) {
+                // Si usuario hizo la acción: cerrar y resetear tras un breve delay
+                setTimeout(() => {
+                    closeTimerModalAndReset();
+                }, 800);
+            } else {
+                // Si expiró por tiempo: mostrar confirm reversible y luego cerrar
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Tiempo finalizado',
+                        html: `El tiempo de <strong>${STATE.participanteActivo ? STATE.participanteActivo.nombre : ''}</strong> terminó.`,
+                        icon: 'info',
+                        confirmButtonText: 'Cerrar y marcar como completado'
+                    }).then(() => {
+                        closeTimerModalAndReset();
+                    }).catch(() => {
+                        // fallback: cerrar de todas formas
+                        closeTimerModalAndReset();
+                    });
+                } else {
+                    // fallback simple
+                    alert('El tiempo ha finalizado');
+                    closeTimerModalAndReset();
+                }
+            }
         }
 
-        // Botón finalizar manual
-        document.getElementById('btnFinalizar').onclick = finalizarCronometro;
-
-        // Notificar al servidor (simulado)
-        function notificarServidor(accion, participanteId) {
+        // ========================================
+        // NOTIFICAR AL SERVIDOR (SSE)
+        // ========================================
+        function notificarServidor(data) {
             mostrarSync();
             
-            // Aquí iría tu llamada real al servidor
-            fetch('/api/concurso/cronometro', {
+            $.ajax({
+                url: '/jurado/cronometro/actualizar',
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    accion: accion,
-                    participanteId: participanteId,
-                    timestamp: Date.now()
-                })
-            }).catch(err => console.error('Error sincronizando:', err));
-
-            setTimeout(ocultarSync, 1000);
-        }
-
-        // Iniciar SSE para recibir actualizaciones
-        function iniciarSSE() {
-            const eventSource = new EventSource('/api/concurso/stream');
-            eventSource.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                if (data.accion === 'iniciar') {
-                    const participante = STATE.participantes.find(p => p.id === data.participanteId);
-                    if (participante && !STATE.participanteActivo) {
-                        iniciarCronometro(participante);
-                    }
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function(response) {
+                    console.log('✅ Notificación enviada:', response);
+                },
+                error: function(xhr) {
+                    console.error('❌ Error notificando:', xhr);
+                },
+                complete: function() {
+                    setTimeout(ocultarSync, 800);
                 }
-            };
+            });
         }
 
-        // Mostrar notificación de sincronización
         function mostrarSync() {
-            document.getElementById('syncNotification').classList.add('active');
+            $('#syncNotification').addClass('active');
         }
 
         function ocultarSync() {
-            document.getElementById('syncNotification').classList.remove('active');
+            $('#syncNotification').removeClass('active');
         }
 
-        // Prevenir cierre accidental durante cronómetro
+        // ========================================
+        // PREVENIR CIERRE ACCIDENTAL
+        // ========================================
         window.addEventListener('beforeunload', (e) => {
             if (STATE.participanteActivo) {
                 e.preventDefault();
-                e.returnValue = '';
+                e.returnValue = 'Hay un cronómetro activo. ¿Estás seguro de salir?';
             }
         });
     </script>

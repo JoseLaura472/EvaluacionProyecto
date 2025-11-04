@@ -1,5 +1,6 @@
 package com.example.proyecto.Controllers.PersonaControllers;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -391,20 +392,32 @@ public class JuradoController {
      */
     @GetMapping(value = "/cronometro/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamCronometro(HttpSession session) {
-        Long idJurado = (Long) session.getAttribute("idJurado");
-        
-        if (idJurado == null) {
-            SseEmitter emitter = new SseEmitter();
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        System.out.println("[SSE] streamCronometro invoked, usuario = " + (usuario == null ? "null" : usuario.getIdUsuario()));
+
+        if (usuario == null) {
+            SseEmitter emitter = new SseEmitter(5000L);
             try {
-                emitter.completeWithError(new RuntimeException("No autorizado"));
-            } catch (Exception e) {
-                // ignore
-            }
+                Map<String,Object> payload = Map.of("accion", "error", "message", "No autorizado");
+                emitter.send(SseEmitter.event().name("cronometro").data(payload));
+                System.out.println("[SSE] enviado error no autorizado y completando emitter");
+            } catch (IOException ignored) {}
+            emitter.complete();
             return emitter;
         }
-        
-        return cronometroSseService.crearEmitter();
+
+        SseEmitter emitter = cronometroSseService.crearEmitter();
+        try {
+            emitter.send(SseEmitter.event().name("cronometro").data(Map.of("accion","ping")));
+            System.out.println("[SSE] enviado ping inicial al jurado " + usuario.getIdUsuario());
+        } catch (IOException e) {
+            System.err.println("[SSE] fallo al enviar ping: " + e.getMessage());
+        }
+
+        return emitter;
     }
+
+
 
     /**
      * Endpoint para actualizar el cronómetro (lo llama el coordinador)
