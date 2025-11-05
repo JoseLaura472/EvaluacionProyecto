@@ -660,6 +660,7 @@ public class ReportePdfService {
         // Encabezado
         table.addCell(crearCeldaEncabezado("#", colorEncabezado));
         table.addCell(crearCeldaEncabezado("Participante", colorEncabezado));
+        table.addCell(crearCeldaEncabezado("Inicio", colorEncabezado));
         table.addCell(crearCeldaEncabezado("Recorrido", colorEncabezado));
         table.addCell(crearCeldaEncabezado("Palco", colorEncabezado));
         table.addCell(crearCeldaEncabezado("TOTAL", colorEncabezado));
@@ -682,6 +683,7 @@ public class ReportePdfService {
             table.addCell(crearCeldaNormal(String.valueOf(puesto), TextAlignment.CENTER));
             table.addCell(crearCeldaNormal(p.getNombre()));
             
+            double puntajeInicio = 0;
             double puntajeRecorrido = 0;
             double puntajePalco = 0;
             
@@ -689,17 +691,20 @@ public class ReportePdfService {
                 CategoriaActividad cat = insc.getCategoriaActividad();
                 double promedio = calcularPromedioParticipante(p.getIdParticipante(), cat.getIdCategoriaActividad());
                 
-                if ("RECORRIDO".equalsIgnoreCase(cat.getNombre())) {
+                if ("INICIO".equalsIgnoreCase(cat.getNombre())) {
+                    puntajeInicio = promedio;
+                } else if ("RECORRIDO".equalsIgnoreCase(cat.getNombre())) {
                     puntajeRecorrido = promedio;
                 } else if ("PALCO".equalsIgnoreCase(cat.getNombre())) {
                     puntajePalco = promedio;
                 }
             }
             
+            table.addCell(crearCeldaNormal(String.format("%.2f", puntajeInicio), TextAlignment.CENTER));
             table.addCell(crearCeldaNormal(String.format("%.2f", puntajeRecorrido), TextAlignment.CENTER));
             table.addCell(crearCeldaNormal(String.format("%.2f", puntajePalco), TextAlignment.CENTER));
             
-            double total = puntajeRecorrido + puntajePalco;
+            double total = puntajeInicio + puntajeRecorrido + puntajePalco;
             table.addCell(crearCeldaNormal(String.format("%.2f", total), TextAlignment.CENTER, true)
                     .setBackgroundColor(new DeviceRgb(241, 196, 15)));
             
