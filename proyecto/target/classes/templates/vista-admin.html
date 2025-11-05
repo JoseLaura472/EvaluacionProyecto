@@ -406,6 +406,12 @@
 
                 state.vistaActual = vista;
 
+                // ✅ CRÍTICO: Limpiar categoriaId al cambiar de vista
+                if (vista === 'total' || vista === 'completo') {
+                    state.categoriaId = null;
+                    DOM.btnLimpiarFiltro.style.display = 'none';
+                }
+
                 DOM.btnVista.forEach(btn => {
                     const isActive = btn.dataset.vista === vista;
                     btn.classList.toggle('active', isActive);
@@ -418,6 +424,8 @@
                         btn.classList.add(vista === 'total' ? 'btn-outline-primary' : 'btn-outline-success');
                     }
                 });
+
+                Utils.clearCache();
 
                 // OPTIMIZACIÓN: Si tenemos cache válido, renderizar desde cache
                 if (Utils.isCacheValid() && state.cache.snapshot) {
