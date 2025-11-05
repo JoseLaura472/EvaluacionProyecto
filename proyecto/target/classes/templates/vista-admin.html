@@ -222,6 +222,7 @@
             const root = document.getElementById('concurso-dashboard');
             if (!root) return;
 
+            // ========== ESTADO GLOBAL OPTIMIZADO ==========
             let state = {
                 actividadId: null,
                 categoriaId: null,
@@ -230,7 +231,19 @@
                 categorias: [],
                 filas: [],
                 sse: null,
-                polling: null
+                polling: null,
+                // NUEVO: Caché de datos
+                cache: {
+                    snapshot: null,
+                    timestamp: null,
+                    maxAge: 5000 // 5 segundos
+                },
+                // NUEVO: Control de renderizado
+                rendering: {
+                    debounceTimer: null,
+                    isRendering: false,
+                    pendingRender: false
+                }
             };
 
             const DOM = {
@@ -255,6 +268,54 @@
                 filaEmpty: document.getElementById('fila-empty')
             };
 
+            // ========== UTILIDADES OPTIMIZADAS ==========
+            const Utils = {
+                // Debounce optimizado
+                debounce(func, wait) {
+                    return function executedFunction(...args) {
+                        clearTimeout(state.rendering.debounceTimer);
+                        state.rendering.debounceTimer = setTimeout(() => func(...args), wait);
+                    };
+                },
+
+                // Throttle para eventos frecuentes
+                throttle(func, limit) {
+                    let inThrottle;
+                    return function(...args) {
+                        if (!inThrottle) {
+                            func.apply(this, args);
+                            inThrottle = true;
+                            setTimeout(() => inThrottle = false, limit);
+                        }
+                    };
+                },
+
+                // Cache manager
+                isCacheValid() {
+                    if (!state.cache.snapshot || !state.cache.timestamp) return false;
+                    return (Date.now() - state.cache.timestamp) < state.cache.maxAge;
+                },
+
+                setCache(data) {
+                    state.cache.snapshot = data;
+                    state.cache.timestamp = Date.now();
+                },
+
+                clearCache() {
+                    state.cache.snapshot = null;
+                    state.cache.timestamp = null;
+                },
+
+                // Comparación eficiente de arrays
+                arraysEqual(a, b) {
+                    if (a === b) return true;
+                    if (a == null || b == null) return false;
+                    if (a.length !== b.length) return false;
+                    return JSON.stringify(a) === JSON.stringify(b);
+                }
+            };
+
+            // ========== INICIALIZACIÓN ==========
             init();
 
             async function init() {
@@ -264,15 +325,22 @@
 
             function setupEventListeners() {
                 DOM.selActividad.addEventListener('change', onActividadChange);
-                DOM.btnRefrescar.addEventListener('change', () => cargarSnapshot(false));
+
+                // Debounce en refrescar para evitar múltiples llamadas
+                DOM.btnRefrescar.addEventListener('click', Utils.debounce(() => {
+                    Utils.clearCache();
+                    cargarSnapshot(false);
+                }, 300));
+
                 DOM.btnLimpiarFiltro.addEventListener('click', limpiarFiltroCategoria);
 
                 DOM.btnVista.forEach(btn => {
-                    btn.addEventListener('click', () => {
+                    btn.addEventListener('click', Utils.debounce(() => {
                         const vista = btn.dataset.vista;
                         cambiarVista(vista);
-                    });
+                    }, 200));
                 });
+
                 window.addEventListener('beforeunload', cleanup);
             }
 
@@ -287,13 +355,17 @@
                     const actividades = await r.json();
                     DOM.selActividad.innerHTML = '<option value="">Seleccione una actividad…</option>';
 
+                    // Usar DocumentFragment para inserción eficiente
+                    const fragment = document.createDocumentFragment();
+
                     actividades.forEach(a => {
                         const opt = document.createElement('option');
                         opt.value = a.id;
                         const fecha = a.fecha ? new Date(a.fecha).toLocaleDateString() : '';
                         opt.textContent = `${a.nombre}${fecha ? ' — ' + fecha : ''}`;
-                        DOM.selActividad.appendChild(opt);
+                        fragment.appendChild(opt);
                     });
+                    DOM.selActividad.appendChild(fragment);
 
                     const ultimaId = localStorage.getItem('dash.actividadId');
                     if (ultimaId && actividades.some(a => String(a.id) === ultimaId)) {
@@ -306,6 +378,7 @@
                 }
             }
 
+            // ========== CAMBIO DE ACTIVIDAD ==========
             function onActividadChange() {
                 const id = DOM.selActividad.value;
 
@@ -322,16 +395,22 @@
 
                 mostrarConActividad();
                 stopLiveUpdates();
+                Utils.clearCache();
                 cargarSnapshot(false);
                 startLiveUpdates();
             }
 
+            // ========== CAMBIO DE VISTA OPTIMIZADO ==========
             function cambiarVista(vista) {
+                if (state.vistaActual === vista) return;
+
                 state.vistaActual = vista;
 
                 DOM.btnVista.forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.vista === vista);
-                    if (btn.dataset.vista === vista) {
+                    const isActive = btn.dataset.vista === vista;
+                    btn.classList.toggle('active', isActive);
+                    
+                    if (isActive) {
                         btn.classList.remove('btn-outline-primary', 'btn-outline-success');
                         btn.classList.add(vista === 'total' ? 'btn-success' : 'btn-primary');
                     } else {
@@ -340,11 +419,23 @@
                     }
                 });
 
-                cargarSnapshot(true);
+                // OPTIMIZACIÓN: Si tenemos cache válido, renderizar desde cache
+                if (Utils.isCacheValid() && state.cache.snapshot) {
+                    renderSnapshot(state.cache.snapshot);
+                } else {
+                    cargarSnapshot(true);
+                }
             }
 
+            // ========== CARGA DE DATOS OPTIMIZADA ==========
             async function cargarSnapshot(silencioso) {
                 if (!state.actividadId) return;
+
+                // OPTIMIZACIÓN: Si hay cache válido y es silencioso, usar cache
+                if (silencioso && Utils.isCacheValid()) {
+                    renderSnapshot(state.cache.snapshot);
+                    return;
+                }
 
                 try {
                     let url = `/api/admin/concurso/${state.actividadId}/snapshot`;
@@ -370,6 +461,8 @@
                     if (!response.ok) { throw new Error(`HTTP ${response.status}`); }
 
                     const data = await response.json();
+
+                    Utils.setCache(data);
                     renderSnapshot(data);
 
                     if (!silencioso) { marcarActualizado(); }
@@ -384,26 +477,54 @@
 
             function renderSnapshot(data) {
 
-                const juradosChanged = JSON.stringify(data.jurados || []) !== JSON.stringify(state.jurados);
-                state.jurados = data.jurados || [];
-
-                if (juradosChanged) { renderThead(); }
-
-                state.categorias = data.categorias || [];
-
-                if (state.vistaActual !== 'total') {
-                    renderCategorias(data.categorias || []);
-                } else {
-                    DOM.categoriasWrap.style.display = 'none';
+                // OPTIMIZACIÓN: Evitar renderizado concurrente
+                if (state.rendering.isRendering) {
+                    state.rendering.pendingRender = true;
+                    return;
                 }
 
-                renderResumen(data.resumenGlobal);
+                state.rendering.isRendering = true;
 
-                state.filas = data.filas || [];
+                // Usar requestAnimationFrame para optimizar el renderizado
+                requestAnimationFrame(() => {
+                    try {
+                        // Solo actualizar jurados si cambiaron
+                        const juradosChanged = !Utils.arraysEqual(data.jurados || [], state.jurados);
+                        if (juradosChanged) {
+                            state.jurados = data.jurados || [];
+                            renderThead();
+                        }
 
-                renderTbody();
-                renderBotonesReporte();
-                actualizarTituloTabla();
+                        state.categorias = data.categorias || [];
+
+                        if (state.vistaActual !== 'total') {
+                            renderCategorias(data.categorias || []);
+                        } else {
+                            DOM.categoriasWrap.style.display = 'none';
+                        }
+
+                        renderResumen(data.resumenGlobal);
+
+                        // Solo actualizar filas si cambiaron
+                        const filasChanged = !Utils.arraysEqual(data.filas || [], state.filas);
+                        if (filasChanged) {
+                            state.filas = data.filas || [];
+                            renderTbody();
+                        }
+
+                        renderBotonesReporte();
+                        actualizarTituloTabla();
+
+                    } finally {
+                        state.rendering.isRendering = false;
+                        
+                        // Si hay un render pendiente, ejecutarlo
+                        if (state.rendering.pendingRender) {
+                            state.rendering.pendingRender = false;
+                            renderSnapshot(data);
+                        }
+                    }
+                });
             }
 
             function renderThead() {
@@ -434,7 +555,6 @@
             }
 
             function renderCategorias(categorias) {
-                DOM.categoriasChips.innerHTML = '';
 
                 if (!categorias || categorias.length === 0) {
                     DOM.categoriasWrap.style.display = 'none';
@@ -442,6 +562,10 @@
                 }
 
                 DOM.categoriasWrap.style.display = 'block';
+
+                // Limpiar y usar DocumentFragment
+                DOM.categoriasChips.innerHTML = '';
+                const fragment = document.createDocumentFragment();
 
                 categorias.forEach(cat => {
                     const isActive = state.categoriaId === cat.id;
@@ -456,21 +580,24 @@
                         </span>
                     `;
 
-                    chip.addEventListener('click', () => {
+                    chip.addEventListener('click', Utils.debounce(() => {
                         state.categoriaId = cat.id;
                         state.vistaActual = 'categoria';
+                        Utils.clearCache();
                         cargarSnapshot(true);
                         DOM.btnLimpiarFiltro.style.display = 'inline-block';
-                    });
+                    }, 200));
 
-                    DOM.categoriasChips.appendChild(chip);
+                    fragment.appendChild(chip);
                 });
+                DOM.categoriasChips.appendChild(fragment);
             }
 
             function limpiarFiltroCategoria() {
                 state.categoriaId = null;
                 state.vistaActual = 'completo';
                 DOM.btnLimpiarFiltro.style.display = 'none';
+                Utils.clearCache();
                 cargarSnapshot(true);
             }
 
@@ -512,12 +639,12 @@
 
                 DOM.filaEmpty.style.display = 'none';
 
+                // Pre-calcular y ordenar
                 const ordenado = [...state.filas].sort((a, b) => {
-                    const puntosA = getPuntaje(a);
-                    const puntosB = getPuntaje(b);
-                    return puntosB - puntosA;
+                    return getPuntaje(b) - getPuntaje(a);
                 });
 
+               // Calcular rankings una sola vez
                 let lastPuntos = null;
                 let lastRank = 0;
                 const ranked = ordenado.map((fila, i) => {
@@ -528,6 +655,7 @@
                     return { ...fila, __rank: rank, __puntos: puntos };
                 });
 
+                // Usar DocumentFragment para inserción masiva eficiente
                 const fragment = document.createDocumentFragment();
 
                 ranked.forEach(fila => {
@@ -632,13 +760,6 @@
                 DOM.tbodyRows.appendChild(fragment);
             }
 
-            function obtenerIdCategoriaPorNombre(nombre) {
-                if (!state.filas || state.filas.length === 0) return null;
-                const fila = state.filas.find(f => f.categoriaNombre === nombre);
-                if (fila && fila.categoriaId) { return fila.categoriaId; }
-                return null;
-            }
-
             function renderBotonesReporte() {
                 DOM.reportesBtn.innerHTML = '';
 
@@ -717,6 +838,13 @@
                 }
             }
 
+            // function obtenerIdCategoriaPorNombre(nombre) {
+            //     if (!state.filas || state.filas.length === 0) return null;
+            //     const fila = state.filas.find(f => f.categoriaNombre === nombre);
+            //     if (fila && fila.categoriaId) { return fila.categoriaId; }
+            //     return null;
+            // }
+
             function actualizarTituloTabla() {
                 let titulo = 'Resultados';
 
@@ -739,27 +867,49 @@
 
                 try {
                     state.sse = new EventSource(`/api/admin/concurso/${state.actividadId}/stream`);
-                    state.sse.onmessage = (event) => {
+
+                    // Throttle para evitar renderizados excesivos
+                    const throttledUpdate = Utils.throttle((data) => {
                         try {
-                            const data = JSON.parse(event.data);
-                            if (data.filas) { state.filas = data.filas; renderTbody(); }
-                            if (data.categorias) { renderCategorias(data.categorias); }
-                            if (data.resumenGlobal) { renderResumen(data.resumenGlobal); }
+                            // Actualizar cache
+                            Utils.setCache(data);
+
+                            // Solo renderizar si hay cambios reales
+                            const hasChanges = 
+                                !Utils.arraysEqual(data.filas || [], state.filas) ||
+                                !Utils.arraysEqual(data.categorias || [], state.categorias);
+
+                            if (hasChanges) {
+                                renderSnapshot(data);
+                            }
+                            
                             marcarActualizado();
                         } catch (error) {
                             console.error('Error procesando SSE:', error);
                         }
+                    }, 1000); // Máximo 1 actualización por segundo
+
+                    state.sse.onmessage = (event) => {
+                        const data = JSON.parse(event.data);
+                        throttledUpdate(data);
                     };
+
                     state.sse.onerror = () => {
                         console.warn('Error en SSE, usando polling');
+                        state.sse.close();
+                        state.sse = null;
                     };
 
                 } catch (error) {
                     console.warn('SSE no disponible, usando polling');
                 }
 
-                // Polling de respaldo
-                state.polling = setInterval(() => { cargarSnapshot(true); }, 15000);
+                // OPTIMIZACIÓN: Polling reducido solo si SSE falla
+                state.polling = setInterval(() => {
+                    if (!state.sse) {
+                        cargarSnapshot(true);
+                    }
+                }, 30000); // 30 segundos (reducido de 15)
             }
 
             function stopLiveUpdates() {
@@ -788,6 +938,7 @@
                 DOM.reportesBtn.style.display = 'none';
                 stopLiveUpdates();
                 limpiarTabla();
+                Utils.clearCache();
             }
 
             function mostrarConActividad() {
@@ -830,7 +981,7 @@
                 }
             }
 
-            function cleanup() { stopLiveUpdates(); }
+            function cleanup() { stopLiveUpdates(); Utils.clearCache(); }
         })();
     </script>
 </body>

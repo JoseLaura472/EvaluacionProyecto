@@ -53,6 +53,18 @@
                 <div class="valid-feedback">Correcto!</div>
                 <div class="invalid-feedback">Debe seleccionar a una tipoParticipante.</div>
             </div>
+            <div class="col-12 col-md-6">
+                <label class="form-label">Categoria participante</label>
+                <select class="select2" th:field="*{categoriaParticipante.idCategoriaParticiapnte}" required>
+                    <option value="">Seleccione…</option>
+                    <option th:each="catPar : ${listaCategoriaParticipantes}" th:value="${catPar.idCategoriaParticiapnte}"
+                        th:text="${catPar.nombre}">
+                    </option>
+                </select>
+
+                <div class="valid-feedback">Correcto!</div>
+                <div class="invalid-feedback">Debe seleccionar a una tipoParticipante.</div>
+            </div>
         </div>
     </div>
 

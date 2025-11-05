@@ -1,0 +1,81 @@
+<h4 class="py-3 mb-4"><span class="text-muted fw-light">Menú /</span> Rubrica</h4>
+
+<div id="tablaRegistro"></div>
+
+<div class="modal fade" id="formularioCategoriaParticipante" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="contenidoModalCategoriaParticipante"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        cargarTabla();
+
+        // Limpia contenido al cerrar (evita duplicar scripts/ids)
+        $('#formularioCategoriaParticipante').on('hidden.bs.modal', function () {
+            $('#contenidoModalCategoriaParticipante').empty();
+        });
+    });
+
+    function cargarTabla() {
+        $.ajax({
+            type: 'POST',
+            url: "/categoria-participante/tabla-registros",
+            success: function (html) { $("#tablaRegistro").html(html); },
+            error: function () {
+                $("#tablaRegistro").html(`
+            <div class="alert alert-danger m-3">
+                Ocurrió un error al cargar la tabla.
+                <button class="btn btn-sm btn-outline-light ms-2" onclick="cargarTabla()">Reintentar</button>
+            </div>
+            `);
+            }
+        });
+    }
+
+    // Registrar
+    $(document).on('click', '.btn-registrar-categoria-participante', function () {
+        $('#formularioCategoriaParticipante').modal('show');
+        cargarFormularioAlert(
+            "/categoria-participante/formulario",
+            "#contenidoModalCategoriaParticipante",
+            "#formularioCategoriaParticipante",
+            function onLoaded() {
+                manejarEnvioFormulario('#formularioCategoriaParticipante', {
+                    modalSelector: '#formularioCategoriaParticipante',
+                    recargarTablaFn: cargarTabla
+                });
+            }
+        );
+    });
+
+    // Editar
+    $(document).on('click', '.btn-editar-categoria-participante', function () {
+        const id = $(this).data('id');
+        if (!id) return Swal.fire('Error', 'ID no válido.', 'error');
+
+        $('#formularioCategoriaParticipante').modal('show');
+        cargarFormularioEditAlert(
+            id,
+            "/categoria-participante/formulario-edit",
+            "#contenidoModalCategoriaParticipante",
+            "#formularioCategoriaParticipante",
+            function onLoaded() {
+                manejarEnvioFormulario('#formularioCategoriaParticipante', {
+                    modalSelector: '#formularioCategoriaParticipante',
+                    recargarTablaFn: cargarTabla
+                });
+            }
+        );
+    });
+
+    // Eliminar
+    $(document).on('click', '.btn-eliminar-categoria-participante', function () {
+        const id = $(this).data('id');
+        const nombre = $(this).data('nombre') || 'el registro';
+        if (!id) return Swal.fire('Error', 'ID no válido.', 'error');
+
+        eliminarRegistroAlert(nombre, id, "/categoria-participante/eliminar", cargarTabla);
+    });
+</script>

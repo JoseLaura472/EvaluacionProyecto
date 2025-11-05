@@ -1,0 +1,40 @@
+<div class="modal-header">
+    <h4 class="modal-title" th:text="${edit}? 'Modificar categoria-participante' : 'Registrar categoria-participante'"></h4>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+</div>
+
+<form id="formularioCategoriaParticipante" method="post"
+    th:action="${edit} ? @{/categoria-participante/modificar-categoria-participante} : @{/categoria-participante/registrar-categoria-participante}" th:object="${categoriaParticipante}"
+    novalidate>
+
+    <input type="hidden" th:if="${edit}" th:field="*{idCategoriaParticipante}" />
+
+    <div class="modal-body">
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <label class="form-label">Nombre</label>
+                <input type="text" th:field="*{nombre}" class="form-control" placeholder="Escriba un nombre" required />
+                <div class="invalid-feedback">Por favor, introduzca un nombre.</div>
+            </div>
+
+            <div class="col-12 col-md-4">
+                <label class="form-label">Descripcion</label>
+                <input type="text" th:field="*{descripcion}" class="form-control" placeholder="Ej: bla bla bla" required />
+                <div class="invalid-feedback">Por favor, introduzca una descripcion.</div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="modal-footer d-flex gap-2">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+        <button type="submit" class="btn btn-success"
+            th:text="${edit}? 'Guardar Cambios' : 'Guardar Registro'"></button>
+    </div>
+</form>
+
+<script>
+    manejarEnvioFormulario('#formularioCategoriaParticipante');
+</script>

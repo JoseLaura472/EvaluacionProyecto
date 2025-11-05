@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.example.proyecto.Models.Entity.Participante;
+import com.example.proyecto.Models.IService.ICategoriaParticipanteService;
 import com.example.proyecto.Models.IService.IParticipanteService;
 import com.example.proyecto.Models.IService.ITipoParticipanteService;
 
@@ -24,6 +25,7 @@ public class ParticipanteController {
 
     private final IParticipanteService participanteService;
     private final ITipoParticipanteService tipoParticipanteService;
+    private final ICategoriaParticipanteService categoriaParticipanteService;
 
     @GetMapping("/vista")
     public String vista() {
@@ -39,6 +41,7 @@ public class ParticipanteController {
     @PostMapping("/formulario")
     public String formulario(Model model, Participante participante) {
         model.addAttribute("listaTipoParticipantes", tipoParticipanteService.listarTipoParticipantes());
+        model.addAttribute("listaCategoriaParticipantes", categoriaParticipanteService.findAll());
         return "vista/participante/formulario";
     }
 

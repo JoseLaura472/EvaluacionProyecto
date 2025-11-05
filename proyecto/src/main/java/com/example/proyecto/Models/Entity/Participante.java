@@ -25,6 +25,10 @@ public class Participante extends AuditoriaConfig {
     @JoinColumn(name = "id_tipo_participante")
     private TipoParticipante tipoParticipante;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_categoria_participante")
+    private CategoriaParticipante CategoriaParticipante;
+
     private String nombre;
     private String institucion;
 }
