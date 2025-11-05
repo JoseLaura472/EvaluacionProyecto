@@ -652,7 +652,7 @@ public class ReportePdfService {
             Map<Long, List<Inscripcion>> porParticipante,
             Long idActividad) {
 
-        Table table = new Table(UnitValue.createPercentArray(new float[]{0.8f, 3f, 1.5f, 1.5f, 1.5f}))
+        Table table = new Table(UnitValue.createPercentArray(new float[]{0.8f, 3f, 1.5f, 1.5f, 1.5f, 1.5f}))
                 .useAllAvailableWidth();
 
         DeviceRgb colorEncabezado = new DeviceRgb(39, 174, 96);
