@@ -385,11 +385,19 @@ public class ReportePdfService {
             
             table.addCell(crearCeldaNormal("Vestuario, alegría e interpretación/escenografía"));
             table.addCell(crearCeldaNormal("15 pts", TextAlignment.CENTER));
+
+            // Fila TOTAL
+            table.addCell(crearCeldaNormal("TOTAL", true));
+            table.addCell(crearCeldaNormal("50 pts", TextAlignment.CENTER, true));
             
         } else if ("RECORRIDO".equalsIgnoreCase(nombreCategoria)) {
             
             table.addCell(crearCeldaNormal("Alegría baile en el recorrido"));
             table.addCell(crearCeldaNormal("30 pts", TextAlignment.CENTER));
+
+            // Fila TOTAL
+            table.addCell(crearCeldaNormal("TOTAL", true));
+            table.addCell(crearCeldaNormal("30 pts", TextAlignment.CENTER, true));
 
         } else if ("INICIO".equalsIgnoreCase(nombreCategoria)) {
             table.addCell(crearCeldaNormal("Puntualidad de salida y organización de los participantes"));
@@ -397,11 +405,13 @@ public class ReportePdfService {
             
             table.addCell(crearCeldaNormal("Disciplina en el recorrido y cuidado del medio ambiente"));
             table.addCell(crearCeldaNormal("10 pts", TextAlignment.CENTER));
+
+            // Fila TOTAL
+            table.addCell(crearCeldaNormal("TOTAL", true));
+            table.addCell(crearCeldaNormal("20 pts", TextAlignment.CENTER, true));
         } 
 
-        // Fila TOTAL
-        table.addCell(crearCeldaNormal("TOTAL", true));
-        table.addCell(crearCeldaNormal("50 pts", TextAlignment.CENTER, true));
+        
 
         return table;
     }
