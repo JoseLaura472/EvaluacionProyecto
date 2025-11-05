@@ -387,15 +387,17 @@ public class ReportePdfService {
             table.addCell(crearCeldaNormal("15 pts", TextAlignment.CENTER));
             
         } else if ("RECORRIDO".equalsIgnoreCase(nombreCategoria)) {
+            
+            table.addCell(crearCeldaNormal("Alegría baile en el recorrido"));
+            table.addCell(crearCeldaNormal("30 pts", TextAlignment.CENTER));
+
+        } else if ("INICIO".equalsIgnoreCase(nombreCategoria)) {
             table.addCell(crearCeldaNormal("Puntualidad de salida y organización de los participantes"));
             table.addCell(crearCeldaNormal("10 pts", TextAlignment.CENTER));
             
             table.addCell(crearCeldaNormal("Disciplina en el recorrido y cuidado del medio ambiente"));
             table.addCell(crearCeldaNormal("10 pts", TextAlignment.CENTER));
-            
-            table.addCell(crearCeldaNormal("Alegría baile en el recorrido"));
-            table.addCell(crearCeldaNormal("30 pts", TextAlignment.CENTER));
-        }
+        } 
 
         // Fila TOTAL
         table.addCell(crearCeldaNormal("TOTAL", true));
