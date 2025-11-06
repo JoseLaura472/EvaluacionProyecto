@@ -97,7 +97,7 @@ public class CoordinadorController {
         try {
             List<Inscripcion> inscripciones;
             
-            inscripciones = inscripcionService.findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividad(idActividad, 2L);
+            inscripciones = inscripcionService.findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(idActividad, 2L);
             
             List<Map<String, Object>> resultado = inscripciones.stream()
                 .filter(i -> i.getParticipante() != null) // Validar que tenga participante

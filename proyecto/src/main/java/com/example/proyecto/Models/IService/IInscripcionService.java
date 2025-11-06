@@ -20,7 +20,7 @@ public interface IInscripcionService extends IServiceGenerico<Inscripcion, Long>
 
     long countByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividad(Long actividadId, Long categoriaId);
 
-    List<Inscripcion> findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividad(Long actividadId, Long categoriaId);
+    List<Inscripcion> findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(Long actividadId, Long categoriaId);
 
     List<Inscripcion> findByActividad_IdActividad(Long actividadId);
 

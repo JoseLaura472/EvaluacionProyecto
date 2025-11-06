@@ -193,7 +193,7 @@ public class EvaluacionService {
             
             // 4. 🔥 AQUÍ ESTÁ EL CAMBIO CLAVE 🔥
             // Obtener inscripciones SOLO de esta categoría específica
-            List<Inscripcion> inscripciones = inscripcionService.findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividad(
+            List<Inscripcion> inscripciones = inscripcionService.findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(
                 idActividad, 
                 idCategoria  // ← FILTRAR POR CATEGORÍA
             );

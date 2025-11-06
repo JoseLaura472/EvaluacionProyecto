@@ -35,7 +35,7 @@ public interface IInscripcionDao extends JpaRepository<Inscripcion, Long> {
     long countByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividad(Long actividadId, Long categoriaId);
 
     // opcional: por actividad y categoría (si quieres filtrar desde DB)
-    List<Inscripcion> findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividad(Long actividadId,
+    List<Inscripcion> findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(Long actividadId,
             Long categoriaId);
 
     List<Inscripcion> findByActividad_IdActividad(Long actividadId);

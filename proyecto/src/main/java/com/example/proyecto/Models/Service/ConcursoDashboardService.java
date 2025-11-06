@@ -95,7 +95,7 @@ public class ConcursoDashboardService {
         // 4) Inscripciones (filtradas si corresponde)
         List<Inscripcion> inscs = (categoriaId == null)
             ? inscripcionRepo.findByActividad_IdActividad(actividadId)
-            : inscripcionRepo.findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividad(actividadId, categoriaId);
+            : inscripcionRepo.findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(actividadId, categoriaId);
 
         // 5) Evaluaciones (todas de la actividad; si quieres, filtra por categoría en el repo)
         List<Evaluacion> evals = evaluacionRepo.findByActividad_IdActividad(actividadId);
@@ -446,7 +446,7 @@ public class ConcursoDashboardService {
      */
     private Map<String, Object> calcularProgreso(Long idActividad, Long categoriaId) {
         List<Inscripcion> inscripciones = inscripcionService
-                .findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividad(idActividad, categoriaId);
+                .findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(idActividad, categoriaId);
         
         int total = inscripciones.size();
         int completadas = 0;

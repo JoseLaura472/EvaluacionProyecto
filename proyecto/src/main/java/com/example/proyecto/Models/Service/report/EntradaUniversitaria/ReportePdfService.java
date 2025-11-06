@@ -170,7 +170,7 @@ public class ReportePdfService {
 
             // Obtener inscripciones de esta categoría
             List<Inscripcion> inscripciones = inscripcionService
-                    .findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividad(idActividad, idCategoria);
+                    .findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(idActividad, idCategoria);
 
             // Tabla de resultados
             Table table = crearTablaResultadosCategoria(inscripciones, idCategoria);

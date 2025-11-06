@@ -31,4 +31,5 @@ public class Participante extends AuditoriaConfig {
 
     private String nombre;
     private String institucion;
+    private Integer posicion;
 }
