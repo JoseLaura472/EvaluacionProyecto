@@ -1,0 +1,449 @@
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding: 20px;
+}
+
+/* CRONÓMETRO FLOTANTE */
+.cronometro-flotante {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    background: white;
+    border-radius: 20px;
+    padding: 1rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    min-width: 200px;
+    text-align: center;
+    display: none;
+    animation: slideInRight 0.5s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.cronometro-flotante.activo {
+    display: block;
+}
+
+.cronometro-participante {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.cronometro-tiempo {
+    font-size: 2.5rem;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    margin: 0.5rem 0;
+    transition: all 0.3s ease;
+}
+
+.cronometro-tiempo.verde {
+    color: #4caf50;
+}
+
+.cronometro-tiempo.amarillo {
+    color: #ff9800;
+}
+
+.cronometro-tiempo.rojo {
+    color: #f44336;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    50%,
+    100% {
+        opacity: 1;
+    }
+
+    25%,
+    75% {
+        opacity: 0.5;
+    }
+}
+
+.cronometro-estado {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.cronometro-estado.verde {
+    background: #e8f5e9;
+    color: #4caf50;
+}
+
+.cronometro-estado.amarillo {
+    background: #fff3e0;
+    color: #ff9800;
+}
+
+.cronometro-estado.rojo {
+    background: #ffebee;
+    color: #f44336;
+}
+
+
+
+/* ═══════════════════════════════════════════════════════════
+           NAVBAR
+           ═══════════════════════════════════════════════════════════ */
+
+.navbar-jurado {
+    padding: 15px 0;
+    margin-bottom: 20px;
+}
+
+.navbar-brand {
+    font-weight: bold;
+    color: #ffffff !important;
+    font-size: 1.3rem;
+}
+
+.navbar-brand i {
+    color: #ffffff;
+    margin-right: 10px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.user-details {
+    text-align: right;
+}
+
+.user-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    margin: 0;
+}
+
+.user-role {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+}
+
+.btn-logout {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 4px 15px rgba(245, 87, 108, 0.4);
+}
+
+.btn-logout:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 87, 108, 0.6);
+    color: white;
+}
+
+/* ═══════════════════════════════════════════════════════════
+           CONTENEDOR PRINCIPAL
+           ═══════════════════════════════════════════════════════════ */
+
+.container-custom {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.header-box {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.header-title {
+    color: #667eea;
+    margin: 0;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.categoria-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 20px;
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.lista-participantes {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.participante-item {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.participante-item:hover {
+    background: #e9ecef;
+    transform: translateX(5px);
+}
+
+.participante-item.evaluado {
+    background: #d4edda;
+    border-left: 4px solid #28a745;
+}
+
+.participante-nombre {
+    font-weight: 600;
+    color: #333;
+}
+
+.badge-status {
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge-evaluado {
+    background: #28a745;
+    color: white;
+}
+
+.badge-pendiente {
+    background: #ffc107;
+    color: #333;
+}
+
+.resumen-box {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.progress-custom {
+    height: 30px;
+    background: #e9ecef;
+    border-radius: 15px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress-bar-custom {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    transition: width 0.5s;
+}
+
+/* Modal */
+.modal-evaluacion {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    overflow-y: auto;
+}
+
+.modal-evaluacion.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content-custom {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-header-custom {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 20px;
+    border-radius: 15px 15px 0 0;
+}
+
+.modal-body-custom {
+    padding: 25px;
+}
+
+.criterio-box {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.criterio-nombre {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.input-puntaje {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    text-align: center;
+}
+
+.total-box {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.total-puntos {
+    font-size: 32px;
+    font-weight: bold;
+}
+
+.btn-custom {
+    padding: 12px 30px;
+    border-radius: 25px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-guardar {
+    background: #28a745;
+    color: white;
+    flex: 1;
+}
+
+.btn-guardar:hover {
+    background: #218838;
+}
+
+.btn-cerrar {
+    background: #6c757d;
+    color: white;
+    flex: 1;
+}
+
+.btn-cerrar:hover {
+    background: #5a6268;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+/* Participante bloqueado */
+.participante-item.bloqueado {
+    background: #f8f9fa !important;
+    border-left: 4px solid #28a745;
+    cursor: not-allowed !important;
+}
+
+.participante-item.bloqueado:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Mensaje de completado */
+#mensajeCompleto {
+    animation: slideIn 0.5s ease-out;
+    border-left: 5px solid #28a745;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Modal header con estado */
+.modal-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#estadoEvaluacion {
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 12px;
+}

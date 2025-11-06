@@ -393,8 +393,7 @@ public class JuradoController {
     @GetMapping(value = "/cronometro/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamCronometro(HttpSession session) {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
-        System.out.println("[SSE] streamCronometro invoked, usuario = " + (usuario == null ? "null" : usuario.getIdUsuario()));
-
+        
         if (usuario == null) {
             SseEmitter emitter = new SseEmitter(5000L);
             try {

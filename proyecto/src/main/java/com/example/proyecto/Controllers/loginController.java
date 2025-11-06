@@ -126,8 +126,6 @@ public class loginController {
                 if (asignacion != null && asignacion.getActividad() != null) {
                     // Tiene asignación - Redirigir a panel de entrada
                     session.setAttribute("tieneAsignacion", true);
-                    System.out.println("[Login] Jurado con asignación - ID: " + jurado.getIdJurado() +
-                            " - Actividad: " + asignacion.getActividad().getNombre());
                     return "redirect:/jurado/panel-entrada";
                 } else {
                     // No tiene asignación - Redirigir a panel de espera
