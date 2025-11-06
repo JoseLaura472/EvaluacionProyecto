@@ -399,7 +399,6 @@ public class JuradoController {
             try {
                 Map<String,Object> payload = Map.of("accion", "error", "message", "No autorizado");
                 emitter.send(SseEmitter.event().name("cronometro").data(payload));
-                System.out.println("[SSE] enviado error no autorizado y completando emitter");
             } catch (IOException ignored) {}
             emitter.complete();
             return emitter;
@@ -408,7 +407,6 @@ public class JuradoController {
         SseEmitter emitter = cronometroSseService.crearEmitter();
         try {
             emitter.send(SseEmitter.event().name("cronometro").data(Map.of("accion","ping")));
-            System.out.println("[SSE] enviado ping inicial al jurado " + usuario.getIdUsuario());
         } catch (IOException e) {
             System.err.println("[SSE] fallo al enviar ping: " + e.getMessage());
         }
