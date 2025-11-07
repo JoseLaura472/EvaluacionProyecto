@@ -396,7 +396,16 @@ public class ConcursoDashboardService {
                     
                     Map<String, Object> fila = new HashMap<>();
                     fila.put("participante", p.getNombre());
+                    fila.put("participanteId", idParticipante);
                     fila.put("institucion", p.getInstitucion());
+
+                    if (p.getCategoriaParticipante() != null) {
+                        fila.put("categoriaParticipanteId", p.getCategoriaParticipante().getIdCategoriaParticiapnte());
+                        fila.put("categoriaParticipanteNombre", p.getCategoriaParticipante().getNombre());
+                    } else {
+                        fila.put("categoriaParticipanteId", null);
+                        fila.put("categoriaParticipanteNombre", "Sin Categoría");
+                    }
                     
                     // Sumar puntos de todas las categorías
                     double puntosTotal = 0;
@@ -434,7 +443,7 @@ public class ConcursoDashboardService {
                     fila.put("puntos", puntosTotal);
                     fila.put("desglose", desglose);
                     fila.put("completado", completoTotal);
-                    fila.put("participanteId", idParticipante);
+                    // fila.put("participanteId", idParticipante);
                     
                     return fila;
                 })

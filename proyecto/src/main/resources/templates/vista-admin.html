@@ -636,8 +636,9 @@
                 }
             }
 
-            function renderTbody() {
+            // ========== RENDERIZADO DE TABLA (REEMPLAZAR FUNCIÓN renderTbody COMPLETA) ==========
 
+            function renderTbody() {
                 DOM.tbodyRows.querySelectorAll('tr:not(#fila-empty)').forEach(tr => tr.remove());
 
                 if (!state.filas || state.filas.length === 0) {
@@ -647,12 +648,22 @@
 
                 DOM.filaEmpty.style.display = 'none';
 
+                // ✅ DECISIÓN: Vista total agrupa por categoría, las demás vistas son normales
+                if (state.vistaActual === 'total') {
+                    renderTbodyConCategorias();
+                } else {
+                    renderTbodyNormal();
+                }
+            }
+
+            // ========== RENDERIZADO NORMAL (SIN AGRUPAR) ==========
+            function renderTbodyNormal() {
                 // Pre-calcular y ordenar
                 const ordenado = [...state.filas].sort((a, b) => {
                     return getPuntaje(b) - getPuntaje(a);
                 });
 
-               // Calcular rankings una sola vez
+                // Calcular rankings una sola vez
                 let lastPuntos = null;
                 let lastRank = 0;
                 const ranked = ordenado.map((fila, i) => {
@@ -667,105 +678,188 @@
                 const fragment = document.createDocumentFragment();
 
                 ranked.forEach(fila => {
-                    const tr = document.createElement('tr');
-                    tr.className = fila.completado ? 'table-success' : '';
-
-                    const tdPuesto = document.createElement('td');
-                    tdPuesto.className = 'text-center';
-                    const medalla = getMedalla(fila.__rank);
-                    tdPuesto.innerHTML = `
-                        ${medalla ? `<span class="medalla">${medalla}</span>` : ''}
-                        <span class="small text-muted">#${fila.__rank}</span>
-                    `;
-                    tr.appendChild(tdPuesto);
-
-                    const tdParticipante = document.createElement('td');
-                    tdParticipante.innerHTML = `
-                        <div class="fw-semibold">${fila.participante || '—'}</div>
-                        <div class="small text-muted">${fila.institucion || ''}</div>
-                    `;
-                    tr.appendChild(tdParticipante);
-
-                    if (state.vistaActual === 'total') {
-                        const tdDesglose = document.createElement('td');
-                        tdDesglose.className = 'desglose-categoria';
-
-                        const desglose = fila.desglose || {};
-                        let html = '<div>';
-                        Object.entries(desglose).forEach(([cat, puntos]) => {
-                            html += `<div><strong>${cat}:</strong> ${Number(puntos).toFixed(2)}</div>`;
-                        });
-                        html += '</div>';
-
-                        tdDesglose.innerHTML = html;
-                        tr.appendChild(tdDesglose);
-
-                    } else {
-                        state.jurados.forEach(jurado => {
-                            const td = document.createElement('td');
-                            td.className = 'text-center';
-
-                            const scores = fila.scores || {};
-                            const puntaje = scores[jurado.id];
-
-                            if (puntaje !== undefined) {
-                                td.innerHTML = `<span class="fw-semibold">${Number(puntaje).toFixed(2)}</span>`;
-                            } else {
-                                td.innerHTML = '<span class="text-muted">—</span>';
-                            }
-
-                            tr.appendChild(td);
-                        });
-                    }
-
-                    const tdPuntaje = document.createElement('td');
-                    tdPuntaje.className = 'text-end';
-                    const puntaje = fila.__puntos;
-                    const formato = Number.isInteger(puntaje) ? puntaje : puntaje.toFixed(2);
-                    tdPuntaje.innerHTML = `<span class="fw-bold fs-5 text-primary">${formato}</span>`;
-                    tr.appendChild(tdPuntaje);
-
-                    const tdEstado = document.createElement('td');
-                    tdEstado.className = 'text-center';
-                    tdEstado.innerHTML = `
-                        <span class="badge ${fila.completado ? 'bg-success badge-completado' : 'bg-secondary'}">
-                            <i class="bi bi-${fila.completado ? 'check-circle' : 'clock'}"></i>
-                            ${fila.completado ? 'Completo' : 'Pendiente'}
-                        </span>
-                    `;
-                    tr.appendChild(tdEstado);
-
-                    const tdAcciones = document.createElement('td');
-                    tdAcciones.className = 'text-center';
-                    const participanteId = fila.participanteId || fila.idParticipante;
-
-                    if (!participanteId) {
-                        tdAcciones.innerHTML = '<span class="text-muted">—</span>';
-                    } else if (state.categoriaId) {
-                        const btnReporte = document.createElement('a');
-                        btnReporte.className = 'btn btn-sm btn-outline-primary';
-                        btnReporte.href = `/api/admin/concurso/${state.actividadId}/reporte/participante/${participanteId}/categoria/${state.categoriaId}.pdf`;
-                        btnReporte.target = '_blank';
-                        btnReporte.innerHTML = '<i class="bi bi-file-earmark-pdf"></i> Evaluaciones';
-                        btnReporte.title = `Descargar evaluaciones individuales de ${fila.participante}`;
-                        tdAcciones.appendChild(btnReporte);
-
-                    } else if (state.vistaActual === 'total') {
-                        const btnReporteCompleto = document.createElement('a');
-                        btnReporteCompleto.className = 'btn btn-sm btn-outline-success';
-                        btnReporteCompleto.href = `/api/admin/concurso/${state.actividadId}/reporte/participante/${participanteId}/completo.pdf`;
-                        btnReporteCompleto.target = '_blank';
-                        btnReporteCompleto.innerHTML = '<i class="bi bi-file-earmark-pdf-fill"></i> Completo';
-                        btnReporteCompleto.title = `Descargar reporte completo de ${fila.participante}`;
-                        tdAcciones.appendChild(btnReporteCompleto);
-
-                    } else {
-                        tdAcciones.innerHTML = '<span class="text-muted">Selecciona una categoría</span>';
-                    }
-                    tr.appendChild(tdAcciones);
+                    const tr = crearFilaParticipante(fila);
                     fragment.appendChild(tr);
                 });
+                
                 DOM.tbodyRows.appendChild(fragment);
+            }
+
+            // ========== RENDERIZADO CON CATEGORÍAS (AGRUPADO) ==========
+            function renderTbodyConCategorias() {
+                // Agrupar por categoría de participante
+                const grouped = {};
+                
+                state.filas.forEach(fila => {
+                    const catId = fila.categoriaParticipanteId || 'sin-categoria';
+                    const catNombre = fila.categoriaParticipanteNombre || 'Sin Categoría';
+                    
+                    if (!grouped[catId]) {
+                        grouped[catId] = {
+                            nombre: catNombre,
+                            filas: []
+                        };
+                    }
+                    grouped[catId].filas.push(fila);
+                });
+
+                const fragment = document.createDocumentFragment();
+
+                // Ordenar las categorías (opcional)
+                const categoriasOrdenadas = Object.entries(grouped).sort((a, b) => {
+                    if (a[0] === 'sin-categoria') return 1;
+                    if (b[0] === 'sin-categoria') return -1;
+                    return a[1].nombre.localeCompare(b[1].nombre);
+                });
+
+                categoriasOrdenadas.forEach(([catId, grupo]) => {
+                    // Ordenar participantes dentro de la categoría
+                    const ordenado = [...grupo.filas].sort((a, b) => {
+                        return getPuntaje(b) - getPuntaje(a);
+                    });
+
+                    // Calcular rankings dentro de la categoría
+                    let lastPuntos = null;
+                    let lastRank = 0;
+                    const ranked = ordenado.map((fila, i) => {
+                        const puntos = getPuntaje(fila);
+                        const rank = (puntos === lastPuntos) ? lastRank : (i + 1);
+                        lastPuntos = puntos;
+                        lastRank = rank;
+                        return { ...fila, __rank: rank, __puntos: puntos };
+                    });
+
+                    // Fila de encabezado de categoría
+                    const trHeader = document.createElement('tr');
+                    trHeader.className = 'table-info';
+                    trHeader.innerHTML = `
+                        <td colspan="5" class="fw-bold py-3">
+                            <i class="bi bi-award"></i> ${grupo.nombre}
+                            <span class="badge bg-primary ms-2">${ranked.length} participantes</span>
+                        </td>
+                    `;
+                    fragment.appendChild(trHeader);
+
+                    // Filas de participantes
+                    ranked.forEach(fila => {
+                        const tr = crearFilaParticipante(fila);
+                        fragment.appendChild(tr);
+                    });
+                });
+
+                DOM.tbodyRows.appendChild(fragment);
+            }
+
+            // ========== FUNCIÓN AUXILIAR: CREAR FILA DE PARTICIPANTE ==========
+            function crearFilaParticipante(fila) {
+                const tr = document.createElement('tr');
+                tr.className = fila.completado ? 'table-success' : '';
+
+                // COLUMNA: Puesto
+                const tdPuesto = document.createElement('td');
+                tdPuesto.className = 'text-center';
+                const medalla = getMedalla(fila.__rank);
+                tdPuesto.innerHTML = `
+                    ${medalla ? `<span class="medalla">${medalla}</span>` : ''}
+                    <span class="small text-muted">#${fila.__rank}</span>
+                `;
+                tr.appendChild(tdPuesto);
+
+                // COLUMNA: Participante
+                const tdParticipante = document.createElement('td');
+                tdParticipante.innerHTML = `
+                    <div class="fw-semibold">${fila.participante || '—'}</div>
+                    <div class="small text-muted">${fila.institucion || ''}</div>
+                `;
+                tr.appendChild(tdParticipante);
+
+                // COLUMNAS DINÁMICAS: Desglose o Jurados
+                if (state.vistaActual === 'total') {
+                    // Vista TOTAL: Mostrar desglose por categoría
+                    const tdDesglose = document.createElement('td');
+                    tdDesglose.className = 'desglose-categoria';
+
+                    const desglose = fila.desglose || {};
+                    let html = '<div>';
+                    Object.entries(desglose).forEach(([cat, puntos]) => {
+                        html += `<div><strong>${cat}:</strong> ${Number(puntos).toFixed(2)}</div>`;
+                    });
+                    html += '</div>';
+
+                    tdDesglose.innerHTML = html;
+                    tr.appendChild(tdDesglose);
+
+                } else {
+                    // Vista NORMAL/CATEGORÍA: Mostrar puntajes de jurados
+                    state.jurados.forEach(jurado => {
+                        const td = document.createElement('td');
+                        td.className = 'text-center';
+
+                        const scores = fila.scores || {};
+                        const puntaje = scores[jurado.id];
+
+                        if (puntaje !== undefined) {
+                            td.innerHTML = `<span class="fw-semibold">${Number(puntaje).toFixed(2)}</span>`;
+                        } else {
+                            td.innerHTML = '<span class="text-muted">—</span>';
+                        }
+
+                        tr.appendChild(td);
+                    });
+                }
+
+                // COLUMNA: Puntaje Total
+                const tdPuntaje = document.createElement('td');
+                tdPuntaje.className = 'text-end';
+                const puntaje = fila.__puntos;
+                const formato = Number.isInteger(puntaje) ? puntaje : puntaje.toFixed(2);
+                tdPuntaje.innerHTML = `<span class="fw-bold fs-5 text-primary">${formato}</span>`;
+                tr.appendChild(tdPuntaje);
+
+                // COLUMNA: Estado
+                const tdEstado = document.createElement('td');
+                tdEstado.className = 'text-center';
+                tdEstado.innerHTML = `
+                    <span class="badge ${fila.completado ? 'bg-success badge-completado' : 'bg-secondary'}">
+                        <i class="bi bi-${fila.completado ? 'check-circle' : 'clock'}"></i>
+                        ${fila.completado ? 'Completo' : 'Pendiente'}
+                    </span>
+                `;
+                tr.appendChild(tdEstado);
+
+                // COLUMNA: Acciones
+                const tdAcciones = document.createElement('td');
+                tdAcciones.className = 'text-center';
+                const participanteId = fila.participanteId || fila.idParticipante;
+
+                if (!participanteId) {
+                    tdAcciones.innerHTML = '<span class="text-muted">—</span>';
+                } else if (state.categoriaId) {
+                    // Vista filtrada por categoría
+                    const btnReporte = document.createElement('a');
+                    btnReporte.className = 'btn btn-sm btn-outline-primary';
+                    btnReporte.href = `/api/admin/concurso/${state.actividadId}/reporte/participante/${participanteId}/categoria/${state.categoriaId}.pdf`;
+                    btnReporte.target = '_blank';
+                    btnReporte.innerHTML = '<i class="bi bi-file-earmark-pdf"></i> Evaluaciones';
+                    btnReporte.title = `Descargar evaluaciones individuales de ${fila.participante}`;
+                    tdAcciones.appendChild(btnReporte);
+
+                } else if (state.vistaActual === 'total') {
+                    // Vista total
+                    const btnReporteCompleto = document.createElement('a');
+                    btnReporteCompleto.className = 'btn btn-sm btn-outline-success';
+                    btnReporteCompleto.href = `/api/admin/concurso/${state.actividadId}/reporte/participante/${participanteId}/completo.pdf`;
+                    btnReporteCompleto.target = '_blank';
+                    btnReporteCompleto.innerHTML = '<i class="bi bi-file-earmark-pdf-fill"></i> Completo';
+                    btnReporteCompleto.title = `Descargar reporte completo de ${fila.participante}`;
+                    tdAcciones.appendChild(btnReporteCompleto);
+
+                } else {
+                    tdAcciones.innerHTML = '<span class="text-muted">Selecciona una categoría</span>';
+                }
+                
+                tr.appendChild(tdAcciones);
+                return tr;
             }
 
             function renderBotonesReporte() {
