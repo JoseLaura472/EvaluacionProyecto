@@ -407,7 +407,7 @@
                 state.vistaActual = vista;
 
                 // ✅ CRÍTICO: Limpiar categoriaId al cambiar de vista
-                if (vista === 'total' || vista === 'completo') {
+                if (vista === 'total' || vista === 'completo' || vista === 'categoria-participante') {
                     state.categoriaId = null;
                     DOM.btnLimpiarFiltro.style.display = 'none';
                 }
@@ -417,11 +417,21 @@
                     btn.classList.toggle('active', isActive);
                     
                     if (isActive) {
-                        btn.classList.remove('btn-outline-primary', 'btn-outline-success');
-                        btn.classList.add(vista === 'total' ? 'btn-success' : 'btn-primary');
+                        btn.classList.remove('btn-outline-primary', 'btn-outline-success', 'btn-outline-info');
+                        
+                        if (vista === 'total') {
+                            btn.classList.add('btn-success');
+                        } else if (vista === 'categoria-participante') {
+                            btn.classList.add('btn-info');
+                        } else {
+                            btn.classList.add('btn-primary');
+                        }
                     } else {
-                        btn.classList.remove('btn-primary', 'btn-success');
-                        btn.classList.add(vista === 'total' ? 'btn-outline-primary' : 'btn-outline-success');
+                        btn.classList.remove('btn-primary', 'btn-success', 'btn-info');
+                        
+                        const originalColor = btn.dataset.vista === 'total' ? 'success' : 
+                                            btn.dataset.vista === 'categoria-participante' ? 'info' : 'primary';
+                        btn.classList.add(`btn-outline-${originalColor}`);
                     }
                 });
 
@@ -449,8 +459,11 @@
                     let url = `/api/admin/concurso/${state.actividadId}/snapshot`;
 
                     const params = new URLSearchParams();
+
                     if (state.vistaActual === 'total') {
                         params.append('vistaTotal', 'true');
+                    } else if (state.vistaActual === 'categoria-participante') {
+                        params.append('vistaCategoriaParticipante', 'true');
                     } else if (state.categoriaId) {
                         params.append('categoriaId', state.categoriaId);
                     }
@@ -505,7 +518,7 @@
 
                         state.categorias = data.categorias || [];
 
-                        if (state.vistaActual !== 'total') {
+                        if (state.vistaActual !== 'total' && state.vistaActual !== 'categoria-participante') {
                             renderCategorias(data.categorias || []);
                         } else {
                             DOM.categoriasWrap.style.display = 'none';
@@ -540,7 +553,7 @@
                     DOM.theadRow.removeChild(DOM.theadRow.children[2]);
                 }
 
-                if (state.vistaActual === 'total') {
+                if (state.vistaActual === 'total' || state.vistaActual === 'categoria-participante') {
                     const th = document.createElement('th');
                     th.className = 'text-center';
                     th.style.minWidth = '200px';
@@ -648,12 +661,78 @@
 
                 DOM.filaEmpty.style.display = 'none';
 
-                // ✅ DECISIÓN: Vista total agrupa por categoría, las demás vistas son normales
                 if (state.vistaActual === 'total') {
                     renderTbodyConCategorias();
+                } else if (state.vistaActual === 'categoria-participante') {
+                    renderTbodyPorCategoriaParticipante();
                 } else {
                     renderTbodyNormal();
                 }
+            }
+
+            // ========== 🆕 RENDERIZADO POR CATEGORÍA DE PARTICIPANTE ==========
+            function renderTbodyPorCategoriaParticipante() {
+                // Agrupar por categoría de participante
+                const grouped = {};
+                
+                state.filas.forEach(fila => {
+                    const catId = fila.categoriaParticipanteId || 'sin-categoria';
+                    const catNombre = fila.categoriaParticipanteNombre || 'Sin Categoría';
+                    
+                    if (!grouped[catId]) {
+                        grouped[catId] = {
+                            nombre: catNombre,
+                            filas: []
+                        };
+                    }
+                    grouped[catId].filas.push(fila);
+                });
+
+                const fragment = document.createDocumentFragment();
+
+                // Ordenar las categorías
+                const categoriasOrdenadas = Object.entries(grouped).sort((a, b) => {
+                    if (a[0] === 'sin-categoria') return 1;
+                    if (b[0] === 'sin-categoria') return -1;
+                    return a[1].nombre.localeCompare(b[1].nombre);
+                });
+
+                categoriasOrdenadas.forEach(([catId, grupo]) => {
+                    // Ordenar participantes por puntaje
+                    const ordenado = [...grupo.filas].sort((a, b) => {
+                        return getPuntaje(b) - getPuntaje(a);
+                    });
+
+                    // Calcular rankings
+                    let lastPuntos = null;
+                    let lastRank = 0;
+                    const ranked = ordenado.map((fila, i) => {
+                        const puntos = getPuntaje(fila);
+                        const rank = (puntos === lastPuntos) ? lastRank : (i + 1);
+                        lastPuntos = puntos;
+                        lastRank = rank;
+                        return { ...fila, __rank: rank, __puntos: puntos };
+                    });
+
+                    // Encabezado de categoría
+                    const trHeader = document.createElement('tr');
+                    trHeader.className = 'table-info';
+                    trHeader.innerHTML = `
+                        <td colspan="5" class="fw-bold py-3">
+                            <i class="bi bi-award-fill"></i> ${grupo.nombre}
+                            <span class="badge bg-primary ms-2">${ranked.length} participantes</span>
+                        </td>
+                    `;
+                    fragment.appendChild(trHeader);
+
+                    // Filas de participantes
+                    ranked.forEach(fila => {
+                        const tr = crearFilaParticipante(fila);
+                        fragment.appendChild(tr);
+                    });
+                });
+
+                DOM.tbodyRows.appendChild(fragment);
             }
 
             // ========== RENDERIZADO NORMAL (SIN AGRUPAR) ==========
@@ -774,7 +853,7 @@
                 tr.appendChild(tdParticipante);
 
                 // COLUMNAS DINÁMICAS: Desglose o Jurados
-                if (state.vistaActual === 'total') {
+                if (state.vistaActual === 'total' || state.vistaActual === 'categoria-participante') {
                     // Vista TOTAL: Mostrar desglose por categoría
                     const tdDesglose = document.createElement('td');
                     tdDesglose.className = 'desglose-categoria';
@@ -844,7 +923,7 @@
                     btnReporte.title = `Descargar evaluaciones individuales de ${fila.participante}`;
                     tdAcciones.appendChild(btnReporte);
 
-                } else if (state.vistaActual === 'total') {
+                } else if (state.vistaActual === 'total' || state.vistaActual === 'categoria-participante') {
                     // Vista total
                     const btnReporteCompleto = document.createElement('a');
                     btnReporteCompleto.className = 'btn btn-sm btn-outline-success';
@@ -879,6 +958,16 @@
                     btn.target = '_blank';
                     btn.innerHTML = '<i class="bi bi-file-pdf-fill"></i> Reporte General Total';
                     btn.title = 'Descargar tabla resumen con suma de ambas categorías';
+                    DOM.reportesBtn.appendChild(btn);
+
+                } 
+                else if (state.vistaActual === 'categoria-participante') {
+                    const btn = document.createElement('a');
+                    btn.className = 'btn-reporte-header btn-info-custom';
+                    btn.href = `/api/admin/concurso/${state.actividadId}/reporte/categoria-participante.pdf`;
+                    btn.target = '_blank';
+                    btn.innerHTML = '<i class="bi bi-file-pdf-fill"></i> Reporte por Categoría de Participante';
+                    btn.title = 'Descargar reporte agrupado por categoría de participante';
                     DOM.reportesBtn.appendChild(btn);
 
                 } else if (state.categoriaId) {
@@ -952,6 +1041,8 @@
 
                 if (state.vistaActual === 'total') {
                     titulo = '<i class="bi bi-calculator"></i> Resultados Totales';
+                } else if (state.vistaActual === 'categoria-participante') {
+                    titulo = '<i class="bi bi-award-fill"></i> Ranking por Categoría de Participante';
                 } else if (state.categoriaId) {
                     const cat = state.filas.find(fila => fila.categoriaId === state.categoriaId);
                     if (cat) {

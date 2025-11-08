@@ -34,21 +34,28 @@ public class ConcursoDashboardApi {
     public ResponseEntity<Map<String, Object>> getSnapshot(
             @PathVariable Long idActividad,
             @RequestParam(required = false) Long categoriaId,
-            @RequestParam(required = false, defaultValue = "false") boolean vistaTotal) {
+            @RequestParam(required = false, defaultValue = "false") boolean vistaTotal,
+            @RequestParam(required = false, defaultValue = "false") boolean vistaCategoriaParticipante) {
         
         try {
             Map<String, Object> data;
             
-            if (vistaTotal) {
-                // Vista TOTAL: suma de todas las categorías
-                data = dashService.getSnapshotTotal(idActividad);
-            } else if (categoriaId != null) {
-                // Vista filtrada por categoría específica
-                data = dashService.getSnapshotPorCategoria(idActividad, categoriaId);
-            } else {
-                // Vista por defecto (todas las categorías sin filtrar)
-                data = dashService.getSnapshotCompleto(idActividad);
-            }
+        if (vistaCategoriaParticipante) {
+            // 🆕 Vista por CATEGORÍA DE PARTICIPANTE (Infantil, Juvenil, etc.)
+            data = dashService.getSnapshotPorCategoriaParticipante(idActividad);
+            
+        } else if (vistaTotal) {
+            // Vista TOTAL: suma de todas las categorías
+            data = dashService.getSnapshotTotal(idActividad);
+            
+        } else if (categoriaId != null) {
+            // Vista filtrada por categoría específica
+            data = dashService.getSnapshotPorCategoria(idActividad, categoriaId);
+            
+        } else {
+            // Vista por defecto
+            data = dashService.getSnapshotCompleto(idActividad);
+        }
             
             return ResponseEntity.ok(data);
             

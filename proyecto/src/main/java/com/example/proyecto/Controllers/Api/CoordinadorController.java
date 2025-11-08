@@ -40,7 +40,7 @@ public class CoordinadorController {
     public String panelControl(HttpSession session, RedirectAttributes flash, Model model) {
         Usuario usuario = (Usuario) session.getAttribute("usuario");
 
-        model.addAttribute("actividad", actividadService.findById(1L));
+        model.addAttribute("actividad", actividadService.findById(2L));
 
         // Aquí puedes agregar datos de la actividad activa
         model.addAttribute("usuario", usuario);
@@ -97,7 +97,7 @@ public class CoordinadorController {
         try {
             List<Inscripcion> inscripciones;
             
-            inscripciones = inscripcionService.findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(idActividad, 2L);
+            inscripciones = inscripcionService.findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(idActividad, 4L);
             
             List<Map<String, Object>> resultado = inscripciones.stream()
                 .filter(i -> i.getParticipante() != null) // Validar que tenga participante
