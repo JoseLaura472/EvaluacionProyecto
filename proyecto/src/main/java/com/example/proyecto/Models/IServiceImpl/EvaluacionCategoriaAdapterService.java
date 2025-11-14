@@ -31,22 +31,40 @@ public class EvaluacionCategoriaAdapterService {
     private final IJuradoAsignacionService juradoAsignacionService;
     private final IInscripcionDao inscripcionRepository;
     private final IRubricaService rubricaService;
-    private final IRubricaCriterioServcie criterioService; // ojo con el typo en tu proyecto
-    private final EvaluacionService evaluacionLegacy;      // tu servicio actual
+    private final IRubricaCriterioServcie criterioService;
+    private final EvaluacionService evaluacionLegacy;
+
+    /**
+     * MÉTODO PRINCIPAL: Convierte evaluación por categoría al formato legacy
+     * 
+     * FLUJO:
+     * 1. Validar que el jurado tenga la categoría asignada
+     * 2. Verificar que la rúbrica pertenezca a la categoría
+     * 3. Convertir puntajes de escala (0-maxPuntos) a porcentaje (0-100)
+     * 4. Delegar al servicio legacy uwur
+     */ 
 
     @Transactional
     public void guardarEvaluacionCategoria(Jurado jurado, EvaluacionGuardarCategoriaDto dtoCat) {
 
-        // 1) Validaciones básicas
-        if (jurado == null || jurado.getIdJurado() == null)
+        // ========== VALIDACIONES BÁSICAS ==========
+        if (jurado == null || jurado.getIdJurado() == null) {
             throw new IllegalArgumentException("Jurado inválido");
-        if (dtoCat == null) throw new IllegalArgumentException("Datos requeridos");
-        if (dtoCat.categoriaId() == null || dtoCat.participanteId() == null || dtoCat.rubricaId() == null)
-            throw new IllegalArgumentException("categoriaId, participanteId y rubricaId son requeridos");
-        if (dtoCat.detalles() == null || dtoCat.detalles().isEmpty())
-            throw new IllegalArgumentException("Debe enviar detalle de puntajes");
+        }
+        
+        if (dtoCat == null) {
+            throw new IllegalArgumentException("Datos de evaluación requeridos");
+        }
+        
+        if (dtoCat.categoriaId() == null || dtoCat.participanteId() == null || dtoCat.rubricaId() == null) {
+            throw new IllegalArgumentException("categoriaId, participanteId y rubricaId son obligatorios");
+        }
+        
+        if (dtoCat.detalles() == null || dtoCat.detalles().isEmpty()) {
+            throw new IllegalArgumentException("Debe proporcionar al menos un detalle de puntaje");
+        }
 
-        // 2) Verificar que el jurado tenga esa categoría asignada
+        // ========== VERIFICAR ASIGNACIÓN DEL JURADO ==========
         boolean tieneCat = juradoAsignacionService.existsCategoriaAsignadaByPersona(jurado.getPersona().getIdPersona());
         if (!tieneCat) throw new IllegalStateException("El jurado no tiene categoría asignada");
 
@@ -79,27 +97,40 @@ public class EvaluacionCategoriaAdapterService {
                 .collect(Collectors.toMap(RubricaCriterio::getIdRubricaCriterio, c -> c));
 
         List<Detalle> detallesLegacy = new ArrayList<>();
-        double totalAcumulado = 0.0;
 
         for (EvaluacionDetalleCategoriaDto d : dtoCat.detalles()) {
             RubricaCriterio crit = map.get(d.criterioId());
             if (crit == null) throw new IllegalArgumentException("Criterio inválido: " + d.criterioId());
 
-            // Convertir a 0..100:
-            // - Si el criterio usa maxPuntos, interpretamos el "puntaje" recibido como puntos y lo normalizamos.
-            // - Si NO usa maxPuntos (usa porcentaje), asumimos que `puntaje` ya viene 0..100.
             double puntaje100;
+
             if (crit.getMaxPuntos() != null) {
+                // ✅ CASO 1: Criterio con escala de puntos (ej: 0-10, 0-5)
                 int max = crit.getMaxPuntos();
-                int v = Optional.ofNullable(d.puntaje()).orElse(0);
-                if (v < 0 || v > max)
-                    throw new IllegalArgumentException("Puntaje fuera de rango para criterio " + crit.getNombre() + " (0.." + max + ")");
-                puntaje100 = (max == 0) ? 0.0 : (v * 100.0 / max);
+                int valorRecibido = Optional.ofNullable(d.puntaje()).orElse(0);
+                
+                if (valorRecibido < 0 || valorRecibido > max) {
+                    throw new IllegalArgumentException(
+                        String.format("Puntaje fuera de rango para '%s' (0-%d): %d", 
+                                      crit.getNombre(), max, valorRecibido)
+                    );
+                }
+                
+                // Normalizar a escala 0-100
+                puntaje100 = (max == 0) ? 0.0 : (valorRecibido * 100.0 / max);
+                
             } else {
-                int v = Optional.ofNullable(d.puntaje()).orElse(0);
-                if (v < 0 || v > 100)
-                    throw new IllegalArgumentException("Puntaje fuera de rango (0..100) en criterio " + crit.getNombre());
-                puntaje100 = v;
+                // ✅ CASO 2: Criterio con porcentaje directo (0-100)
+                int valorRecibido = Optional.ofNullable(d.puntaje()).orElse(0);
+                
+                if (valorRecibido < 0 || valorRecibido > 100) {
+                    throw new IllegalArgumentException(
+                        String.format("Puntaje fuera de rango (0-100) para '%s': %d", 
+                                      crit.getNombre(), valorRecibido)
+                    );
+                }
+                
+                puntaje100 = valorRecibido;
             }
 
             // Armar detalle legacy
@@ -110,10 +141,7 @@ public class EvaluacionCategoriaAdapterService {
         }
 
         legacy.setDetalles(detallesLegacy);
-        // El total ponderado lo calcula tu EvaluacionService; setTotal es opcional
-        // legacy.setTotal(...); // si quisieras pre-calcularlo
 
-        // 7) Delegar al flujo existente
         evaluacionLegacy.guardarEvaluacion(jurado, legacy);
     }
 }

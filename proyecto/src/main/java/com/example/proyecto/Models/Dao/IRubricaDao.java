@@ -39,7 +39,7 @@ public interface IRubricaDao extends JpaRepository<Rubrica, Long> {
         from Rubrica r
         left join fetch r.categoriaActividad c
         where r.estado='A' and c.idCategoriaActividad = :categoriaId
-        order by r.idRubrica desc
+        order by r.idRubrica asc
     """)
     List<Rubrica> findActivasPorCategoriaOrderDesc(@Param("categoriaId") Long categoriaId);
 

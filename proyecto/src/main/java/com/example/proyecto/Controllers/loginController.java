@@ -109,28 +109,25 @@ public class loginController {
         // JURADO
         if (esJurado && idPersona != null) {
             try {
-                // Buscar el jurado
+
                 Jurado jurado = juradoService.findByPersonaId(idPersona);
 
                 if (jurado == null) {
+                    System.out.println("aqui 0");
                     flash.addFlashAttribute("error", "No se encontró registro de jurado para este usuario");
                     return "redirect:/LoginR";
                 }
 
-                // Guardar ID del jurado en sesión
                 session.setAttribute("idJurado", jurado.getIdJurado());
-
-                // Verificar si tiene actividades asignadas
                 JuradoAsignacion asignacion = juradoAsignacionService.findFirstByJuradoId(jurado.getIdJurado());
 
                 if (asignacion != null && asignacion.getActividad() != null) {
-                    // Tiene asignación - Redirigir a panel de entrada
+                    System.out.println("aqui 1");
                     session.setAttribute("tieneAsignacion", true);
-                    return "redirect:/jurado/panel-entrada";
+                    return "redirect:/jurado/panel-categoria";
                 } else {
-                    // No tiene asignación - Redirigir a panel de espera
+                    System.out.println("aqui 2");
                     session.setAttribute("tieneAsignacion", false);
-                    System.out.println("[Login] Jurado sin asignación - ID: " + jurado.getIdJurado());
                     flash.addFlashAttribute("info", "Aún no tienes actividades asignadas. Por favor espera.");
                     return "redirect:/jurado/panel";
                 }

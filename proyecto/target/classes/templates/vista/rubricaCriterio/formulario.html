@@ -32,7 +32,7 @@
                 <select class="select2" th:field="*{rubrica.idRubrica}" required>
                     <option value="">Seleccione…</option>
                     <option th:each="rubri : ${listarRubricas}" th:value="${rubri.idRubrica}"
-                        th:text="${rubri.nombre}">
+                        th:text="${rubri.nombre} + ' - ' + ${rubri.categoriaActividad.nombre}">
                     </option>
                 </select>
 

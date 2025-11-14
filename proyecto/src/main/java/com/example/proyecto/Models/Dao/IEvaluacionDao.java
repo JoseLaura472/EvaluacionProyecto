@@ -68,4 +68,60 @@ public interface IEvaluacionDao extends JpaRepository<Evaluacion, Long>{
     Evaluacion findByJuradoIdJuradoAndParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(Long idJurado, Long idParticipante, Long idCategoria);
     List<Evaluacion> findByParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(Long idParticipante, Long idCategoria);
     int countByParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(Long idParticipante, Long idCategoria);
+
+    /* FEXCOIN */
+    /**
+     * ✅ Verifica si ya existe evaluación (usa índice compuesto)
+     */
+    boolean existsByJurado_IdJuradoAndInscripcion_IdInscripcionAndRubrica_IdRubrica(
+        Long juradoId, Long inscripcionId, Long rubricaId
+    );
+    
+    /**
+     * ✅ Busca evaluación existente para actualizar
+     */
+    Optional<Evaluacion> findByJurado_IdJuradoAndInscripcion_IdInscripcionAndRubrica_IdRubrica(
+        Long juradoId, Long inscripcionId, Long rubricaId
+    );
+    
+    /**
+     * ✅ Obtiene todas las evaluaciones de un jurado en una categoría
+     */
+    @Query("SELECT e FROM Evaluacion e " +
+           "JOIN FETCH e.rubrica " +
+           "WHERE e.jurado.idJurado = :juradoId " +
+           "AND e.categoriaActividad.idCategoriaActividad = :categoriaId " +
+           "AND e.estado = 'A'")
+    List<Evaluacion> findByJuradoAndCategoria(
+        @Param("juradoId") Long juradoId, 
+        @Param("categoriaId") Long categoriaId
+    );
+    
+    /**
+     * ✅ Obtiene evaluaciones de un participante con detalles
+     */
+    @Query("SELECT DISTINCT e FROM Evaluacion e " +
+           "LEFT JOIN FETCH e.detalles d " +
+           "LEFT JOIN FETCH d.rubricaCriterio " +
+           "WHERE e.participante.idParticipante = :participanteId " +
+           "AND e.categoriaActividad.idCategoriaActividad = :categoriaId " +
+           "AND e.estado = 'A'")
+    List<Evaluacion> findByParticipanteAndCategoriaWithDetalles(
+        @Param("participanteId") Long participanteId,
+        @Param("categoriaId") Long categoriaId
+    );
+    
+    /**
+     * ✅ Cuenta cuántas rúbricas ha evaluado el jurado para un participante
+     */
+    @Query("SELECT COUNT(DISTINCT e.rubrica.idRubrica) FROM Evaluacion e " +
+           "WHERE e.jurado.idJurado = :juradoId " +
+           "AND e.participante.idParticipante = :participanteId " +
+           "AND e.categoriaActividad.idCategoriaActividad = :categoriaId " +
+           "AND e.estado = 'A'")
+    long countRubricasEvaluadas(
+        @Param("juradoId") Long juradoId,
+        @Param("participanteId") Long participanteId,
+        @Param("categoriaId") Long categoriaId
+    );
 }

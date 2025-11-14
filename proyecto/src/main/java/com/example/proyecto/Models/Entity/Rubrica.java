@@ -15,16 +15,11 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "rubrica",
-uniqueConstraints = {
-    @UniqueConstraint(name="uk_rubrica_act_cat_ver",
-      columnNames = {"id_actividad","id_categoria_actividad","version"})
-})
+@Table(name = "rubrica")
 @Setter @Getter
 public class Rubrica extends AuditoriaConfig{
     @Id

@@ -1,9 +1,11 @@
 package com.example.proyecto.Models.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -13,6 +15,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import com.example.proyecto.Models.Dao.IEvaluacionDao;
 import com.example.proyecto.Models.Dao.IRubricaCriterioDao;
 import com.example.proyecto.Models.Dto.EvaluacionGuardarDto;
+import com.example.proyecto.Models.Dto.Fexcoin.EvaluacionCompletaDto;
+import com.example.proyecto.Models.Dto.Fexcoin.EvaluacionResultDto;
 import com.example.proyecto.Models.Entity.CategoriaActividad;
 import com.example.proyecto.Models.Entity.Evaluacion;
 import com.example.proyecto.Models.Entity.EvaluacionDetalle;
@@ -27,6 +31,7 @@ import com.example.proyecto.Models.IService.IInscripcionService;
 import com.example.proyecto.Models.IService.IJuradoAsignacionService;
 import com.example.proyecto.Models.IService.IRubricaService;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,22 +41,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class EvaluacionService {
     private final IEvaluacionDao evaluacionRepo;
-    private final IInscripcionService inscripcionRepo;
-    private final IRubricaService rubricaRepo;
     private final IRubricaCriterioDao criterioRepo;
     private final SseHub sseHub;
-    private final ConcursoDashboardService dashService;
     private final IJuradoAsignacionService asignacionService;
     private final IRubricaService rubricaService;
     private final IInscripcionService inscripcionService;
     private final IEvaluacionService evaluacionService;
-
     private final ConcursoDashboardService dashboardService;
 
     @Transactional
     public void guardarEvaluacion(Jurado jurado, EvaluacionGuardarDto dto) {
 
-        Inscripcion insc = inscripcionRepo.findById(dto.getInscripcionId());
+        Inscripcion insc = inscripcionService.findById(dto.getInscripcionId());
 
         if (!insc.getActividad().getIdActividad().equals(dto.getActividadId())) {
             throw new IllegalArgumentException("Actividad no coincide con la inscripción");
@@ -65,7 +66,7 @@ public class EvaluacionService {
             throw new IllegalStateException("La inscripción ya fue evaluada por este jurado");
         }
 
-        Rubrica rub = rubricaRepo.findById(dto.getRubricaId());
+        Rubrica rub = rubricaService.findById(dto.getRubricaId());
 
         List<RubricaCriterio> criterios = criterioRepo.findByRubrica(rub.getIdRubrica());
         if (criterios.isEmpty())
@@ -127,7 +128,7 @@ public class EvaluacionService {
 
         evaluacionRepo.save(ev);
 
-        var snap = dashService.snapshot(dto.getActividadId(), null);
+        var snap = dashboardService.snapshot(dto.getActividadId(), null);
         Map<String, Object> payload = Map.of(
                 "tipo", "EVALUACION_GUARDADA",
                 "filas", snap.getFilas(),
@@ -406,4 +407,315 @@ public class EvaluacionService {
             throw new RuntimeException("Error al guardar la evaluación: " + e.getMessage());
         }
     }
+
+    /* PARA FEXCOIN EL PRIMERO SE ELIMINA DE ARRIBAAAA AAHHH */
+
+    /**
+     * ✅ MÉTODO OPTIMIZADO: Guarda TODAS las evaluaciones en UNA sola transacción
+     * 
+     * Flujo:
+     * 1. Validaciones iniciales (jurado, inscripción, categoría)
+     * 2. Cargar TODAS las rúbricas y criterios en memoria (reduce queries)
+     * 3. Procesar todas las evaluaciones
+     * 4. Guardar en batch (reduce roundtrips a BD)
+     * 5. Enviar UN solo evento SSE al finalizar
+     */
+    @Transactional
+    public EvaluacionResultDto guardarEvaluacionCompleta(
+            Jurado jurado, 
+            EvaluacionCompletaDto dto) {
+        
+        log.info("Iniciando evaluación completa - Jurado: {}, Participante: {}, Rúbricas: {}", 
+                 jurado.getIdJurado(), dto.getParticipanteId(), dto.getRubricas().size());
+        
+        // ========== 1. VALIDACIONES INICIALES ==========
+        validarJuradoYCategoria(jurado, dto.getCategoriaId());
+        
+        Inscripcion inscripcion = obtenerInscripcion(dto.getCategoriaId(), dto.getParticipanteId());
+        
+        // ========== 2. CARGAR DATOS EN MEMORIA (optimización) ==========
+        Set<Long> rubricaIds = dto.getRubricas().stream()
+            .map(EvaluacionCompletaDto.EvaluacionRubricaDto::getRubricaId)
+            .collect(Collectors.toSet());
+        
+        Map<Long, Rubrica> mapRubricas = cargarRubricas(rubricaIds, dto.getCategoriaId());
+        Map<Long, List<RubricaCriterio>> mapCriteriosPorRubrica = cargarCriteriosPorRubricas(rubricaIds);
+        
+        // ========== 3. PROCESAR CADA RÚBRICA ==========
+        List<Evaluacion> evaluacionesGuardadas = new ArrayList<>();
+        double sumaPromedios = 0.0;
+        
+        for (EvaluacionCompletaDto.EvaluacionRubricaDto rubricaDto : dto.getRubricas()) {
+            Rubrica rubrica = mapRubricas.get(rubricaDto.getRubricaId());
+            if (rubrica == null) {
+                throw new IllegalArgumentException("Rúbrica no encontrada: " + rubricaDto.getRubricaId());
+            }
+            
+            List<RubricaCriterio> criterios = mapCriteriosPorRubrica.get(rubricaDto.getRubricaId());
+            if (criterios == null || criterios.isEmpty()) {
+                throw new IllegalStateException("La rúbrica '" + rubrica.getNombre() + "' no tiene criterios");
+            }
+            
+            // Verificar si ya existe evaluación para esta rúbrica
+            Optional<Evaluacion> existente = evaluacionRepo
+                .findByJurado_IdJuradoAndInscripcion_IdInscripcionAndRubrica_IdRubrica(
+                    jurado.getIdJurado(), 
+                    inscripcion.getIdInscripcion(), 
+                    rubrica.getIdRubrica()
+                );
+            
+            Evaluacion evaluacion;
+            if (existente.isPresent()) {
+                log.warn("Actualizando evaluación existente - Rúbrica: {}", rubrica.getIdRubrica());
+                evaluacion = existente.get();
+                evaluacion.clearDetalles(); // Limpiar detalles anteriores
+            } else {
+                evaluacion = crearNuevaEvaluacion(jurado, inscripcion, rubrica);
+            }
+            
+            // Procesar detalles de esta rúbrica
+            double totalPonderacion = procesarDetalles(
+                evaluacion, 
+                rubricaDto.getDetalles(), 
+                criterios
+            );
+            
+            evaluacion.setTotalPonderacion(redondear(totalPonderacion));
+            evaluacionesGuardadas.add(evaluacion);
+            sumaPromedios += totalPonderacion;
+        }
+        
+        // ========== 4. GUARDAR TODAS LAS EVALUACIONES ==========
+        evaluacionRepo.saveAll(evaluacionesGuardadas);
+        evaluacionRepo.flush(); // Forzar escritura inmediata
+        
+        log.info("Evaluación completa guardada - Total rúbricas: {}", evaluacionesGuardadas.size());
+        
+        // ========== 5. ENVIAR EVENTO SSE (después del commit) ==========
+        Long actividadId = inscripcion.getActividad().getIdActividad();
+        programarEventoSSE(actividadId);
+        
+        // ========== 6. RETORNAR RESULTADO ==========
+        return EvaluacionResultDto.builder()
+            .success(true)
+            .message("Evaluación guardada correctamente")
+            .participanteId(dto.getParticipanteId())
+            .rubricasGuardadas(evaluacionesGuardadas.size())
+            .promedioTotal(redondear(sumaPromedios / evaluacionesGuardadas.size()))
+            .build();
+    }
+    
+    // ========== MÉTODOS AUXILIARES ==========
+    
+    private void validarJuradoYCategoria(Jurado jurado, Long categoriaId) {
+        if (jurado == null || jurado.getIdJurado() == null) {
+            throw new IllegalArgumentException("Jurado inválido");
+        }
+        
+        boolean tieneAsignacion = asignacionService
+            .existsCategoriaAsignadaByPersona(jurado.getPersona().getIdPersona());
+        
+        if (!tieneAsignacion) {
+            throw new IllegalStateException("El jurado no tiene categoría asignada");
+        }
+    }
+    
+    private Inscripcion obtenerInscripcion(Long categoriaId, Long participanteId) {
+        return inscripcionService
+            .findByCategoriaAndParticipante(categoriaId, participanteId)
+            .orElseThrow(() -> new EntityNotFoundException(
+                "No existe inscripción para el participante en esta categoría"));
+    }
+    
+    /**
+     * ✅ Carga TODAS las rúbricas en una sola query
+     */
+    private Map<Long, Rubrica> cargarRubricas(Set<Long> rubricaIds, Long categoriaId) {
+        List<Rubrica> rubricas = rubricaRepo.findAllById(rubricaIds);
+        
+        Map<Long, Rubrica> mapa = new HashMap<>();
+        for (Rubrica r : rubricas) {
+            // Validar que pertenece a la categoría
+            if (r.getCategoriaActividad() == null ||
+                !r.getCategoriaActividad().getIdCategoriaActividad().equals(categoriaId)) {
+                throw new IllegalStateException(
+                    "La rúbrica '" + r.getNombre() + "' no pertenece a la categoría seleccionada");
+            }
+            
+            if (!"A".equalsIgnoreCase(r.getEstado())) {
+                throw new IllegalStateException(
+                    "La rúbrica '" + r.getNombre() + "' no está activa");
+            }
+            
+            mapa.put(r.getIdRubrica(), r);
+        }
+        
+        return mapa;
+    }
+    
+    /**
+     * ✅ Carga TODOS los criterios de múltiples rúbricas en una sola query
+     */
+    private Map<Long, List<RubricaCriterio>> cargarCriteriosPorRubricas(Set<Long> rubricaIds) {
+        List<RubricaCriterio> todosCriterios = criterioRepo.findByRubricaIdIn(rubricaIds);
+        
+        return todosCriterios.stream()
+            .collect(Collectors.groupingBy(
+                c -> c.getRubrica().getIdRubrica(),
+                Collectors.toList()
+            ));
+    }
+    
+    private Evaluacion crearNuevaEvaluacion(Jurado jurado, Inscripcion inscripcion, Rubrica rubrica) {
+        Evaluacion ev = new Evaluacion();
+        ev.setJurado(jurado);
+        ev.setInscripcion(inscripcion);
+        ev.setRubrica(rubrica);
+        ev.setActividad(inscripcion.getActividad());
+        ev.setParticipante(inscripcion.getParticipante());
+        ev.setCategoriaActividad(inscripcion.getCategoriaActividad());
+        ev.setEstado("A");
+        return ev;
+    }
+    
+    /**
+     * ✅ Procesa detalles de una rúbrica y retorna el total ponderado
+     */
+    private double procesarDetalles(
+            Evaluacion evaluacion,
+            List<EvaluacionCompletaDto.DetalleDto> detallesDto,
+            List<RubricaCriterio> criterios) {
+        
+        // Determinar si es rúbrica de escala (puntos máximos) o porcentual
+        boolean esEscala = criterios.stream()
+            .anyMatch(c -> c.getMaxPuntos() != null);
+        
+        // Validar suma de porcentajes si no es escala
+        if (!esEscala) {
+            int sumaPorc = criterios.stream()
+                .mapToInt(RubricaCriterio::getPorcentaje)
+                .sum();
+            
+            if (sumaPorc != 100) {
+                throw new IllegalStateException(
+                    "La rúbrica '" + evaluacion.getRubrica().getNombre() + 
+                    "' no suma 100% (suma actual: " + sumaPorc + "%)");
+            }
+        }
+        
+        // Crear mapa de criterios
+        Map<Long, RubricaCriterio> mapCriterios = criterios.stream()
+            .collect(Collectors.toMap(
+                RubricaCriterio::getIdRubricaCriterio,
+                c -> c
+            ));
+        
+        // Validar que se proporcionaron todos los criterios necesarios
+        if (esEscala && detallesDto.size() != 1) {
+            throw new IllegalArgumentException(
+                "La rúbrica de escala debe tener exactamente un criterio seleccionado");
+        }
+        
+        double totalPonderacion = 0.0;
+        
+        for (EvaluacionCompletaDto.DetalleDto detalleDto : detallesDto) {
+            RubricaCriterio criterio = mapCriterios.get(detalleDto.getCriterioId());
+            
+            if (criterio == null) {
+                throw new IllegalArgumentException(
+                    "Criterio inválido: " + detalleDto.getCriterioId());
+            }
+            
+            // Normalizar puntaje a escala 0-100
+            double puntaje100 = normalizarPuntaje(
+                detalleDto.getPuntaje(), 
+                criterio
+            );
+            
+            // Calcular ponderación
+            int porcentaje = esEscala ? 100 : criterio.getPorcentaje();
+            double ponderado = (puntaje100 * porcentaje) / 100.0;
+            
+            // Crear detalle
+            EvaluacionDetalle detalle = EvaluacionDetalle.builder()
+                .rubricaCriterio(criterio)
+                .puntaje(puntaje100)
+                .porcentaje(porcentaje)
+                .ponderado(redondear(ponderado))
+                .build();
+            
+            evaluacion.addDetalle(detalle);
+            totalPonderacion += ponderado;
+        }
+        
+        return totalPonderacion;
+    }
+    
+    /**
+     * ✅ Normaliza puntaje a escala 0-100
+     */
+    private double normalizarPuntaje(Integer puntajeRecibido, RubricaCriterio criterio) {
+        if (puntajeRecibido == null || puntajeRecibido < 0) {
+            throw new IllegalArgumentException("Puntaje inválido");
+        }
+        
+        if (criterio.getMaxPuntos() != null) {
+            // CASO 1: Escala de puntos (ej: 0-10)
+            int max = criterio.getMaxPuntos();
+            
+            if (puntajeRecibido > max) {
+                throw new IllegalArgumentException(
+                    String.format("Puntaje fuera de rango para '%s' (0-%d): %d",
+                                  criterio.getNombre(), max, puntajeRecibido));
+            }
+            
+            return max == 0 ? 0.0 : (puntajeRecibido * 100.0 / max);
+            
+        } else {
+            // CASO 2: Porcentaje directo (0-100)
+            if (puntajeRecibido > 100) {
+                throw new IllegalArgumentException(
+                    String.format("Puntaje fuera de rango (0-100) para '%s': %d",
+                                  criterio.getNombre(), puntajeRecibido));
+            }
+            
+            return puntajeRecibido.doubleValue();
+        }
+    }
+    
+    /**
+     * ✅ Programa evento SSE para ejecutar DESPUÉS del commit
+     */
+    private void programarEventoSSE(Long actividadId) {
+        TransactionSynchronizationManager.registerSynchronization(
+            new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    try {
+                        var snapshot = dashboardService.snapshot(actividadId, null);
+                        
+                        Map<String, Object> payload = Map.of(
+                            "tipo", "EVALUACION_GUARDADA",
+                            "filas", snapshot.getFilas(),
+                            "categorias", snapshot.getCategorias(),
+                            "resumenGlobal", snapshot.getResumenGlobal()
+                        );
+                        
+                        sseHub.broadcast(actividadId, payload);
+                        
+                        log.debug("Evento SSE enviado correctamente - Actividad: {}", actividadId);
+                        
+                    } catch (Exception e) {
+                        log.warn("Error al enviar evento SSE (actividadId={}): {}", 
+                                actividadId, e.getMessage());
+                    }
+                }
+            }
+        );
+    }
+    
+    private double redondear(double valor) {
+        return Math.round(valor * 100.0) / 100.0;
+    }
+
 }

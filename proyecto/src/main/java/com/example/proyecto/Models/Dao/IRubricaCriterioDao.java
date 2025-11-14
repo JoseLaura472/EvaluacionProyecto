@@ -2,6 +2,7 @@ package com.example.proyecto.Models.Dao;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,14 @@ public interface IRubricaCriterioDao extends JpaRepository<RubricaCriterio, Long
         order by rc.idRubricaCriterio asc
     """)
     List<RubricaCriterioDto> listarCriteriosDto(@Param("rubricaId") Long rubricaId);
+
+    /* PARA FEXCOIN */
+    /**
+     * ✅ OPTIMIZACIÓN: Carga criterios de múltiples rúbricas en UNA sola query
+     */
+    @Query("SELECT rc FROM RubricaCriterio rc " +
+           "JOIN FETCH rc.rubrica r " +
+           "WHERE r.idRubrica IN :rubricaIds " +
+           "AND rc.estado = 'A'")
+    List<RubricaCriterio> findByRubricaIdIn(@Param("rubricaIds") Set<Long> rubricaIds);
 }

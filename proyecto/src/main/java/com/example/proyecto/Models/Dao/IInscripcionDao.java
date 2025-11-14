@@ -7,7 +7,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.example.proyecto.Models.Entity.CategoriaActividad;
 import com.example.proyecto.Models.Entity.Inscripcion;
+import com.example.proyecto.Models.Entity.Participante;
 
 public interface IInscripcionDao extends JpaRepository<Inscripcion, Long> {
     @Query("SELECT p FROM Inscripcion p WHERE p.estado = 'A'")
@@ -35,7 +37,8 @@ public interface IInscripcionDao extends JpaRepository<Inscripcion, Long> {
     long countByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividad(Long actividadId, Long categoriaId);
 
     // opcional: por actividad y categoría (si quieres filtrar desde DB)
-    List<Inscripcion> findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(Long actividadId,
+    List<Inscripcion> findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(
+            Long actividadId,
             Long categoriaId);
 
     List<Inscripcion> findByActividad_IdActividad(Long actividadId);
@@ -85,4 +88,10 @@ public interface IInscripcionDao extends JpaRepository<Inscripcion, Long> {
             Long idActividad,
             Long idParticipante,
             Long idCategoriaActividad);
+
+    /* FEXCOIN */
+    Optional<Inscripcion> findByParticipanteAndCategoriaActividad(
+        Participante participante, 
+        CategoriaActividad categoria
+    );
 }
