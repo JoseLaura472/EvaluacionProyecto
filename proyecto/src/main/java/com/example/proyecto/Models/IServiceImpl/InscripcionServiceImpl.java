@@ -100,4 +100,9 @@ public class InscripcionServiceImpl implements IInscripcionService{
             Long idCategoriaActividad) {
        return dao.findByActividadIdActividadAndParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(idActividad, idParticipante, idCategoriaActividad);
     }
+
+    @Override
+    public Optional<Inscripcion> findByCategoriaAndParticipante(Long categoriaId, Long participanteId) {
+        return dao.findByCategoriaAndParticipante(categoriaId, participanteId);
+    }
 }

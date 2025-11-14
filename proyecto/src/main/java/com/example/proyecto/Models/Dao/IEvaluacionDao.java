@@ -124,4 +124,35 @@ public interface IEvaluacionDao extends JpaRepository<Evaluacion, Long>{
         @Param("participanteId") Long participanteId,
         @Param("categoriaId") Long categoriaId
     );
+
+    /**
+     * ✅ NUEVO: Obtiene todas las evaluaciones de una categoría con datos del jurado
+     */
+    @Query("SELECT e FROM Evaluacion e " +
+           "JOIN FETCH e.jurado j " +
+           "JOIN FETCH j.persona p " +
+           "JOIN FETCH e.participante part " +
+           "LEFT JOIN FETCH e.rubrica r " +
+           "WHERE e.categoriaActividad.idCategoriaActividad = :categoriaId " +
+           "AND e.estado = 'A' " +
+           "ORDER BY part.nombre, j.idJurado, r.idRubrica")
+    List<Evaluacion> findAllByCategoriaWithJuradoAndParticipante(
+        @Param("categoriaId") Long categoriaId
+    );
+    
+    /**
+     * ✅ NUEVO: Suma el total acumulado por jurado y participante
+     */
+    @Query("SELECT " +
+           "  e.participante.idParticipante as participanteId, " +
+           "  e.jurado.idJurado as juradoId, " +
+           "  SUM(e.totalPonderacion) as totalAcumulado, " +
+           "  COUNT(DISTINCT e.rubrica.idRubrica) as rubricasEvaluadas " +
+           "FROM Evaluacion e " +
+           "WHERE e.categoriaActividad.idCategoriaActividad = :categoriaId " +
+           "AND e.estado = 'A' " +
+           "GROUP BY e.participante.idParticipante, e.jurado.idJurado")
+    List<Object[]> findTotalesAcumuladosPorJuradoYParticipante(
+        @Param("categoriaId") Long categoriaId
+    );
 }

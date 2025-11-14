@@ -53,6 +53,19 @@ public interface IRubricaDao extends JpaRepository<Rubrica, Long> {
 
     /* PARA ENTRADA UNIVERSITARIA */
     // Obtener la rúbrica por id de categoría (asumiendo una versión activa)
-    Optional<Rubrica> findByCategoriaActividadIdCategoriaActividad(Long idCategoriaActividad);
+
+    List<Rubrica> findByCategoriaActividadIdCategoriaActividad(Long idCategoriaActividad);
+
     Rubrica findByActividadIdActividadAndCategoriaActividadIdCategoriaActividad(Long idActividad, Long idCategoriaActividad); // creo que esto ya no usaremos,,
+
+    /* FEXCOIN */
+    List<Rubrica> findAllByIdRubricaIn(List<Long> rubricaIds);
+
+    /**
+     * ✅ NUEVO: Cuenta rúbricas activas de una categoría
+     */
+    long countByCategoriaActividad_IdCategoriaActividadAndEstado(
+        Long categoriaId, 
+        String estado
+    );
 }

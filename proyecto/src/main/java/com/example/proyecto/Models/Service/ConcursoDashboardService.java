@@ -7,9 +7,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.proyecto.Models.Dto.ActividadMiniDto;
 import com.example.proyecto.Models.Dto.DashboardSnapshotDto;
+import com.example.proyecto.Models.Dto.DashboardSnapshotDto.CategoriaResumenDto;
+import com.example.proyecto.Models.Dto.DashboardSnapshotDto.FilaDto;
+import com.example.proyecto.Models.Dto.DashboardSnapshotDto.ProgresoDto;
 import com.example.proyecto.Models.Entity.Actividad;
 import com.example.proyecto.Models.Entity.CategoriaActividad;
 import com.example.proyecto.Models.Entity.Evaluacion;
@@ -26,9 +30,11 @@ import com.example.proyecto.Models.IService.IRubricaService;
 import com.example.proyecto.Models.Service.report.EntradaUniversitaria.ReportePdfService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ConcursoDashboardService {
     private final IEvaluacionService evaluacionRepo;
     private final IJuradoAsignacionService asignacionRepo;
@@ -36,26 +42,37 @@ public class ConcursoDashboardService {
     private final IInscripcionService inscripcionRepo;
     private final IActividadService actividadRepo;
     private final IRubricaService rubricaService;
-
     private final IActividadService actividadService;
     private final ICategoriaActividadService categoriaService;
     private final IInscripcionService inscripcionService;
     private final IEvaluacionService evaluacionService;
     private final IJuradoAsignacionService juradoAsignacionService;
-
     private final ReportePdfService reportePdfService;
 
-    // Jurados para columnas
-    private List<DashboardSnapshotDto.JuradoMiniDto> miniJurados(List<Jurado> jurados) {
-            return jurados.stream()
-                .map(j -> {
-                    var d = new DashboardSnapshotDto.JuradoMiniDto();
-                    d.setId(j.getIdJurado());
-                    d.setNombre(j.getPersona() != null ? j.getPersona().getNombres() : ("Jurado #" + j.getIdJurado()));
-                    return d;
-                }).toList();
-        }
+    // ========== MÉTODOS AUXILIARES ==========
 
+    private List<DashboardSnapshotDto.JuradoMiniDto> miniJurados(List<Jurado> jurados) {
+        return jurados.stream()
+            .map(j -> {
+                var d = new DashboardSnapshotDto.JuradoMiniDto();
+                d.setId(j.getIdJurado());
+                d.setNombre(j.getPersona() != null ? j.getPersona().getNombres() : ("Jurado #" + j.getIdJurado()));
+                return d;
+            }).toList();
+    }
+
+    private Map<String, Object> mapActividad(Actividad a) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", a.getIdActividad());
+        map.put("nombre", a.getNombre());
+        map.put("tipo", a.getTipo());
+        map.put("fecha", a.getFecha());
+        return map;
+    }
+
+    // ========== SNAPSHOT PRINCIPAL (MEJORADO) ==========
+
+    @Transactional(readOnly = true)
     public DashboardSnapshotDto snapshot(Long actividadId, Long categoriaId) {
         var dto = new DashboardSnapshotDto();
 
@@ -87,12 +104,12 @@ public class ConcursoDashboardService {
         List<Jurado> juradosEntity = (categoriaId != null)
             ? asignacionRepo.findJuradosByActividadAndCategoriaOrdenAsignacion(actividadId, categoriaId)
             : asignacionRepo.findJuradosByActividadOrdenAsignacion(actividadId);
+
         var jurados = miniJurados(juradosEntity);
         dto.setJurados(jurados);
-        // para validación "completado"
         List<Long> juradoIdsConsiderados = juradosEntity.stream().map(Jurado::getIdJurado).toList();
 
-        // 4) Inscripciones (filtradas si corresponde)
+        // 4) Inscripciones
         List<Inscripcion> inscs = (categoriaId == null)
             ? inscripcionRepo.findByActividad_IdActividad(actividadId)
             : inscripcionRepo.findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(actividadId, categoriaId);
@@ -110,6 +127,7 @@ public class ConcursoDashboardService {
         // 5.1) Agrupar por inscripción y jurado → lista de evaluaciones (cada evaluación = una rúbrica)
         // Map<inscId, Map<juradoId, List<Evaluacion>>>
         Map<Long, Map<Long, List<Evaluacion>>> evalsByInscJurado = new HashMap<>();
+
         for (var e : evals) {
             Long inscId = e.getInscripcion().getIdInscripcion();
             Long jurId = e.getJurado().getIdJurado();
@@ -120,12 +138,13 @@ public class ConcursoDashboardService {
         }
 
         // 6) Armar filas
-        List<DashboardSnapshotDto.FilaDto> filas = new ArrayList<>();
+        List<FilaDto> filas = new ArrayList<>();
         Map<Long, Integer> completadasPorCat = new HashMap<>();
 
         for (var insc : inscs) {
-            var f = new DashboardSnapshotDto.FilaDto();
+            var f = new FilaDto();
             f.setInscripcionId(insc.getIdInscripcion());
+
             Long catId = insc.getCategoriaActividad().getIdCategoriaActividad();
             f.setCategoriaId(catId);
             f.setParticipante(insc.getParticipante().getNombre());
@@ -136,36 +155,60 @@ public class ConcursoDashboardService {
 
             Map<Long, List<Evaluacion>> byJur = evalsByInscJurado.getOrDefault(insc.getIdInscripcion(), Map.of());
 
-            // llenar scores y rubricasPorJurado sólo para jurados considerados
+            // ========== SUMA DE RÚBRICAS POR JURADO ==========
             for (Long jId : juradoIdsConsiderados) {
-                List<Evaluacion> list = byJur.getOrDefault(jId, List.of());
-                int hechas = list.size();
-                f.getRubricasPorJurado().put(jId, hechas);
-
-                if (!list.isEmpty()) {
-                    // SUMA por jurado (todas las rúbricas de esa inscripción hechas por ese jurado)
-                    double suma = list.stream()
-                                    .mapToDouble(Evaluacion::getTotalPonderacion)
-                                    .sum();
-                    suma = Math.round(suma * 100.0) / 100.0;
-                    f.getScores().put(jId, suma);
+                List<Evaluacion> evaluacionesDelJurado = byJur.getOrDefault(jId, List.of());
+                int rubricasEvaluadas = evaluacionesDelJurado.size();
+                
+                // Guardar cantidad de rúbricas evaluadas
+                f.getRubricasPorJurado().put(jId, rubricasEvaluadas);
+                
+                if (!evaluacionesDelJurado.isEmpty()) {
+                    // ✅ SUMA directa de todas las rúbricas (NO promedio)
+                    double totalAcumulado = evaluacionesDelJurado.stream()
+                        .mapToDouble(Evaluacion::getTotalPonderacion)
+                        .sum();
+                    
+                    totalAcumulado = redondear(totalAcumulado);
+                    f.getScores().put(jId, totalAcumulado);
+                    
+                    log.debug("Inscripción {}, Jurado {}: {} rúbricas evaluadas = {} pts", 
+                             insc.getIdInscripcion(), jId, rubricasEvaluadas, totalAcumulado);
                 }
             }
 
-            // promedio/puntos (promedio simple de scores disponibles)
-            if (!f.getScores().isEmpty()) {
-                double prom = f.getScores().values().stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-                prom = Math.round(prom * 100.0) / 100.0;
-                f.setPromedio(prom);
+            // ========== PROMEDIO ENTRE JURADOS (solo si todos completaron) ==========
+            // El promedio es el PROMEDIO de las SUMAS de cada jurado
+            List<Double> scoresCompletos = new ArrayList<>();
+            
+            for (Long jId : juradoIdsConsiderados) {
+                int rubricasHechas = f.getRubricasPorJurado().getOrDefault(jId, 0);
+                
+                // Solo considerar jurados que completaron TODAS las rúbricas
+                if (rubricasHechas >= rubTotales && rubTotales > 0) {
+                    Double score = f.getScores().get(jId);
+                    if (score != null) {
+                        scoresCompletos.add(score);
+                    }
+                }
+            }
+
+            if (!scoresCompletos.isEmpty()) {
+                double promedio = scoresCompletos.stream()
+                    .mapToDouble(Double::doubleValue)
+                    .average()
+                    .orElse(0.0);
+                f.setPromedio(redondear(promedio));
             } else {
                 f.setPromedio(null);
             }
 
-            // completado: TODOS los jurados considerados hicieron TODAS las rúbricas
+             // ========== COMPLETITUD ==========
             boolean completo = !juradoIdsConsiderados.isEmpty()
                     && juradoIdsConsiderados.stream().allMatch(jId ->
                         f.getRubricasPorJurado().getOrDefault(jId, 0) >= rubTotales && rubTotales > 0
                     );
+
             f.setCompletado(completo);
             if (completo) {
                 completadasPorCat.merge(catId, 1, Integer::sum);
@@ -178,11 +221,11 @@ public class ConcursoDashboardService {
 
         // 7) Chips de categorías (progreso)
         var catsDto = cats.stream().map(c -> {
-            var cd = new DashboardSnapshotDto.CategoriaResumenDto();
+            var cd = new CategoriaResumenDto();
             cd.setId(c.getIdCategoriaActividad());
             cd.setNombre(c.getNombre());
 
-            var prog = new DashboardSnapshotDto.ProgresoDto();
+            var prog = new ProgresoDto();
             int total = inscPorCat.getOrDefault(c.getIdCategoriaActividad(), 0L).intValue();
             int comp = completadasPorCat.getOrDefault(c.getIdCategoriaActividad(), 0);
             prog.setTotal(total);
@@ -192,12 +235,13 @@ public class ConcursoDashboardService {
             cd.setProgreso(prog);
             return cd;
         }).toList();
+        
         dto.setCategorias(catsDto);
 
         // 8) Resumen global
         int totalGlobal = catsDto.stream().mapToInt(x -> x.getProgreso().getTotal()).sum();
         int compGlobal = catsDto.stream().mapToInt(x -> x.getProgreso().getCompletadas()).sum();
-        var glob = new DashboardSnapshotDto.ProgresoDto();
+        var glob = new ProgresoDto();
         glob.setTotal(totalGlobal);
         glob.setCompletadas(compGlobal);
         glob.setPorcentaje(totalGlobal == 0 ? 0 : (compGlobal * 100.0 / totalGlobal));
@@ -257,6 +301,26 @@ public class ConcursoDashboardService {
         
         return result;
     }
+
+    /**
+     * Snapshot agrupado por CATEGORÍA DE PARTICIPANTE
+     * Muestra rankings independientes por cada categoría (Infantil, Juvenil, etc.)
+     */
+    public Map<String, Object> getSnapshotPorCategoriaParticipante(Long idActividad) {
+        Actividad actividad = actividadService.findById(idActividad);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("actividad", mapActividad(actividad));
+        result.put("categorias", obtenerCategorias(idActividad));
+        result.put("jurados", obtenerJurados(idActividad));
+        result.put("filas", obtenerFilasPorCategoriaParticipante(idActividad));
+        result.put("resumenGlobal", calcularResumenGlobal(idActividad));
+        result.put("tipoVista", "categoria-participante");
+        
+        return result;
+    }
+
+    // ========== MÉTODOS DE OBTENCIÓN DE DATOS (MEJORADOS) ==========
     
     /**
      * Obtener categorías con su progreso
@@ -271,11 +335,7 @@ public class ConcursoDashboardService {
                     map.put("id", cat.getIdCategoriaActividad());
                     map.put("nombre", cat.getNombre());
                     map.put("fase", cat.getFase());
-                    
-                    // Calcular progreso
-                    Map<String, Object> progreso = calcularProgreso(idActividad, cat.getIdCategoriaActividad());
-                    map.put("progreso", progreso);
-                    
+                    map.put("progreso", calcularProgreso(idActividad, cat.getIdCategoriaActividad()));
                     return map;
                 })
                 .collect(Collectors.toList());
@@ -342,25 +402,45 @@ public class ConcursoDashboardService {
                     List<Evaluacion> evaluaciones = evaluacionService
                             .findByParticipanteAndCategoria(p.getIdParticipante(), cat.getIdCategoriaActividad());
                     
-                    Map<Long, Double> scores = new HashMap<>();
-                    double suma = 0;
-                    int count = 0;
                     
-                    for (Evaluacion ev : evaluaciones) {
-                        if (ev.getJurado() != null) {
-                            scores.put(ev.getJurado().getIdJurado(), ev.getTotalPonderacion());
-                            suma += ev.getTotalPonderacion();
-                            count++;
+                    // Agrupar por jurado
+                    Map<Long, List<Evaluacion>> porJurado = evaluaciones.stream()
+                    .filter(e -> e.getJurado() != null)
+                    .collect(Collectors.groupingBy(e -> e.getJurado().getIdJurado()));
+
+                    Map<Long, Double> scores = new HashMap<>();
+                    Map<Long, Integer> rubricasPorJurado = new HashMap<>();
+                    double sumaPromedios = 0;
+                    int juradosCompletos = 0;
+
+                    int rubTotales = (int) rubricaService.countActivasByCategoria(cat.getIdCategoriaActividad());
+                    int juradosEsperados = juradoAsignacionService
+                    .countByActividadAndCategoria(idActividad, cat.getIdCategoriaActividad());
+                    
+                    for (Map.Entry<Long, List<Evaluacion>> entry : porJurado.entrySet()) {
+                        Long juradoId = entry.getKey();
+                        List<Evaluacion> evals = entry.getValue();
+                        
+                        // SUMA de todas las rúbricas
+                        double totalJurado = evals.stream()
+                            .mapToDouble(Evaluacion::getTotalPonderacion)
+                            .sum();
+                        
+                        scores.put(juradoId, redondear(totalJurado));
+                        rubricasPorJurado.put(juradoId, evals.size());
+                        
+                        // Solo promediar jurados que completaron
+                        if (evals.size() >= rubTotales) {
+                            sumaPromedios += totalJurado;
+                            juradosCompletos++;
                         }
                     }
                     
                     fila.put("scores", scores);
-                    fila.put("promedio", count > 0 ? suma / count : 0);
-                    
-                    // Verificar si está completo (todos los jurados de esta categoría evaluaron)
-                    int juradosEsperados = juradoAsignacionService
-                            .countByActividadAndCategoria(idActividad, cat.getIdCategoriaActividad());
-                    fila.put("completado", count >= juradosEsperados);
+                    fila.put("rubricasPorJurado", rubricasPorJurado);
+                    fila.put("rubricasTotales", rubTotales);
+                    fila.put("promedio", juradosCompletos > 0 ? redondear(sumaPromedios / juradosCompletos) : 0);
+                    fila.put("completado", juradosCompletos >= juradosEsperados);
                     
                     return fila;
                 })
@@ -391,7 +471,6 @@ public class ConcursoDashboardService {
                 .map(entry -> {
                     Long idParticipante = entry.getKey();
                     List<Inscripcion> inscrips = entry.getValue();
-                    
                     Participante p = inscrips.get(0).getParticipante();
                     
                     Map<String, Object> fila = new HashMap<>();
@@ -414,28 +493,27 @@ public class ConcursoDashboardService {
                     
                     for (Inscripcion insc : inscrips) {
                         CategoriaActividad cat = insc.getCategoriaActividad();
-                        
                         List<Evaluacion> evaluaciones = evaluacionService
                                 .findByParticipanteAndCategoria(idParticipante, cat.getIdCategoriaActividad());
                         
-                        double sumaCategoria = 0;
-                        int countCategoria = 0;
+                        // Agrupar por jurado y sumar
+                        Map<Long, Double> sumasPorJurado = evaluaciones.stream()
+                            .filter(e -> e.getJurado() != null)
+                            .collect(Collectors.groupingBy(
+                                e -> e.getJurado().getIdJurado(),
+                                Collectors.summingDouble(Evaluacion::getTotalPonderacion)
+                            ));
                         
-                        for (Evaluacion ev : evaluaciones) {
-                            sumaCategoria += ev.getTotalPonderacion();
-                            countCategoria++;
-                        }
-                        
-                        double promedioCategoria = countCategoria > 0 ? sumaCategoria / countCategoria : 0;
+                        double promedioCategoria = sumasPorJurado.isEmpty() ? 0 : 
+                            sumasPorJurado.values().stream().mapToDouble(Double::doubleValue).average().orElse(0);
+                    
                         puntosTotal += promedioCategoria;
+                        desglose.put(cat.getNombre(), redondear(promedioCategoria));
                         
-                        desglose.put(cat.getNombre(), promedioCategoria);
-                        
-                        // Verificar si esta categoría está completa
                         int juradosEsperados = juradoAsignacionService
-                                .countByActividadAndCategoria(idActividad, cat.getIdCategoriaActividad());
+                            .countByActividadAndCategoria(idActividad, cat.getIdCategoriaActividad());
                         
-                        if (countCategoria < juradosEsperados) {
+                        if (sumasPorJurado.size() < juradosEsperados) {
                             completoTotal = false;
                         }
                     }
@@ -450,23 +528,6 @@ public class ConcursoDashboardService {
                 .collect(Collectors.toList());
     }
 
-    /**
- * Snapshot agrupado por CATEGORÍA DE PARTICIPANTE
- * Muestra rankings independientes por cada categoría (Infantil, Juvenil, etc.)
- */
-public Map<String, Object> getSnapshotPorCategoriaParticipante(Long idActividad) {
-    Actividad actividad = actividadService.findById(idActividad);
-    
-    Map<String, Object> result = new HashMap<>();
-    result.put("actividad", mapActividad(actividad));
-    result.put("categorias", obtenerCategorias(idActividad));
-    result.put("jurados", obtenerJurados(idActividad));
-    result.put("filas", obtenerFilasPorCategoriaParticipante(idActividad));
-    result.put("resumenGlobal", calcularResumenGlobal(idActividad));
-    result.put("tipoVista", "categoria-participante");
-    
-    return result;
-}
 
 /**
  * Obtener filas agrupadas por CATEGORÍA DE PARTICIPANTE
@@ -509,33 +570,32 @@ private List<Map<String, Object>> obtenerFilasPorCategoriaParticipante(Long idAc
                 
                 for (Inscripcion insc : inscrips) {
                     CategoriaActividad cat = insc.getCategoriaActividad();
-                    
                     List<Evaluacion> evaluaciones = evaluacionService
                             .findByParticipanteAndCategoria(idParticipante, cat.getIdCategoriaActividad());
                     
-                    double sumaCategoria = 0;
-                    int countCategoria = 0;
+                    // Agrupar y sumar por jurado
+                    Map<Long, Double> sumasPorJurado = evaluaciones.stream()
+                        .filter(e -> e.getJurado() != null)
+                        .collect(Collectors.groupingBy(
+                            e -> e.getJurado().getIdJurado(),
+                            Collectors.summingDouble(Evaluacion::getTotalPonderacion)
+                        ));
                     
-                    for (Evaluacion ev : evaluaciones) {
-                        if (ev.getJurado() != null) {
-                            sumaCategoria += ev.getTotalPonderacion();
-                            countCategoria++;
-                            
-                            // Acumular scores por jurado
-                            Long idJurado = ev.getJurado().getIdJurado();
-                            scoresPorJurado.merge(idJurado, ev.getTotalPonderacion(), Double::sum);
-                        }
-                    }
+                    double promedioCategoria = sumasPorJurado.isEmpty() ? 0 :
+                        sumasPorJurado.values().stream().mapToDouble(Double::doubleValue).average().orElse(0);
                     
-                    double promedioCategoria = countCategoria > 0 ? sumaCategoria / countCategoria : 0;
                     puntosTotal += promedioCategoria;
-                    desglose.put(cat.getNombre(), promedioCategoria);
+                    desglose.put(cat.getNombre(), redondear(promedioCategoria));
                     
-                    // Verificar completitud
+                    // Acumular por jurado
+                    sumasPorJurado.forEach((jId, suma) -> 
+                        scoresPorJurado.merge(jId, suma, Double::sum)
+                    );
+                    
                     int juradosEsperados = juradoAsignacionService
-                            .countByActividadAndCategoria(idActividad, cat.getIdCategoriaActividad());
+                        .countByActividadAndCategoria(idActividad, cat.getIdCategoriaActividad());
                     
-                    if (countCategoria < juradosEsperados) {
+                    if (sumasPorJurado.size() < juradosEsperados) {
                         completoTotal = false;
                     }
                 }
@@ -559,18 +619,27 @@ private List<Map<String, Object>> obtenerFilasPorCategoriaParticipante(Long idAc
         
         int total = inscripciones.size();
         int completadas = 0;
-        
+        int rubTotales = (int) rubricaService.countActivasByCategoria(categoriaId);
         int juradosEsperados = juradoAsignacionService
                 .countByActividadAndCategoria(idActividad, categoriaId);
         
         for (Inscripcion insc : inscripciones) {
-            int evaluaciones = evaluacionService
-                    .countByParticipanteAndCategoria(
-                        insc.getParticipante().getIdParticipante(), 
-                        categoriaId
-                    );
+            List<Evaluacion> evaluaciones = evaluacionService
+                .findByParticipanteAndCategoria(insc.getParticipante().getIdParticipante(), categoriaId);
             
-            if (evaluaciones >= juradosEsperados) {
+            // Contar jurados que completaron todas las rúbricas
+            Map<Long, Long> rubricasPorJurado = evaluaciones.stream()
+                .filter(e -> e.getJurado() != null)
+                .collect(Collectors.groupingBy(
+                    e -> e.getJurado().getIdJurado(),
+                    Collectors.counting()
+                ));
+            
+            long juradosCompletos = rubricasPorJurado.values().stream()
+                .filter(count -> count >= rubTotales)
+                .count();
+            
+            if (juradosCompletos >= juradosEsperados) {
                 completadas++;
             }
         }
@@ -630,14 +699,7 @@ private List<Map<String, Object>> obtenerFilasPorCategoriaParticipante(Long idAc
         return map;
     }
     
-    private Map<String, Object> mapActividad(Actividad a) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", a.getIdActividad());
-        map.put("nombre", a.getNombre());
-        map.put("tipo", a.getTipo());
-        map.put("fecha", a.getFecha());
-        return map;
-    }
+    
     
     /**
      * Genera reporte PDF por categoría
@@ -665,5 +727,10 @@ private List<Map<String, Object>> obtenerFilasPorCategoriaParticipante(Long idAc
      */
     public byte[] generarReporteCompletoParticipante(Long idActividad, Long idParticipante) {
         return reportePdfService.generarReporteCompletoParticipante(idActividad, idParticipante);
+    }
+
+    // ========== UTILIDAD ==========
+    private double redondear(double valor) {
+        return Math.round(valor * 100.0) / 100.0;
     }
 }

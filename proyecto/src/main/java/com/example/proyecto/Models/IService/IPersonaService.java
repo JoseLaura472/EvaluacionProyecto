@@ -19,4 +19,5 @@ public interface IPersonaService {
 	public Persona getPersonaCI(String ci); 
 
 	List<Persona> listarPersona(@Param("estado") String estado);
+	Persona findByNombres(String nombres);
 }

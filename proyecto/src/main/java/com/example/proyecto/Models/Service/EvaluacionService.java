@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -434,16 +433,16 @@ public class EvaluacionService {
         Inscripcion inscripcion = obtenerInscripcion(dto.getCategoriaId(), dto.getParticipanteId());
         
         // ========== 2. CARGAR DATOS EN MEMORIA (optimización) ==========
-        Set<Long> rubricaIds = dto.getRubricas().stream()
+        List<Long> rubricaIds = dto.getRubricas().stream()
             .map(EvaluacionCompletaDto.EvaluacionRubricaDto::getRubricaId)
-            .collect(Collectors.toSet());
+            .collect(Collectors.toList());
         
         Map<Long, Rubrica> mapRubricas = cargarRubricas(rubricaIds, dto.getCategoriaId());
         Map<Long, List<RubricaCriterio>> mapCriteriosPorRubrica = cargarCriteriosPorRubricas(rubricaIds);
         
         // ========== 3. PROCESAR CADA RÚBRICA ==========
         List<Evaluacion> evaluacionesGuardadas = new ArrayList<>();
-        double sumaPromedios = 0.0;
+        double totalAcumulado = 0.0;
         
         for (EvaluacionCompletaDto.EvaluacionRubricaDto rubricaDto : dto.getRubricas()) {
             Rubrica rubrica = mapRubricas.get(rubricaDto.getRubricaId());
@@ -451,12 +450,14 @@ public class EvaluacionService {
                 throw new IllegalArgumentException("Rúbrica no encontrada: " + rubricaDto.getRubricaId());
             }
             
-            List<RubricaCriterio> criterios = mapCriteriosPorRubrica.get(rubricaDto.getRubricaId());
-            if (criterios == null || criterios.isEmpty()) {
+            List<RubricaCriterio> criteriosDisponibles = mapCriteriosPorRubrica.get(rubricaDto.getRubricaId());
+            if (criteriosDisponibles == null || criteriosDisponibles.isEmpty()) {
                 throw new IllegalStateException("La rúbrica '" + rubrica.getNombre() + "' no tiene criterios");
             }
             
-            // Verificar si ya existe evaluación para esta rúbrica
+            log.debug("Procesando rúbrica: '{}' (ID: {})", rubrica.getNombre(), rubrica.getIdRubrica());
+            
+            // Verificar si ya existe evaluación
             Optional<Evaluacion> existente = evaluacionRepo
                 .findByJurado_IdJuradoAndInscripcion_IdInscripcionAndRubrica_IdRubrica(
                     jurado.getIdJurado(), 
@@ -466,42 +467,42 @@ public class EvaluacionService {
             
             Evaluacion evaluacion;
             if (existente.isPresent()) {
-                log.warn("Actualizando evaluación existente - Rúbrica: {}", rubrica.getIdRubrica());
+                log.warn("⚠ Actualizando evaluación existente - Rúbrica: {}", rubrica.getIdRubrica());
                 evaluacion = existente.get();
-                evaluacion.clearDetalles(); // Limpiar detalles anteriores
+                evaluacion.clearDetalles();
             } else {
                 evaluacion = crearNuevaEvaluacion(jurado, inscripcion, rubrica);
             }
             
-            // Procesar detalles de esta rúbrica
-            double totalPonderacion = procesarDetalles(
+            // ✅ PROCESAR: Obtiene el puntaje directo del criterio seleccionado
+            double puntajeRubrica = procesarDetalles(
                 evaluacion, 
                 rubricaDto.getDetalles(), 
-                criterios
+                criteriosDisponibles
             );
             
-            evaluacion.setTotalPonderacion(redondear(totalPonderacion));
+            evaluacion.setTotalPonderacion(redondear(puntajeRubrica));
             evaluacionesGuardadas.add(evaluacion);
-            sumaPromedios += totalPonderacion;
+            
+            // ✅ SUMAR al total acumulado
+            totalAcumulado += puntajeRubrica;
         }
         
         // ========== 4. GUARDAR TODAS LAS EVALUACIONES ==========
         evaluacionRepo.saveAll(evaluacionesGuardadas);
         evaluacionRepo.flush(); // Forzar escritura inmediata
-        
-        log.info("Evaluación completa guardada - Total rúbricas: {}", evaluacionesGuardadas.size());
-        
+   
         // ========== 5. ENVIAR EVENTO SSE (después del commit) ==========
         Long actividadId = inscripcion.getActividad().getIdActividad();
         programarEventoSSE(actividadId);
-        
+
         // ========== 6. RETORNAR RESULTADO ==========
         return EvaluacionResultDto.builder()
             .success(true)
             .message("Evaluación guardada correctamente")
             .participanteId(dto.getParticipanteId())
             .rubricasGuardadas(evaluacionesGuardadas.size())
-            .promedioTotal(redondear(sumaPromedios / evaluacionesGuardadas.size()))
+            .promedioTotal(redondear(totalAcumulado))
             .build();
     }
     
@@ -530,8 +531,8 @@ public class EvaluacionService {
     /**
      * ✅ Carga TODAS las rúbricas en una sola query
      */
-    private Map<Long, Rubrica> cargarRubricas(Set<Long> rubricaIds, Long categoriaId) {
-        List<Rubrica> rubricas = rubricaRepo.findAllById(rubricaIds);
+    private Map<Long, Rubrica> cargarRubricas(List<Long> rubricaIds, Long categoriaId) {
+        List<Rubrica> rubricas = rubricaService.findAllByIdRubricaIn(rubricaIds);
         
         Map<Long, Rubrica> mapa = new HashMap<>();
         for (Rubrica r : rubricas) {
@@ -556,7 +557,7 @@ public class EvaluacionService {
     /**
      * ✅ Carga TODOS los criterios de múltiples rúbricas en una sola query
      */
-    private Map<Long, List<RubricaCriterio>> cargarCriteriosPorRubricas(Set<Long> rubricaIds) {
+    private Map<Long, List<RubricaCriterio>> cargarCriteriosPorRubricas(List<Long> rubricaIds) {
         List<RubricaCriterio> todosCriterios = criterioRepo.findByRubricaIdIn(rubricaIds);
         
         return todosCriterios.stream()
@@ -582,105 +583,96 @@ public class EvaluacionService {
      * ✅ Procesa detalles de una rúbrica y retorna el total ponderado
      */
     private double procesarDetalles(
-            Evaluacion evaluacion,
-            List<EvaluacionCompletaDto.DetalleDto> detallesDto,
-            List<RubricaCriterio> criterios) {
+        Evaluacion evaluacion,
+        List<EvaluacionCompletaDto.DetalleDto> detallesSeleccionados,
+        List<RubricaCriterio> criteriosDisponibles) {
+    
+        String nombreRubrica = evaluacion.getRubrica().getNombre();
         
-        // Determinar si es rúbrica de escala (puntos máximos) o porcentual
-        boolean esEscala = criterios.stream()
-            .anyMatch(c -> c.getMaxPuntos() != null);
+        log.debug("Procesando rúbrica '{}' - Criterios seleccionados: {}", 
+                nombreRubrica, detallesSeleccionados.size());
         
-        // Validar suma de porcentajes si no es escala
-        if (!esEscala) {
-            int sumaPorc = criterios.stream()
-                .mapToInt(RubricaCriterio::getPorcentaje)
-                .sum();
-            
-            if (sumaPorc != 100) {
-                throw new IllegalStateException(
-                    "La rúbrica '" + evaluacion.getRubrica().getNombre() + 
-                    "' no suma 100% (suma actual: " + sumaPorc + "%)");
-            }
+        // ========== VALIDACIÓN: Solo se permite UN criterio por rúbrica ==========
+        if (detallesSeleccionados.size() != 1) {
+            throw new IllegalArgumentException(
+                "Debe seleccionar exactamente UN criterio por rúbrica. " +
+                "Rúbrica '" + nombreRubrica + "' tiene " + detallesSeleccionados.size() + " seleccionados."
+            );
         }
         
-        // Crear mapa de criterios
-        Map<Long, RubricaCriterio> mapCriterios = criterios.stream()
+        // ========== CREAR MAPA DE CRITERIOS DISPONIBLES ==========
+        Map<Long, RubricaCriterio> mapCriterios = criteriosDisponibles.stream()
             .collect(Collectors.toMap(
                 RubricaCriterio::getIdRubricaCriterio,
                 c -> c
             ));
         
-        // Validar que se proporcionaron todos los criterios necesarios
-        if (esEscala && detallesDto.size() != 1) {
+        // ========== PROCESAR EL CRITERIO SELECCIONADO ==========
+        EvaluacionCompletaDto.DetalleDto detalleDto = detallesSeleccionados.get(0);
+        RubricaCriterio criterioSeleccionado = mapCriterios.get(detalleDto.getCriterioId());
+        
+        if (criterioSeleccionado == null) {
             throw new IllegalArgumentException(
-                "La rúbrica de escala debe tener exactamente un criterio seleccionado");
-        }
-        
-        double totalPonderacion = 0.0;
-        
-        for (EvaluacionCompletaDto.DetalleDto detalleDto : detallesDto) {
-            RubricaCriterio criterio = mapCriterios.get(detalleDto.getCriterioId());
-            
-            if (criterio == null) {
-                throw new IllegalArgumentException(
-                    "Criterio inválido: " + detalleDto.getCriterioId());
-            }
-            
-            // Normalizar puntaje a escala 0-100
-            double puntaje100 = normalizarPuntaje(
-                detalleDto.getPuntaje(), 
-                criterio
+                "Criterio inválido o no pertenece a la rúbrica: " + detalleDto.getCriterioId()
             );
-            
-            // Calcular ponderación
-            int porcentaje = esEscala ? 100 : criterio.getPorcentaje();
-            double ponderado = (puntaje100 * porcentaje) / 100.0;
-            
-            // Crear detalle
-            EvaluacionDetalle detalle = EvaluacionDetalle.builder()
-                .rubricaCriterio(criterio)
-                .puntaje(puntaje100)
-                .porcentaje(porcentaje)
-                .ponderado(redondear(ponderado))
-                .build();
-            
-            evaluacion.addDetalle(detalle);
-            totalPonderacion += ponderado;
         }
         
-        return totalPonderacion;
+        // ========== OBTENER PUNTAJE DEL CRITERIO ==========
+        // El puntaje viene directamente del criterio (maxPuntos o el valor que envía el frontend)
+        double puntajeDirecto = obtenerPuntajeCriterio(detalleDto, criterioSeleccionado);
+        
+        log.debug("  → Criterio seleccionado: '{}' - Puntaje: {} pts", 
+                criterioSeleccionado.getNombre(), puntajeDirecto);
+        
+        // ========== CREAR DETALLE DE EVALUACIÓN ==========
+        EvaluacionDetalle detalle = new EvaluacionDetalle();
+        detalle.setEvaluacion(evaluacion);
+        detalle.setRubricaCriterio(criterioSeleccionado);
+        detalle.setPuntaje(puntajeDirecto);         // Puntaje directo
+        detalle.setPorcentaje(100);                  // Siempre 100% (es el único seleccionado)
+        detalle.setPonderado(puntajeDirecto);        // Ponderado = puntaje directo
+        detalle.setEstado("A");
+        
+        evaluacion.getDetalles().add(detalle);
+        
+        // ========== RETORNAR EL PUNTAJE (que se sumará al total) ==========
+        return puntajeDirecto;
     }
     
     /**
-     * ✅ Normaliza puntaje a escala 0-100
+     * Obtiene el puntaje del criterio seleccionado
      */
-    private double normalizarPuntaje(Integer puntajeRecibido, RubricaCriterio criterio) {
+    private double obtenerPuntajeCriterio(
+            EvaluacionCompletaDto.DetalleDto detalleDto, 
+            RubricaCriterio criterio) {
+        
+        // El frontend envía el puntaje que el jurado ve en pantalla
+        Integer puntajeRecibido = detalleDto.getPuntaje();
+        
         if (puntajeRecibido == null || puntajeRecibido < 0) {
-            throw new IllegalArgumentException("Puntaje inválido");
+            throw new IllegalArgumentException(
+                "Puntaje inválido para criterio '" + criterio.getNombre() + "'"
+            );
         }
         
-        if (criterio.getMaxPuntos() != null) {
-            // CASO 1: Escala de puntos (ej: 0-10)
-            int max = criterio.getMaxPuntos();
+        // Validar que el puntaje coincida con maxPuntos (si está definido)
+        if (criterio.getMaxPuntos() != null && criterio.getMaxPuntos() > 0) {
+            // El criterio tiene un puntaje fijo
+            int maxPuntos = criterio.getMaxPuntos();
             
-            if (puntajeRecibido > max) {
-                throw new IllegalArgumentException(
-                    String.format("Puntaje fuera de rango para '%s' (0-%d): %d",
-                                  criterio.getNombre(), max, puntajeRecibido));
+            // El puntaje enviado debe ser exactamente el maxPuntos del criterio
+            // (porque el jurado seleccionó ESTE criterio completo)
+            if (puntajeRecibido != maxPuntos) {
+                log.warn("Puntaje recibido ({}) difiere de maxPuntos ({}). Usando maxPuntos.", 
+                        puntajeRecibido, maxPuntos);
+                return maxPuntos;
             }
             
-            return max == 0 ? 0.0 : (puntajeRecibido * 100.0 / max);
-            
-        } else {
-            // CASO 2: Porcentaje directo (0-100)
-            if (puntajeRecibido > 100) {
-                throw new IllegalArgumentException(
-                    String.format("Puntaje fuera de rango (0-100) para '%s': %d",
-                                  criterio.getNombre(), puntajeRecibido));
-            }
-            
-            return puntajeRecibido.doubleValue();
+            return maxPuntos;
         }
+        
+        // Si no tiene maxPuntos, usar el puntaje recibido
+        return puntajeRecibido.doubleValue();
     }
     
     /**

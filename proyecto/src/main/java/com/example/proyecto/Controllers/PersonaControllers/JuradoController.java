@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.boot.autoconfigure.neo4j.Neo4jProperties.Authentication;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,8 @@ import com.example.proyecto.Models.Dto.CronometroDTO;
 import com.example.proyecto.Models.Dto.EvaluacionGuardarCategoriaDto;
 import com.example.proyecto.Models.Dto.ParticipanteListadoDto;
 import com.example.proyecto.Models.Dto.RubricaDto;
+import com.example.proyecto.Models.Dto.Fexcoin.EvaluacionCompletaDto;
+import com.example.proyecto.Models.Dto.Fexcoin.EvaluacionResultDto;
 import com.example.proyecto.Models.Entity.Actividad;
 import com.example.proyecto.Models.Entity.CategoriaActividad;
 import com.example.proyecto.Models.Entity.Jurado;
@@ -42,13 +45,16 @@ import com.example.proyecto.Models.Service.CronometroSseService;
 import com.example.proyecto.Models.Service.EvaluacionService;
 import com.example.proyecto.Models.Service.JuradoLookupService;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Controller
 @RequestMapping("/jurado")
 @RequiredArgsConstructor
+@Slf4j
 public class JuradoController {
 
     private final IPersonaService personaService;
@@ -249,6 +255,59 @@ public class JuradoController {
         Jurado jurado = juradoLookupService.cargarPorPersonaOrThrow(persona.getIdPersona());
         evaluacionCategoriaAdapterService.guardarEvaluacionCategoria(jurado, dto);
         return ResponseEntity.ok().build();
+    }
+
+    /**
+     * ✅ ENDPOINT OPTIMIZADO: Recibe TODAS las evaluaciones en UNA sola petición
+     */
+    @ResponseBody // ← IMPORTANTE
+    @PostMapping("/evaluar-completo")
+    public ResponseEntity<?> evaluarParticipanteCompleto(
+            @Validated @RequestBody EvaluacionCompletaDto dto,
+            HttpSession session) { // ← Cambiado: usa HttpSession en lugar de Authentication
+        
+        try {
+            // Obtener jurado de la sesión
+            Persona persona = (Persona) session.getAttribute("persona");
+            if (persona == null) {
+                return ResponseEntity.status(401)
+                    .body(Map.of("success", false, "message", "Sesión inválida"));
+            }
+            
+            Jurado jurado = juradoLookupService.cargarPorPersonaOrThrow(persona.getIdPersona());
+            
+            // Guardar evaluación
+            EvaluacionResultDto resultado = evaluacionService.guardarEvaluacionCompleta(jurado, dto);
+            
+            return ResponseEntity.ok(resultado);
+            
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            log.error("Error de validación: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                .body(Map.of("success", false, "message", e.getMessage()));
+                
+        } catch (EntityNotFoundException e) {
+            log.error("Entidad no encontrada: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("success", false, "message", e.getMessage()));
+                
+        } catch (Exception e) {
+            log.error("Error inesperado", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of(
+                    "success", false,
+                    "message", "Error: " + e.getMessage()
+                ));
+        }
+    }
+
+    
+    private Jurado obtenerJuradoAutenticado(Authentication authentication) {
+        String username = authentication.getUsername();
+        Usuario usuario = usuarioService.buscarPorNombreUser(username);
+        Persona persona = personaService.findByNombres(usuario.getPersona().getNombres());
+        Jurado jurado = juradoService.findByPersonaId(persona.getIdPersona());
+        return juradoService.findOne(jurado.getIdJurado());
     }
 
     /* ENTRADA UNIVERSITARIA */

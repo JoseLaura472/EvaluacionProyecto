@@ -265,28 +265,71 @@
 
             async function finalizarTodo() {
                 const faltan = rubricas.filter(r => !valores[r.id]?.critId);
-                if (faltan.length) { Swal.fire('Aviso', 'Responde todas las rúbricas antes de finalizar.', 'info'); return; }
+                if (faltan.length) {
+                    Swal.fire('Aviso', 'Responde todas las rúbricas antes de finalizar.', 'info');
+                    return;
+                }
+                
                 $('#btn-finalizar').prop('disabled', true);
+                
                 try {
-                    for (const r of rubricas) {
-                        const sel = valores[r.id];
-                        const body = {
-                            categoriaId: Number(categoria.id),
-                            participanteId: getParticipanteId(participanteSel),
+                    // ✅ Construir payload con TODAS las rúbricas
+                    const payload = {
+                        categoriaId: Number(categoria.id),
+                        participanteId: getParticipanteId(participanteSel),
+                        rubricas: rubricas.map(r => ({
                             rubricaId: Number(r.id),
-                            detalles: [{ criterioId: Number(sel.critId), puntaje: Number(sel.puntaje) }]
-                        };
-                        await $.ajax({ url: '/jurado/api/evaluar', method: 'POST', contentType: 'application/json', data: JSON.stringify(body) });
-                    }
+                            detalles: [{
+                                criterioId: Number(valores[r.id].critId),
+                                puntaje: Number(valores[r.id].puntaje),
+                                observacion: null
+                            }]
+                        }))
+                    };
+                    
+                    console.log('Enviando evaluación completa:', payload);
+                    
+                    // ✅ UNA SOLA petición HTTP
+                    const response = await $.ajax({
+                        url: '/jurado/evaluar-completo',
+                        method: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(payload)
+                    });
+                    
+                    console.log('✅ Respuesta:', response);
+                    
+                    // Eliminar participante de la lista
                     const pid = getParticipanteId(participanteSel);
                     participantes = participantes.filter(p => getParticipanteId(p) !== pid);
                     renderGrid($('#inp-buscar').val() || '');
-
-                    Swal.fire('OK', 'Evaluación finalizada', 'success');
+                    
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Éxito!',
+                        text: `Evaluación finalizada correctamente. ${response.rubricasGuardadas} rúbricas guardadas.`,
+                        timer: 3000
+                    });
+                    
                     $('#modalEval').modal('hide');
                     participanteSel = null;
+                    
                 } catch (e) {
-                    Swal.fire('Error', (e && e.responseText) || 'No se pudo finalizar', 'error');
+                    console.error('❌ Error:', e);
+                    
+                    let errorMsg = 'No se pudo finalizar la evaluación';
+                    if (e.responseJSON?.message) {
+                        errorMsg = e.responseJSON.message;
+                    } else if (e.responseText) {
+                        errorMsg = e.responseText;
+                    }
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMsg
+                    });
+                    
                     $('#btn-finalizar').prop('disabled', false);
                 }
             }

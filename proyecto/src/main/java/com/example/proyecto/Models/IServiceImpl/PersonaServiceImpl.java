@@ -48,4 +48,9 @@ public class PersonaServiceImpl implements IPersonaService{
     public List<Persona> listarPersona(String estado) {
         return personaDao.listarPersona(estado);
     }
+
+    @Override
+    public Persona findByNombres(String nombres) {
+        return personaDao.findByNombres(nombres);
+    }
 }

@@ -35,6 +35,10 @@ public interface IRubricaService extends IServiceGenerico<Rubrica, Long> {
     long countActivasByCategoria(Long categoriaId);
 
     /* PARA ENTRADA UNIVERSITARIA */
-    Rubrica findByCategoria(Long idCategoriaActividad);
+    List<Rubrica> findByCategoria(Long idCategoriaActividad);
+
     Rubrica findByActividadAndCategoria(Long idActividad, Long idCategoriaActividad);
+
+    /* fexcoin */
+    List<Rubrica> findAllByIdRubricaIn(List<Long> rubricaIds);
 }

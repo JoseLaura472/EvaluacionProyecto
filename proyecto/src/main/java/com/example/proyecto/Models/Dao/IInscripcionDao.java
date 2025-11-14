@@ -54,18 +54,14 @@ public interface IInscripcionDao extends JpaRepository<Inscripcion, Long> {
     Optional<Inscripcion> fetchFull(@Param("actId") Long actId,
             @Param("inscId") Long inscId);
 
-    @Query("""
-                select i
-                from Inscripcion i
-                join i.actividad a
-                join i.categoriaActividad c
-                join i.participante p
-                where coalesce(i.estado,'A') = 'A'
-                and c.idCategoriaActividad = :categoriaId
-                and p.idParticipante = :participanteId
-            """)
-    Optional<Inscripcion> findByCategoriaAndParticipante(@Param("categoriaId") Long categoriaId,
-            @Param("participanteId") Long participanteId);
+    @Query("SELECT i FROM Inscripcion i " +
+           "WHERE i.categoriaActividad.idCategoriaActividad = :categoriaId " +
+           "AND i.participante.idParticipante = :participanteId " +
+           "AND i.estado = 'A'")
+    Optional<Inscripcion> findByCategoriaAndParticipante(
+        @Param("categoriaId") Long categoriaId,
+        @Param("participanteId") Long participanteId
+    );
 
     /* para entrada univeristaria */
     // Buscar por participante (id) y fase (campo en CategoriaActividad)
@@ -94,4 +90,9 @@ public interface IInscripcionDao extends JpaRepository<Inscripcion, Long> {
         Participante participante, 
         CategoriaActividad categoria
     );
+
+    /**
+     * ✅ NUEVO: Obtiene inscripciones de una categoría
+     */
+    List<Inscripcion> findByCategoriaActividad_IdCategoriaActividad(Long categoriaId);
 }

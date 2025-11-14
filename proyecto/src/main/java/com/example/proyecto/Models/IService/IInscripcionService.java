@@ -37,4 +37,8 @@ public interface IInscripcionService extends IServiceGenerico<Inscripcion, Long>
         Long idParticipante, 
         Long idCategoriaActividad
     );
+
+    /* FEXCOIN */
+    Optional<Inscripcion> findByCategoriaAndParticipante(@Param("categoriaId") Long categoriaId,
+            @Param("participanteId") Long participanteId);
 }

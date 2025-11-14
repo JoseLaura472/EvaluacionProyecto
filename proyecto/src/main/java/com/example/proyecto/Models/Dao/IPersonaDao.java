@@ -15,4 +15,6 @@ public interface IPersonaDao extends CrudRepository<Persona, Long>{
 
     @Query("SELECT p FROM Persona p WHERE p.estado = :estado")
     List<Persona> listarPersona(@Param("estado") String estado);
+
+    Persona findByNombres(String nombres);
 }

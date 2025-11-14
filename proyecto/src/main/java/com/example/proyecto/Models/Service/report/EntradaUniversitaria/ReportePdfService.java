@@ -1,6 +1,7 @@
 package com.example.proyecto.Models.Service.report.EntradaUniversitaria;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -42,10 +43,13 @@ import com.itextpdf.layout.element.Image;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.element.Text;
+import com.itextpdf.layout.properties.AreaBreakType;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import com.itextpdf.layout.properties.VerticalAlignment;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,101 +71,528 @@ public class ReportePdfService {
     @Value("${app.logo.derecho:}")
     private String logoDerechoPath;
 
+    // HELPER
+
     /**
-     * Genera reporte individual por participante y categoría
-     * Un PDF por cada jurado que evaluó
+     * Genera una página de evaluación individual con MÚLTIPLES rúbricas
      */
-    public byte[] generarReportePorParticipanteCategoria(
-            Long idParticipante, 
-            Long idCategoria) {
+    private void generarPaginaEvaluacionMultipleRubricas(
+            Document document,
+            Actividad actividad,
+            CategoriaActividad categoria,
+            Participante participante,
+            List<Rubrica> rubricas,
+            Evaluacion evaluacion) {
 
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PdfWriter writer = new PdfWriter(baos);
-            PdfDocument pdfDoc = new PdfDocument(writer);
-            
-            // Configurar página horizontal
-            pdfDoc.setDefaultPageSize(PageSize.LETTER.rotate());
-            
-            Document document = new Document(pdfDoc);
-            document.setMargins(30, 40, 30, 40);
+        // Encabezado
+        agregarEncabezado(document, actividad);
 
-            // Obtener datos
-            Participante participante = participanteService.findById(idParticipante);
-            CategoriaActividad categoria = categoriaService.findById(idCategoria);
-            Rubrica rubrica = rubricaService.findByCategoria(idCategoria);
-            
-            if (participante == null || categoria == null || rubrica == null) {
-                throw new RuntimeException("Datos incompletos para generar reporte");
+        // Título
+        Paragraph titulo = new Paragraph()
+                .add(new Text("FORMULARIO DE EVALUACIÓN DE: ").setBold().setFontSize(11))
+                .add(new Text(participante.getNombre().toUpperCase()).setFontSize(11))
+                .setMarginBottom(15);
+        document.add(titulo);
+
+        // Tabla de criterios generales (estática según categoría)
+        Table tablaCriterios = crearTablaCriteriosEstatica(categoria.getNombre());
+        document.add(tablaCriterios);
+
+        // Categoría
+        Paragraph categoriaP = new Paragraph()
+                .add(new Text("CATEGORÍA: ").setBold().setFontSize(10))
+                .add(new Text(categoria.getNombre().toUpperCase()).setFontSize(10))
+                .setMarginTop(12)
+                .setMarginBottom(8);
+        document.add(categoriaP);
+
+        // ═══════════════════════════════════════════════════════════
+        // Tabla de evaluación para MÚLTIPLES RÚBRICAS
+        // ═══════════════════════════════════════════════════════════
+        Table tablaEvaluacion = crearTablaEvaluacionMultipleRubricas(participante, rubricas, evaluacion);
+        document.add(tablaEvaluacion);
+
+        // Nota
+        document.add(new Paragraph("Nota: Formulario de evaluación con múltiples rúbricas")
+                .setFontSize(10)
+                .setItalic()
+                .setMarginTop(10));
+
+        // Firmas
+        agregarSeccionFirmas(document, evaluacion.getJurado());
+    }
+
+    /**
+     * Crea la tabla de evaluación dinámica con MÚLTIPLES rúbricas
+     */
+    private Table crearTablaEvaluacionMultipleRubricas(
+            Participante participante,
+            List<Rubrica> rubricas,
+            Evaluacion evaluacion) {
+
+        // Recopilar todos los criterios de todas las rúbricas
+        List<RubricaCriterio> todosCriterios = new ArrayList<>();
+        Map<Long, String> criterioARubricaNombre = new HashMap<>();
+
+        for (Rubrica rubrica : rubricas) {
+            List<RubricaCriterio> criteriosDeRubrica = rubrica.getCriterios().stream()
+                    .filter(c -> "A".equals(c.getEstado()))
+                    .collect(Collectors.toList());
+
+            todosCriterios.addAll(criteriosDeRubrica);
+
+            for (RubricaCriterio criterio : criteriosDeRubrica) {
+                criterioARubricaNombre.put(criterio.getIdRubricaCriterio(), rubrica.getNombre());
+            }
+        }
+
+        // Crear tabla con columnas dinámicas
+        float[] columnWidths = new float[todosCriterios.size() + 2]; // Nombre + criterios + Total
+        columnWidths[0] = 3; // Nombre de la danza
+        for (int i = 1; i <= todosCriterios.size(); i++) {
+            columnWidths[i] = 1.5f; // Criterios
+        }
+        columnWidths[columnWidths.length - 1] = 1.5f; // Total
+
+        Table table = new Table(UnitValue.createPercentArray(columnWidths))
+                .useAllAvailableWidth();
+
+        DeviceRgb colorEncabezado = new DeviceRgb(41, 128, 185);
+
+        // Encabezado
+        table.addCell(crearCeldaEncabezado("Nombre de la danza", colorEncabezado));
+
+        for (RubricaCriterio criterio : todosCriterios) {
+            String titulo;
+            if (rubricas.size() > 1) {
+                // Indicar la rúbrica si hay múltiples
+                String nombreRubrica = criterioARubricaNombre.get(criterio.getIdRubricaCriterio());
+                titulo = nombreRubrica + "\n" + criterio.getNombre() + "\n(" + criterio.getPorcentaje() + " pts)";
+            } else {
+                titulo = criterio.getNombre() + "\n(" + criterio.getPorcentaje() + " pts)";
             }
 
-            Actividad actividad = categoria.getActividad();
-            
-            // Obtener evaluaciones de este participante en esta categoría
-            List<Evaluacion> evaluaciones = evaluacionService
-                    .findByParticipanteAndCategoria(idParticipante, idCategoria);
+            table.addCell(crearCeldaEncabezado(titulo, colorEncabezado)
+                    .setFontSize(7));
+        }
 
-            if (evaluaciones.isEmpty()) {
-                // Página indicando que no hay evaluaciones
-                agregarEncabezado(document, actividad);
-                document.add(new Paragraph("No hay evaluaciones registradas para este participante en esta categoría.")
-                        .setTextAlignment(TextAlignment.CENTER)
-                        .setMarginTop(100)
-                        .setFontSize(14));
-            } else {
-                // Generar una página por cada jurado
-                for (int i = 0; i < evaluaciones.size(); i++) {
-                    Evaluacion evaluacion = evaluaciones.get(i);
-                    
-                    if (i > 0) {
-                        document.add(new AreaBreak());
+        table.addCell(crearCeldaEncabezado("TOTAL", colorEncabezado));
+
+        // Datos del participante
+        table.addCell(crearCeldaNormal(participante.getNombre()));
+
+        double total = 0;
+
+        for (RubricaCriterio criterio : todosCriterios) {
+            double puntaje = 0;
+
+            // Buscar el puntaje en los detalles de la evaluación
+            if (evaluacion.getDetalles() != null) {
+                for (EvaluacionDetalle detalle : evaluacion.getDetalles()) {
+                    if (detalle.getRubricaCriterio() != null &&
+                            detalle.getRubricaCriterio().getIdRubricaCriterio()
+                                    .equals(criterio.getIdRubricaCriterio())) {
+                        puntaje = detalle.getPuntaje();
+                        break;
                     }
-                    
-                    generarPaginaEvaluacion(
-                            document, 
-                            actividad, 
-                            categoria, 
-                            participante, 
-                            rubrica, 
-                            evaluacion
-                    );
                 }
             }
 
-            document.close();
-            return baos.toByteArray();
-
-        } catch (Exception e) {
-            log.error("Error generando reporte por participante-categoría", e);
-            throw new RuntimeException("Error generando reporte: " + e.getMessage());
+            total += puntaje;
+            table.addCell(crearCeldaNormal(String.format("%.2f", puntaje), TextAlignment.CENTER));
         }
+
+        table.addCell(crearCeldaNormal(String.format("%.2f", total), TextAlignment.CENTER, true)
+                .setBackgroundColor(new DeviceRgb(241, 196, 15)));
+
+        return table;
+    }
+
+    /**
+     * MÉTODO PRINCIPAL - Genera reporte por participante y categoría
+     * Crea UNA PÁGINA por cada jurado que evaluó al participante
+     * CORREGIDO: Usa la estructura correcta de Evaluacion + EvaluacionDetalle
+     */
+    public byte[] generarReportePorParticipanteCategoria(
+        Long idParticipante, 
+        Long idCategoria) {
+
+    try {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(baos);
+        PdfDocument pdfDoc = new PdfDocument(writer);
+        pdfDoc.setDefaultPageSize(PageSize.A4);
+        
+        Document document = new Document(pdfDoc);
+        document.setMargins(25, 25, 25, 25);
+
+        // Obtener datos
+        Participante participante = participanteService.findById(idParticipante);
+        CategoriaActividad categoria = categoriaService.findById(idCategoria);
+        
+        if (participante == null || categoria == null) {
+            throw new RuntimeException("Participante o categoría no encontrados");
+        }
+
+        Actividad actividad = categoria.getActividad();
+        
+        // Obtener TODAS las evaluaciones de este participante en esta categoría
+        List<Evaluacion> evaluaciones = evaluacionService
+                .findByParticipanteAndCategoria(idParticipante, idCategoria);
+
+        if (evaluaciones.isEmpty()) {
+            agregarEncabezado(document, actividad);
+            document.add(new Paragraph("No hay evaluaciones registradas para este participante en esta categoría.")
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginTop(50)
+                    .setFontSize(11)
+                    .setItalic());
+        } else {
+            // Agrupar evaluaciones por jurado
+            Map<Long, List<Evaluacion>> evaluacionesPorJurado = evaluaciones.stream()
+                    .collect(Collectors.groupingBy(e -> e.getJurado().getIdJurado()));
+
+            // Generar una página por cada jurado
+            int contador = 0;
+            for (Map.Entry<Long, List<Evaluacion>> entry : evaluacionesPorJurado.entrySet()) {
+                if (contador > 0) {
+                    document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+                }
+                
+                Jurado jurado = entry.getValue().get(0).getJurado();
+                List<Evaluacion> evaluacionesJurado = entry.getValue();
+                
+                generarPaginaJurado(document, actividad, categoria, participante, jurado, evaluacionesJurado);
+                
+                contador++;
+            }
+        }
+
+        document.close();
+        return baos.toByteArray();
+
+    } catch (Exception e) {
+        log.error("Error generando reporte por participante-categoría", e);
+        throw new RuntimeException("Error generando reporte: " + e.getMessage());
+    }
+}
+
+    /**
+     * Genera una página completa de evaluación para UN jurado específico
+     * El jurado puede haber evaluado múltiples rúbricas
+     */
+    private void generarPaginaJurado(
+        Document document,
+        Actividad actividad,
+        CategoriaActividad categoria,
+        Participante participante,
+        Jurado jurado,
+        List<Evaluacion> evaluacionesJurado) {
+
+    // ENCABEZADO
+    agregarEncabezado(document, actividad);
+
+    // INFORMACIÓN PRINCIPAL (Compacta)
+    Table tablaInfo = new Table(UnitValue.createPercentArray(new float[]{0.8f, 2, 0.8f, 2}))
+            .useAllAvailableWidth()
+            .setMarginBottom(6);
+
+    tablaInfo.addCell(crearCeldaLabel("Participante:"));
+    tablaInfo.addCell(crearCeldaValor(participante.getNombre().toUpperCase()));
+    tablaInfo.addCell(crearCeldaLabel("Categoría:"));
+    tablaInfo.addCell(crearCeldaValor(categoria.getNombre().toUpperCase()));
+
+    document.add(tablaInfo);
+
+    // INFORMACIÓN DEL JURADO (línea compacta)
+    Table tablaJuradoCompacta = new Table(UnitValue.createPercentArray(new float[]{1, 3}))
+            .useAllAvailableWidth()
+            .setMarginBottom(8);
+
+    tablaJuradoCompacta.addCell(crearCeldaLabel("Jurado:"));
+    tablaJuradoCompacta.addCell(crearCeldaValor(jurado.getPersona().getNombreCompleto()));
+
+    document.add(tablaJuradoCompacta);
+
+    // Colores más suaves y transparentes para cada rúbrica
+    DeviceRgb[] coloresRubricas = new DeviceRgb[]{
+            new DeviceRgb(173, 216, 230),   // Azul claro
+            new DeviceRgb(144, 238, 144),  // Verde claro
+            new DeviceRgb(221, 160, 221),  // Púrpura claro
+            new DeviceRgb(255, 218, 185)   // Naranja claro
+    };
+
+    // Iterar por cada evaluación del jurado (cada rúbrica)
+    double totalGeneral = 0;
+    int numeroRubrica = 0;
+
+    for (Evaluacion evaluacion : evaluacionesJurado) {
+        Rubrica rubrica = evaluacion.getRubrica();
+        DeviceRgb colorRubrica = coloresRubricas[numeroRubrica % coloresRubricas.length];
+        
+        if (numeroRubrica > 0) {
+            document.add(new Paragraph()
+                    .setMarginTop(2)
+                    .setMarginBottom(2));
+        }
+
+        // TÍTULO DE LA RÚBRICA (Solo con color de fondo suave en el título)
+        document.add(new Paragraph(rubrica.getNombre().toUpperCase())
+                .setFontSize(8)
+                .setBold()
+                .setBackgroundColor(colorRubrica)
+                .setFontColor(ColorConstants.BLACK)
+                .setPadding(2)
+                .setMarginBottom(3)
+                .setMarginTop(0)
+                .setMarginLeft(0)
+                .setMarginRight(0));
+
+        // TABLA DE CRITERIOS EVALUADOS POR ESTA RÚBRICA (Sin colores, solo bordes simples)
+        List<EvaluacionDetalle> detalles = evaluacion.getDetalles();
+
+        if (detalles != null && !detalles.isEmpty()) {
+            Table tablaCriterios = new Table(UnitValue.createPercentArray(new float[]{2.5f, 0.7f, 0.8f}))
+                    .useAllAvailableWidth()
+                    .setMarginLeft(5)
+                    .setMarginRight(5);
+
+            // ENCABEZADOS (Sin color en tabla, solo texto)
+            tablaCriterios.addCell(crearCeldaEncabezadoSimple("Criterio"));
+            tablaCriterios.addCell(crearCeldaEncabezadoSimple("Puntaje"));
+            tablaCriterios.addCell(crearCeldaEncabezadoSimple("Pond."));
+
+            // FILAS DE CRITERIOS
+            double subTotal = 0;
+            
+            for (EvaluacionDetalle detalle : detalles) {
+                RubricaCriterio criterio = detalle.getRubricaCriterio();
+
+                // Nombre del criterio
+                tablaCriterios.addCell(crearCeldaNormalSimple(criterio.getNombre()));
+
+                // Puntaje
+                tablaCriterios.addCell(crearCeldaNormalSimple(
+                        String.format("%.2f", detalle.getPuntaje()),
+                        TextAlignment.CENTER));
+
+                // Ponderado (resaltado en amarillo muy claro)
+                tablaCriterios.addCell(crearCeldaNormalSimple(
+                        String.format("%.2f", detalle.getPonderado()),
+                        TextAlignment.CENTER)
+                        .setBackgroundColor(new DeviceRgb(255, 250, 205)));
+
+                subTotal += detalle.getPuntaje();
+            }
+
+            // FILA DE SUBTOTAL POR RÚBRICA (Sin color, solo bordes)
+            Cell cellSubTotalLabel = new Cell(1, 2)
+                    .add(new Paragraph("SUBTOTAL")
+                            .setBold()
+                            .setFontSize(7))
+                    .setTextAlignment(TextAlignment.RIGHT)
+                    .setPadding(2)
+                    .setBorder(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f))
+                    .setVerticalAlignment(VerticalAlignment.MIDDLE);
+            tablaCriterios.addCell(cellSubTotalLabel);
+
+            tablaCriterios.addCell(crearCeldaNormalSimple(String.format("%.2f", subTotal),
+                    TextAlignment.CENTER)
+                    .setBold());
+
+            document.add(tablaCriterios);
+            
+            totalGeneral += subTotal;
+        }
+
+        numeroRubrica++;
+    }
+
+    // TOTAL GENERAL (Sin color, solo bordes simples)
+    document.add(new Paragraph()
+            .setMarginTop(4)
+            .setMarginBottom(2));
+
+    Table tablaTotal = new Table(UnitValue.createPercentArray(new float[]{2.5f, 0.7f, 0.8f}))
+            .useAllAvailableWidth()
+            .setMarginLeft(5)
+            .setMarginRight(5);
+
+    Cell cellTotalLabel = new Cell(1, 2)
+            .add(new Paragraph("TOTAL GENERAL")
+                    .setBold()
+                    .setFontSize(8))
+            .setTextAlignment(TextAlignment.RIGHT)
+            .setPadding(2)
+            .setBorder(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f))
+            .setVerticalAlignment(VerticalAlignment.MIDDLE);
+    tablaTotal.addCell(cellTotalLabel);
+
+    tablaTotal.addCell(crearCeldaNormalSimple(String.format("%.2f", totalGeneral),
+            TextAlignment.CENTER)
+            .setBold()
+            .setFontSize(8));
+
+    document.add(tablaTotal);
+
+    // SECCIÓN DE FIRMAS (Compacta)
+    agregarSeccionFirmas(document, jurado);
+}
+
+/**
+     * Encabezado oficial del documento
+     */
+    private void agregarEncabezado(Document document, Actividad actividad) {
+    try {
+        Table tableHeader = new Table(UnitValue.createPercentArray(new float[]{0.7f, 3, 0.7f}))
+                .useAllAvailableWidth()
+                .setMarginBottom(6);
+
+        // Logo izquierdo
+        Cell cellLogoIzq = new Cell();
+        if (logoIzquierdoPath != null && !logoIzquierdoPath.isEmpty()) {
+            try {
+                ImageData imageDataIzq = ImageDataFactory.create(logoIzquierdoPath);
+                Image logoIzq = new Image(imageDataIzq).setWidth(40).setHeight(40);
+                cellLogoIzq.add(logoIzq).setTextAlignment(TextAlignment.CENTER);
+            } catch (Exception e) {
+                log.warn("Logo izquierdo no encontrado");
+            }
+        }
+        cellLogoIzq.setBorder(Border.NO_BORDER).setVerticalAlignment(VerticalAlignment.MIDDLE).setPadding(0);
+        tableHeader.addCell(cellLogoIzq);
+
+        // Información central
+        Cell cellInfo = new Cell()
+                .add(new Paragraph("FEXCOIN V.4")
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontSize(10)
+                        .setBold())
+                .add(new Paragraph("Feria Exposición de Conocimiento e Investigación")
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontSize(7))
+                .add(new Paragraph(actividad.getNombre())
+                        .setTextAlignment(TextAlignment.CENTER)
+                        .setFontSize(6)
+                        .setMarginTop(1))
+                .setBorder(Border.NO_BORDER)
+                .setVerticalAlignment(VerticalAlignment.MIDDLE)
+                .setPadding(2);
+        tableHeader.addCell(cellInfo);
+
+        // Logo derecho
+        Cell cellLogoDer = new Cell();
+        if (logoDerechoPath != null && !logoDerechoPath.isEmpty()) {
+            try {
+                ImageData imageDataDer = ImageDataFactory.create(logoDerechoPath);
+                Image logoDer = new Image(imageDataDer).setWidth(40).setHeight(40);
+                cellLogoDer.add(logoDer).setTextAlignment(TextAlignment.CENTER);
+            } catch (Exception e) {
+                log.warn("Logo derecho no encontrado");
+            }
+        }
+        cellLogoDer.setBorder(Border.NO_BORDER).setVerticalAlignment(VerticalAlignment.MIDDLE).setPadding(0);
+        tableHeader.addCell(cellLogoDer);
+
+        document.add(tableHeader);
+        
+        // Línea separadora
+        document.add(new Paragraph()
+                .setBorderBottom(new SolidBorder(1.2f))
+                .setMarginBottom(6)
+                .setMarginTop(0));
+
+    } catch (Exception e) {
+        log.warn("Error agregando encabezado: " + e.getMessage());
+    }
+}
+
+
+/**
+     * Sección de firmas
+     */
+    private void agregarSeccionFirmas(Document document, Jurado jurado) {
+        document.add(new Paragraph()
+                .setMarginTop(8)
+                .setMarginBottom(0));
+
+        Table tablaFirmas = new Table(UnitValue.createPercentArray(new float[] { 1, 1 }))
+                .useAllAvailableWidth();
+
+        // Firma del jurado
+        Cell cellJurado = new Cell()
+                .setBorder(Border.NO_BORDER)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setPadding(0);
+
+        cellJurado.add(new Paragraph("_____________________")
+                .setMarginBottom(1)
+                .setMarginTop(15)
+                .setFontSize(7));
+        cellJurado.add(new Paragraph("Firma del Jurado")
+                .setBold()
+                .setFontSize(7));
+        cellJurado.add(new Paragraph(jurado.getPersona().getNombreCompleto())
+                .setFontSize(6)
+                .setMarginTop(0));
+
+        tablaFirmas.addCell(cellJurado);
+
+        // Firma del notario
+        Cell cellNotario = new Cell()
+                .setBorder(Border.NO_BORDER)
+                .setTextAlignment(TextAlignment.CENTER)
+                .setPadding(0);
+
+        cellNotario.add(new Paragraph("_____________________")
+                .setMarginBottom(1)
+                .setMarginTop(15)
+                .setFontSize(7));
+        cellNotario.add(new Paragraph("Firma y Sello del Notario")
+                .setBold()
+                .setFontSize(7));
+        cellNotario.add(new Paragraph("Notario")
+                .setFontSize(6)
+                .setMarginTop(0));
+
+        tablaFirmas.addCell(cellNotario);
+
+        document.add(tablaFirmas);
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class CriterioEvaluado {
+        private String nombreRubrica;
+        private String nombreCriterio;
+        private double puntaje;
     }
 
     /**
      * Genera reporte total de una categoría (todos los participantes)
      */
     public byte[] generarReportePorCategoria(Long idActividad, Long idCategoria) {
-        
+
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdfDoc = new PdfDocument(writer);
             pdfDoc.setDefaultPageSize(PageSize.A4.rotate());
-            
+
             Document document = new Document(pdfDoc);
             document.setMargins(30, 40, 30, 40);
 
             // Obtener datos
             Actividad actividad = actividadService.findById(idActividad);
             CategoriaActividad categoria = categoriaService.findById(idCategoria);
-            
+
             if (actividad == null || categoria == null) {
                 throw new RuntimeException("Datos incompletos");
             }
 
             // Encabezado
             agregarEncabezado(document, actividad);
-            
+
             document.add(new Paragraph("REPORTE GENERAL - CATEGORÍA: " + categoria.getNombre().toUpperCase())
                     .setTextAlignment(TextAlignment.CENTER)
                     .setFontSize(16)
@@ -170,9 +601,10 @@ public class ReportePdfService {
 
             // Obtener inscripciones de esta categoría
             List<Inscripcion> inscripciones = inscripcionService
-                    .findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(idActividad, idCategoria);
+                    .findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(
+                            idActividad, idCategoria);
 
-            // Tabla de resultados
+            // Tabla de resultados (ya maneja múltiples jurados correctamente)
             Table table = crearTablaResultadosCategoria(inscripciones, idCategoria);
             document.add(table);
 
@@ -192,26 +624,26 @@ public class ReportePdfService {
      * Genera reporte TOTAL (todas las categorías sumadas)
      */
     public byte[] generarReporteTotal(Long idActividad) {
-        
+
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdfDoc = new PdfDocument(writer);
             pdfDoc.setDefaultPageSize(PageSize.A4.rotate());
-            
+
             Document document = new Document(pdfDoc);
             document.setMargins(30, 40, 30, 40);
 
             // Obtener datos
             Actividad actividad = actividadService.findById(idActividad);
-            
+
             if (actividad == null) {
                 throw new RuntimeException("Actividad no encontrada");
             }
 
             // Encabezado
             agregarEncabezado(document, actividad);
-            
+
             document.add(new Paragraph("REPORTE TOTAL - RESULTADOS GENERALES")
                     .setTextAlignment(TextAlignment.CENTER)
                     .setFontSize(16)
@@ -220,8 +652,8 @@ public class ReportePdfService {
 
             // Obtener todas las inscripciones
             List<Inscripcion> todasInscripciones = inscripcionService.findByActividad(idActividad);
-            
-            // Agrupar por participante y sumar puntajes
+
+            // Agrupar por participante
             Map<Long, List<Inscripcion>> porParticipante = todasInscripciones.stream()
                     .collect(Collectors.groupingBy(i -> i.getParticipante().getIdParticipante()));
 
@@ -241,133 +673,14 @@ public class ReportePdfService {
         }
     }
 
-    /**
-     * ═══════════════════════════════════════════════════════════════════
-     * MÉTODOS AUXILIARES
-     * ═══════════════════════════════════════════════════════════════════
-     */
-
-    /**
-     * Genera una página de evaluación individual
-     */
-    private void generarPaginaEvaluacion(
-            Document document,
-            Actividad actividad,
-            CategoriaActividad categoria,
-            Participante participante,
-            Rubrica rubrica,
-            Evaluacion evaluacion) {
-
-        // Encabezado
-        agregarEncabezado(document, actividad);
-
-        // Título "FORMULARIO DE EVALUACIÓN DE:"
-        Paragraph titulo = new Paragraph()
-                .add(new Text("FORMULARIO DE EVALUACIÓN DE: ").setBold().setFontSize(11))
-                .add(new Text(participante.getNombre().toUpperCase()).setFontSize(11))
-                .setMarginBottom(15);
-        document.add(titulo);
-
-        // Tabla de criterios generales (estática según categoría)
-        Table tablaCriterios = crearTablaCriteriosEstatica(categoria.getNombre());
-        document.add(tablaCriterios);
-
-        // Categoría
-        Paragraph categoriaP = new Paragraph()
-                .add(new Text("CATEGORÍA: ").setBold().setFontSize(10))
-                .add(new Text(categoria.getNombre().toUpperCase()).setFontSize(10))
-                .setMarginTop(12)
-                .setMarginBottom(8);
-        document.add(categoriaP);
-
-        // Tabla de evaluación dinámica
-        Table tablaEvaluacion = crearTablaEvaluacion(participante, rubrica, evaluacion);
-        document.add(tablaEvaluacion);
-
-        // Nota
-        document.add(new Paragraph("Nota: Formulario de evaluación sobre 50 puntos")
-                .setFontSize(10)
-                .setItalic()
-                .setMarginTop(10));
-
-        // Firmas
-        agregarSeccionFirmas(document, evaluacion.getJurado());
-    }
-
-    /**
-     * Agrega el encabezado con logos y título
-     */
-    private void agregarEncabezado(Document document, Actividad actividad) {
-        
-        Table headerTable = new Table(UnitValue.createPercentArray(new float[]{1, 3, 1}))
-                .useAllAvailableWidth()
-                .setMarginBottom(10);
-
-        // Logo izquierdo
-        Cell cellLogoIzq = new Cell()
-                .setBorder(Border.NO_BORDER)
-                .setVerticalAlignment(VerticalAlignment.MIDDLE)
-                .setTextAlignment(TextAlignment.RIGHT);
-        
-        if (logoIzquierdoPath != null && !logoIzquierdoPath.isEmpty() && new File(logoIzquierdoPath).exists()) {
-            try {
-                ImageData imageData = ImageDataFactory.create(logoIzquierdoPath);
-                Image logo = new Image(imageData).setWidth(80).setHeight(80);
-                cellLogoIzq.add(logo);
-            } catch (Exception e) {
-                log.warn("No se pudo cargar logo izquierdo: {}", e.getMessage());
-            }
-        }
-        headerTable.addCell(cellLogoIzq);
-
-        // Título central
-        Cell cellTitulo = new Cell()
-                .setBorder(Border.NO_BORDER)
-                .setTextAlignment(TextAlignment.CENTER)
-                .setVerticalAlignment(VerticalAlignment.MIDDLE);
-        
-        cellTitulo.add(new Paragraph(actividad.getNombre().toUpperCase())
-                .setBold()
-                .setFontSize(12)
-                .setMarginBottom(5));
-        
-        if (actividad.getDescripcion() != null && !actividad.getDescripcion().isEmpty()) {
-            cellTitulo.add(new Paragraph(actividad.getDescripcion())
-                    .setFontSize(9)
-                    .setItalic());
-        }
-        
-        headerTable.addCell(cellTitulo);
-
-        // Logo derecho
-        Cell cellLogoDer = new Cell()
-                .setBorder(Border.NO_BORDER)
-                .setVerticalAlignment(VerticalAlignment.MIDDLE)
-                .setTextAlignment(TextAlignment.RIGHT);
-        
-        if (logoDerechoPath != null && !logoDerechoPath.isEmpty() && new File(logoDerechoPath).exists()) {
-            try {
-                ImageData imageData = ImageDataFactory.create(logoDerechoPath);
-                Image logo = new Image(imageData).setWidth(80).setHeight(80);
-                cellLogoDer.add(logo);
-            } catch (Exception e) {
-                log.warn("No se pudo cargar logo derecho: {}", e.getMessage());
-            }
-        }
-        headerTable.addCell(cellLogoDer);
-
-        document.add(headerTable);
-        
-        // Línea separadora
-        document.add(new Paragraph().setBorderBottom(new SolidBorder(1)).setMarginBottom(12));
-    }
+    
 
     /**
      * Crea la tabla estática de criterios según categoría
      */
     private Table crearTablaCriteriosEstatica(String nombreCategoria) {
-        
-        Table table = new Table(UnitValue.createPercentArray(new float[]{4, 1}))
+
+        Table table = new Table(UnitValue.createPercentArray(new float[] { 4, 1 }))
                 .useAllAvailableWidth()
                 .setMarginBottom(6);
 
@@ -382,16 +695,16 @@ public class ReportePdfService {
         if ("PALCO".equalsIgnoreCase(nombreCategoria)) {
             table.addCell(crearCeldaNormal("Coreografía y demostración en el palco"));
             table.addCell(crearCeldaNormal("35 pts", TextAlignment.CENTER));
-            
+
             table.addCell(crearCeldaNormal("Vestuario, alegría e interpretación/escenografía"));
             table.addCell(crearCeldaNormal("15 pts", TextAlignment.CENTER));
 
             // Fila TOTAL
             table.addCell(crearCeldaNormal("TOTAL", true));
             table.addCell(crearCeldaNormal("50 pts", TextAlignment.CENTER, true));
-            
+
         } else if ("RECORRIDO".equalsIgnoreCase(nombreCategoria)) {
-            
+
             table.addCell(crearCeldaNormal("Alegría baile en el recorrido"));
             table.addCell(crearCeldaNormal("30 pts", TextAlignment.CENTER));
 
@@ -402,16 +715,14 @@ public class ReportePdfService {
         } else if ("INICIO".equalsIgnoreCase(nombreCategoria)) {
             table.addCell(crearCeldaNormal("Puntualidad de salida y organización de los participantes"));
             table.addCell(crearCeldaNormal("10 pts", TextAlignment.CENTER));
-            
+
             table.addCell(crearCeldaNormal("Disciplina en el recorrido y cuidado del medio ambiente"));
             table.addCell(crearCeldaNormal("10 pts", TextAlignment.CENTER));
 
             // Fila TOTAL
             table.addCell(crearCeldaNormal("TOTAL", true));
             table.addCell(crearCeldaNormal("20 pts", TextAlignment.CENTER, true));
-        } 
-
-        
+        }
 
         return table;
     }
@@ -443,34 +754,35 @@ public class ReportePdfService {
 
         // Encabezado
         table.addCell(crearCeldaEncabezado("Nombre de la danza", colorEncabezado));
-        
+
         for (RubricaCriterio criterio : criterios) {
-            String titulo = criterio.getNombre() + "\n(" + criterio.getMaxPuntos() + " pts)";
+            String titulo = criterio.getNombre() + "\n(" + criterio.getPorcentaje() + " pts)";
             table.addCell(crearCeldaEncabezado(titulo, colorEncabezado)
                     .setFontSize(9));
         }
-        
+
         table.addCell(crearCeldaEncabezado("TOTAL", colorEncabezado));
 
         // Datos del participante
         table.addCell(crearCeldaNormal(participante.getNombre()));
 
         double total = 0;
-        
+
         for (RubricaCriterio criterio : criterios) {
             double puntaje = 0;
-            
+
             // Buscar el puntaje en los detalles de la evaluación
             if (evaluacion.getDetalles() != null) {
                 for (EvaluacionDetalle detalle : evaluacion.getDetalles()) {
                     if (detalle.getRubricaCriterio() != null &&
-                        detalle.getRubricaCriterio().getIdRubricaCriterio().equals(criterio.getIdRubricaCriterio())) {
+                            detalle.getRubricaCriterio().getIdRubricaCriterio()
+                                    .equals(criterio.getIdRubricaCriterio())) {
                         puntaje = detalle.getPuntaje();
                         break;
                     }
                 }
             }
-            
+
             total += puntaje;
             table.addCell(crearCeldaNormal(String.format("%.2f", puntaje), TextAlignment.CENTER));
         }
@@ -481,74 +793,90 @@ public class ReportePdfService {
         return table;
     }
 
+    
+
     /**
-     * Agrega la sección de firmas
+     * Clase auxiliar para estructurar criterios evaluados
      */
-    private void agregarSeccionFirmas(Document document, Jurado jurado) {
-        
-        Table firmasTable = new Table(UnitValue.createPercentArray(new float[]{1, 1}))
-                .useAllAvailableWidth()
-                .setMarginTop(30);
-
-        // Columna izquierda: Jurado
-        Cell cellJurado = new Cell()
-                .setBorder(Border.NO_BORDER)
-                .setTextAlignment(TextAlignment.CENTER);
-        
-        cellJurado.add(new Paragraph("_______________________________")
-                .setMarginBottom(5));
-        cellJurado.add(new Paragraph(jurado.getPersona().getNombreCompleto())
-                .setBold()
-                .setFontSize(11));
-        cellJurado.add(new Paragraph("JURADO")
-                .setFontSize(10));
-        
-        firmasTable.addCell(cellJurado);
-
-        // Columna derecha: Notario
-        Cell cellNotario = new Cell()
-                .setBorder(Border.NO_BORDER)
-                .setTextAlignment(TextAlignment.CENTER);
-        
-        cellNotario.add(new Paragraph("_______________________________")
-                .setMarginBottom(5));
-        cellNotario.add(new Paragraph("Firma y Sello")
-                .setFontSize(10));
-        cellNotario.add(new Paragraph("NOTARIO")
-                .setBold()
-                .setFontSize(11));
-        
-        firmasTable.addCell(cellNotario);
-
-        document.add(firmasTable);
+    @Data
+    @AllArgsConstructor
+    private static class CriterioInfo {
+        private String rubrica;
+        private String nombre;
+        private double puntaje;
     }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // MÉTODOS AUXILIARES PARA CELDAS
+    // ═══════════════════════════════════════════════════════════════════
+
+    private Cell crearCeldaLabel(String texto) {
+        return new Cell()
+                .add(new Paragraph(texto).setBold().setFontSize(7))
+                .setBackgroundColor(new DeviceRgb(240, 240, 240))
+                .setPadding(2)
+                .setBorder(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f));
+    }
+
+    private Cell crearCeldaValor(String texto) {
+        return new Cell()
+                .add(new Paragraph(texto).setFontSize(7))
+                .setPadding(2)
+                .setBorder(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f));
+    }
+
+    // Encabezados de tabla SIN COLOR (solo texto)
+    private Cell crearCeldaEncabezadoSimple(String texto) {
+        return new Cell()
+                .add(new Paragraph(texto).setBold().setFontSize(7))
+                .setTextAlignment(TextAlignment.CENTER)
+                .setPadding(2)
+                .setBorder(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f))
+                .setVerticalAlignment(VerticalAlignment.MIDDLE);
+    }
+
+    // Celdas normales SIN COLOR
+private Cell crearCeldaNormalSimple(String texto) {
+    return crearCeldaNormalSimple(texto, TextAlignment.LEFT);
+}
+
+private Cell crearCeldaNormalSimple(String texto, TextAlignment alineacion) {
+    Paragraph p = new Paragraph(texto).setFontSize(7);
+    return new Cell()
+            .add(p)
+            .setTextAlignment(alineacion)
+            .setPadding(2)
+            .setBorder(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f))
+            .setVerticalAlignment(VerticalAlignment.MIDDLE);
+}
+
 
     /**
      * Crea tabla de resultados por categoría
      */
     private Table crearTablaResultadosCategoria(List<Inscripcion> inscripciones, Long idCategoria) {
-        
+
         // Obtener jurados de esta categoría
         List<JuradoAsignacion> asignaciones = juradoAsignacionService
                 .findByCategoriaActividad(idCategoria);
-        
+
         int numJurados = asignaciones.size();
-        
+
         // ═══════════════════════════════════════════════════════════
         // CALCULAR NÚMERO CORRECTO DE COLUMNAS
         // ═══════════════════════════════════════════════════════════
         // Estructura: # | Participante | Jurado1 | Jurado2 | ... | Promedio
         int numColumnas = 1 + 1 + numJurados + 1; // Puesto + Nombre + Jurados + Promedio
-        
+
         float[] columnWidths = new float[numColumnas];
         columnWidths[0] = 0.6f; // #
-        columnWidths[1] = 3f;   // Participante
-        
+        columnWidths[1] = 3f; // Participante
+
         // Columnas de jurados
         for (int i = 2; i < 2 + numJurados; i++) {
             columnWidths[i] = 1.3f;
         }
-        
+
         columnWidths[numColumnas - 1] = 1.3f; // Promedio
 
         Table table = new Table(UnitValue.createPercentArray(columnWidths))
@@ -559,33 +887,33 @@ public class ReportePdfService {
         // ═══════════════════════════════════════════════════════════
         // FILA 1: ENCABEZADOS
         // ═══════════════════════════════════════════════════════════
-        
+
         // Columna 1: "#"
         table.addCell(crearCeldaEncabezado("#", colorEncabezado));
-        
+
         // Columna 2: "Participante"
         table.addCell(crearCeldaEncabezado("Participante", colorEncabezado));
-        
+
         // Columnas 3 a N: Nombres de jurados
         for (JuradoAsignacion asignacion : asignaciones) {
             String nombre = asignacion.getJurado().getPersona().getNombres();
             table.addCell(crearCeldaEncabezado(nombre, colorEncabezado)
                     .setFontSize(9));
         }
-        
+
         // Última columna: "Promedio"
         table.addCell(crearCeldaEncabezado("Promedio", colorEncabezado));
 
         // ═══════════════════════════════════════════════════════════
         // ORDENAR PARTICIPANTES POR PROMEDIO
         // ═══════════════════════════════════════════════════════════
-        
+
         List<Inscripcion> ordenadas = inscripciones.stream()
                 .sorted((a, b) -> {
                     double promedioA = calcularPromedioParticipante(
-                        a.getParticipante().getIdParticipante(), idCategoria);
+                            a.getParticipante().getIdParticipante(), idCategoria);
                     double promedioB = calcularPromedioParticipante(
-                        b.getParticipante().getIdParticipante(), idCategoria);
+                            b.getParticipante().getIdParticipante(), idCategoria);
                     return Double.compare(promedioB, promedioA);
                 })
                 .collect(Collectors.toList());
@@ -593,52 +921,49 @@ public class ReportePdfService {
         // ═══════════════════════════════════════════════════════════
         // FILAS DE DATOS - UNA FILA POR PARTICIPANTE
         // ═══════════════════════════════════════════════════════════
-        
+
         int puesto = 1;
-        
+
         for (Inscripcion inscripcion : ordenadas) {
             Participante p = inscripcion.getParticipante();
-            
+
             // Columna 1: Puesto
             table.addCell(crearCeldaNormal(String.valueOf(puesto), TextAlignment.CENTER));
-            
+
             // Columna 2: Nombre del participante
             table.addCell(crearCeldaNormal(p.getNombre()));
-            
+
             // Variables para calcular promedio
             double suma = 0;
             int count = 0;
-            
+
             // Columnas 3 a N: Puntajes de cada jurado
             for (JuradoAsignacion asignacion : asignaciones) {
                 Evaluacion eval = evaluacionService.findByJuradoAndParticipanteAndCategoria(
                         asignacion.getJurado().getIdJurado(),
                         p.getIdParticipante(),
-                        idCategoria
-                );
-                
+                        idCategoria);
+
                 if (eval != null) {
                     double puntaje = eval.getTotalPonderacion();
                     suma += puntaje;
                     count++;
                     table.addCell(crearCeldaNormal(
-                        String.format("%.2f", puntaje), 
-                        TextAlignment.CENTER
-                    ));
+                            String.format("%.2f", puntaje),
+                            TextAlignment.CENTER));
                 } else {
                     table.addCell(crearCeldaNormal("—", TextAlignment.CENTER)
                             .setFontColor(ColorConstants.GRAY));
                 }
             }
-            
+
             // Última columna: Promedio
             double promedio = count > 0 ? suma / count : 0;
             table.addCell(crearCeldaNormal(
-                String.format("%.2f", promedio), 
-                TextAlignment.CENTER, 
-                true
-            ).setBackgroundColor(new DeviceRgb(241, 196, 15)));
-            
+                    String.format("%.2f", promedio),
+                    TextAlignment.CENTER,
+                    true).setBackgroundColor(new DeviceRgb(241, 196, 15)));
+
             puesto++;
         }
 
@@ -652,7 +977,7 @@ public class ReportePdfService {
             Map<Long, List<Inscripcion>> porParticipante,
             Long idActividad) {
 
-        Table table = new Table(UnitValue.createPercentArray(new float[]{0.8f, 3f, 1.5f, 1.5f, 1.5f, 1.5f}))
+        Table table = new Table(UnitValue.createPercentArray(new float[] { 0.8f, 3f, 1.5f, 1.5f, 1.5f, 1.5f }))
                 .useAllAvailableWidth();
 
         DeviceRgb colorEncabezado = new DeviceRgb(39, 174, 96);
@@ -679,18 +1004,18 @@ public class ReportePdfService {
         for (Map.Entry<Long, List<Inscripcion>> entry : ordenado) {
             List<Inscripcion> inscripciones = entry.getValue();
             Participante p = inscripciones.get(0).getParticipante();
-            
+
             table.addCell(crearCeldaNormal(String.valueOf(puesto), TextAlignment.CENTER));
             table.addCell(crearCeldaNormal(p.getNombre()));
-            
+
             double puntajeInicio = 0;
             double puntajeRecorrido = 0;
             double puntajePalco = 0;
-            
+
             for (Inscripcion insc : inscripciones) {
                 CategoriaActividad cat = insc.getCategoriaActividad();
                 double promedio = calcularPromedioParticipante(p.getIdParticipante(), cat.getIdCategoriaActividad());
-                
+
                 if ("INICIO".equalsIgnoreCase(cat.getNombre())) {
                     puntajeInicio = promedio;
                 } else if ("RECORRIDO".equalsIgnoreCase(cat.getNombre())) {
@@ -699,15 +1024,15 @@ public class ReportePdfService {
                     puntajePalco = promedio;
                 }
             }
-            
+
             table.addCell(crearCeldaNormal(String.format("%.2f", puntajeInicio), TextAlignment.CENTER));
             table.addCell(crearCeldaNormal(String.format("%.2f", puntajeRecorrido), TextAlignment.CENTER));
             table.addCell(crearCeldaNormal(String.format("%.2f", puntajePalco), TextAlignment.CENTER));
-            
+
             double total = puntajeInicio + puntajeRecorrido + puntajePalco;
             table.addCell(crearCeldaNormal(String.format("%.2f", total), TextAlignment.CENTER, true)
                     .setBackgroundColor(new DeviceRgb(241, 196, 15)));
-            
+
             puesto++;
         }
 
@@ -720,15 +1045,15 @@ public class ReportePdfService {
     private double calcularPromedioParticipante(Long idParticipante, Long idCategoria) {
         List<Evaluacion> evaluaciones = evaluacionService
                 .findByParticipanteAndCategoria(idParticipante, idCategoria);
-        
+
         if (evaluaciones.isEmpty()) {
             return 0;
         }
-        
+
         double suma = evaluaciones.stream()
                 .mapToDouble(Evaluacion::getTotalPonderacion)
                 .sum();
-        
+
         return suma / evaluaciones.size();
     }
 
@@ -737,14 +1062,13 @@ public class ReportePdfService {
      */
     private double calcularPuntajeTotal(List<Inscripcion> inscripciones) {
         double total = 0;
-        
+
         for (Inscripcion insc : inscripciones) {
             total += calcularPromedioParticipante(
                     insc.getParticipante().getIdParticipante(),
-                    insc.getCategoriaActividad().getIdCategoriaActividad()
-            );
+                    insc.getCategoriaActividad().getIdCategoriaActividad());
         }
-        
+
         return total;
     }
 
@@ -757,10 +1081,9 @@ public class ReportePdfService {
                 .setTextAlignment(TextAlignment.CENTER)
                 .setFontSize(9)
                 .setItalic()
-                .add("Documento generado automáticamente - " + 
-                      java.time.LocalDateTime.now().format(
-                              java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-                      )));
+                .add("Documento generado automáticamente - " +
+                        java.time.LocalDateTime.now().format(
+                                java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
     }
 
     /**
@@ -771,13 +1094,11 @@ public class ReportePdfService {
 
     private Cell crearCeldaEncabezado(String texto, DeviceRgb color) {
         return new Cell()
-                .add(new Paragraph(texto).setBold().setFontColor(ColorConstants.WHITE))
+                .add(new Paragraph(texto).setBold().setFontSize(7).setFontColor(ColorConstants.WHITE))
                 .setBackgroundColor(color)
                 .setTextAlignment(TextAlignment.CENTER)
-                .setVerticalAlignment(
-                    VerticalAlignment.MIDDLE)
-                .setPadding(4)
-                .setFontSize(10);
+                .setPadding(2)
+                .setVerticalAlignment(VerticalAlignment.MIDDLE);
     }
 
     private Cell crearCeldaNormal(String texto) {
@@ -793,52 +1114,50 @@ public class ReportePdfService {
     }
 
     private Cell crearCeldaNormal(String texto, TextAlignment alineacion, boolean negrita) {
-        Paragraph p = new Paragraph(texto)
-                .setFontSize(10);
-        
+        Paragraph p = new Paragraph(texto).setFontSize(7);
         if (negrita) {
             p.setBold();
         }
-        
         return new Cell()
                 .add(p)
                 .setTextAlignment(alineacion)
-                .setVerticalAlignment(VerticalAlignment.MIDDLE)
-                .setPadding(6);
+                .setPadding(2)
+                .setBorder(new SolidBorder(ColorConstants.LIGHT_GRAY, 0.5f))
+                .setVerticalAlignment(VerticalAlignment.MIDDLE);
     }
 
     /**
      * Genera reporte COMPLETO de un participante (todas las categorías)
      */
     public byte[] generarReporteCompletoParticipante(Long idActividad, Long idParticipante) {
-        
+
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PdfWriter writer = new PdfWriter(baos);
             PdfDocument pdfDoc = new PdfDocument(writer);
             pdfDoc.setDefaultPageSize(PageSize.A4.rotate());
-            
+
             Document document = new Document(pdfDoc);
             document.setMargins(30, 40, 30, 40);
 
             // Obtener datos
             Participante participante = participanteService.findById(idParticipante);
             Actividad actividad = actividadService.findById(idActividad);
-            
+
             if (participante == null || actividad == null) {
                 throw new RuntimeException("Datos incompletos");
             }
 
             // Encabezado
             agregarEncabezado(document, actividad);
-            
+
             // Título
             document.add(new Paragraph("REPORTE COMPLETO DE EVALUACIONES")
                     .setTextAlignment(TextAlignment.CENTER)
                     .setFontSize(12)
                     .setBold()
                     .setMarginBottom(2));
-            
+
             document.add(new Paragraph("PARTICIPANTE: " + participante.getNombre().toUpperCase())
                     .setTextAlignment(TextAlignment.CENTER)
                     .setFontSize(10)
@@ -847,21 +1166,21 @@ public class ReportePdfService {
 
             // Obtener todas las categorías de la actividad
             List<CategoriaActividad> categorias = categoriaService.findByActividad(idActividad);
-            
+
             double totalGeneral = 0;
             int categoriasEvaluadas = 0;
 
             // Por cada categoría, mostrar evaluaciones
             for (int i = 0; i < categorias.size(); i++) {
                 CategoriaActividad categoria = categorias.get(i);
-                
+
                 if (i > 0) {
                     document.add(new Paragraph()
                             .setBorderTop(new SolidBorder(1))
                             .setMarginTop(5)
                             .setMarginBottom(5));
                 }
-                
+
                 // Título de categoría
                 document.add(new Paragraph("CATEGORÍA: " + categoria.getNombre().toUpperCase())
                         .setFontSize(10)
@@ -883,103 +1202,119 @@ public class ReportePdfService {
                     continue;
                 }
 
-                // Obtener rúbrica
-                Rubrica rubrica = rubricaService.findByCategoria(categoria.getIdCategoriaActividad());
-                
-                if (rubrica == null) {
+                // ═══════════════════════════════════════════════════════════
+                // CAMBIO: Obtener TODAS las rúbricas de la categoría
+                // ═══════════════════════════════════════════════════════════
+                List<Rubrica> rubricas = rubricaService.findByCategoria(categoria.getIdCategoriaActividad());
+
+                if (rubricas == null || rubricas.isEmpty()) {
+                    document.add(new Paragraph("No hay rúbricas definidas para esta categoría")
+                            .setItalic()
+                            .setFontColor(ColorConstants.GRAY)
+                            .setMarginBottom(10));
                     continue;
                 }
 
-                // Tabla de evaluaciones de jurados
-                List<RubricaCriterio> criterios = rubrica.getCriterios().stream()
-                        .filter(c -> "A".equals(c.getEstado()))
-                        .collect(Collectors.toList());
+                // ═══════════════════════════════════════════════════════════
+                // RECOPILAR TODOS LOS CRITERIOS DE TODAS LAS RÚBRICAS
+                // ═══════════════════════════════════════════════════════════
+                List<RubricaCriterio> todosCriterios = new ArrayList<>();
+                Map<Long, String> criterioARubricaNombre = new HashMap<>();
+
+                for (Rubrica rubrica : rubricas) {
+                    List<RubricaCriterio> criteriosDeRubrica = rubrica.getCriterios().stream()
+                            .filter(c -> "A".equals(c.getEstado()))
+                            .collect(Collectors.toList());
+
+                    todosCriterios.addAll(criteriosDeRubrica);
+
+                    for (RubricaCriterio criterio : criteriosDeRubrica) {
+                        criterioARubricaNombre.put(criterio.getIdRubricaCriterio(), rubrica.getNombre());
+                    }
+                }
+
+                if (todosCriterios.isEmpty()) {
+                    document.add(new Paragraph("No hay criterios activos en las rúbricas")
+                            .setItalic()
+                            .setFontColor(ColorConstants.GRAY)
+                            .setMarginBottom(10));
+                    continue;
+                }
 
                 // ═══════════════════════════════════════════════════════════
-                // CREAR TABLA CON ESTRUCTURA CORRECTA
+                // CREAR TABLA
                 // ═══════════════════════════════════════════════════════════
-                
-                // Ancho de columnas: Jurado + Criterios + Total
-                int numColumnas = 1 + criterios.size() + 1;
+
+                int numColumnas = 1 + todosCriterios.size() + 1;
                 float[] columnWidths = new float[numColumnas];
-                columnWidths[0] = 2.5f; // Columna Jurado (más ancha)
-                for (int j = 1; j <= criterios.size(); j++) {
-                    columnWidths[j] = 1.2f; // Columnas de criterios
+                columnWidths[0] = 2.5f;
+                for (int j = 1; j <= todosCriterios.size(); j++) {
+                    columnWidths[j] = 1.2f;
                 }
-                columnWidths[numColumnas - 1] = 1.3f; // Columna Total
+                columnWidths[numColumnas - 1] = 1.3f;
 
                 Table table = new Table(UnitValue.createPercentArray(columnWidths))
                         .useAllAvailableWidth();
 
                 DeviceRgb colorEncabezado = new DeviceRgb(41, 128, 185);
 
-                // ═══════════════════════════════════════════════════════════
-                // FILA 1: ENCABEZADOS
-                // ═══════════════════════════════════════════════════════════
-                
-                // Columna 1: "Jurado"
+                // Encabezados
                 table.addCell(crearCeldaEncabezado("Jurado", colorEncabezado));
-                
-                // Columnas 2 a N: Criterios
-                for (RubricaCriterio criterio : criterios) {
-                    String titulo = criterio.getNombre() + "\n(" + criterio.getMaxPuntos() + " pts)";
+
+                for (RubricaCriterio criterio : todosCriterios) {
+                    String titulo;
+                    if (rubricas.size() > 1) {
+                        String nombreRubrica = criterioARubricaNombre.get(criterio.getIdRubricaCriterio());
+                        titulo = nombreRubrica + "\n" + criterio.getNombre() + "\n(" + criterio.getPorcentaje()
+                                + " pts)";
+                    } else {
+                        titulo = criterio.getNombre() + "\n(" + criterio.getPorcentaje() + " pts)";
+                    }
+
                     table.addCell(crearCeldaEncabezado(titulo, colorEncabezado)
-                            .setFontSize(7));
+                            .setFontSize(6));
                 }
-                
-                // Última columna: "TOTAL"
+
                 table.addCell(crearCeldaEncabezado("TOTAL", colorEncabezado));
 
-                // ═══════════════════════════════════════════════════════════
-                // FILAS 2 a N: DATOS DE CADA JURADO
-                // ═══════════════════════════════════════════════════════════
-                
+                // Datos de cada jurado
                 double sumaPromedios = 0;
-                
+
                 for (Evaluacion evaluacion : evaluaciones) {
                     Jurado jurado = evaluacion.getJurado();
-                    
-                    // Columna 1: Nombre del jurado
+
                     table.addCell(crearCeldaNormal(jurado.getPersona().getNombreCompleto()));
 
                     double totalJurado = 0;
-                    
-                    // Columnas 2 a N: Puntajes por criterio
-                    for (RubricaCriterio criterio : criterios) {
+
+                    for (RubricaCriterio criterio : todosCriterios) {
                         double puntaje = 0;
-                        
-                        // Buscar el puntaje de este criterio en los detalles
+
                         if (evaluacion.getDetalles() != null) {
                             for (EvaluacionDetalle detalle : evaluacion.getDetalles()) {
                                 if (detalle.getRubricaCriterio() != null &&
-                                    detalle.getRubricaCriterio().getIdRubricaCriterio()
-                                            .equals(criterio.getIdRubricaCriterio())) {
+                                        detalle.getRubricaCriterio().getIdRubricaCriterio()
+                                                .equals(criterio.getIdRubricaCriterio())) {
                                     puntaje = detalle.getPuntaje();
                                     break;
                                 }
                             }
                         }
-                        
+
                         totalJurado += puntaje;
                         table.addCell(crearCeldaNormal(String.format("%.2f", puntaje), TextAlignment.CENTER));
                     }
 
-                    // Última columna: Total del jurado
-                    table.addCell(crearCeldaNormal(String.format("%.2f", totalJurado), 
+                    table.addCell(crearCeldaNormal(String.format("%.2f", totalJurado),
                             TextAlignment.CENTER, true)
                             .setBackgroundColor(new DeviceRgb(241, 196, 15)));
-                    
+
                     sumaPromedios += totalJurado;
                 }
 
-                // ═══════════════════════════════════════════════════════════
-                // ÚLTIMA FILA: PROMEDIO DE LA CATEGORÍA
-                // ═══════════════════════════════════════════════════════════
-                
-                double promedioCategoria = evaluaciones.size() > 0 ? 
-                        sumaPromedios / evaluaciones.size() : 0;
-                
-                // Celda que ocupa desde columna 1 hasta la penúltima (antes de Total)
+                // Fila de promedio
+                double promedioCategoria = evaluaciones.size() > 0 ? sumaPromedios / evaluaciones.size() : 0;
+
                 Cell cellPromedio = new Cell(1, numColumnas - 1)
                         .add(new Paragraph("PROMEDIO EN ESTA CATEGORÍA").setBold().setFontSize(8))
                         .setTextAlignment(TextAlignment.RIGHT)
@@ -988,9 +1323,8 @@ public class ReportePdfService {
                         .setPadding(4)
                         .setVerticalAlignment(VerticalAlignment.MIDDLE);
                 table.addCell(cellPromedio);
-                
-                // Última celda: El valor del promedio
-                table.addCell(crearCeldaNormal(String.format("%.2f", promedioCategoria), 
+
+                table.addCell(crearCeldaNormal(String.format("%.2f", promedioCategoria),
                         TextAlignment.CENTER, true)
                         .setBackgroundColor(new DeviceRgb(39, 174, 96))
                         .setFontColor(ColorConstants.WHITE)
@@ -998,24 +1332,21 @@ public class ReportePdfService {
                         .setPadding(2));
 
                 document.add(table);
-                
+
                 totalGeneral += promedioCategoria;
                 categoriasEvaluadas++;
             }
 
-            // ═══════════════════════════════════════════════════════════
-            // TOTAL GENERAL FINAL
-            // ═══════════════════════════════════════════════════════════
-            
+            // Total general final
             if (categoriasEvaluadas > 0) {
                 document.add(new Paragraph()
                         .setBorderTop(new SolidBorder(2))
                         .setMarginTop(10)
                         .setMarginBottom(5));
-                
-                Table tablaTotalGeneral = new Table(UnitValue.createPercentArray(new float[]{3, 1}))
+
+                Table tablaTotalGeneral = new Table(UnitValue.createPercentArray(new float[] { 3, 1 }))
                         .useAllAvailableWidth();
-                
+
                 tablaTotalGeneral.addCell(new Cell()
                         .add(new Paragraph("PUNTAJE TOTAL FINAL").setBold().setFontSize(12))
                         .setTextAlignment(TextAlignment.RIGHT)
@@ -1024,7 +1355,7 @@ public class ReportePdfService {
                         .setPadding(5)
                         .setBorder(Border.NO_BORDER)
                         .setVerticalAlignment(VerticalAlignment.MIDDLE));
-                
+
                 tablaTotalGeneral.addCell(new Cell()
                         .add(new Paragraph(String.format("%.2f", totalGeneral))
                                 .setBold()
@@ -1035,7 +1366,7 @@ public class ReportePdfService {
                         .setPadding(5)
                         .setBorder(Border.NO_BORDER)
                         .setVerticalAlignment(VerticalAlignment.MIDDLE));
-                
+
                 document.add(tablaTotalGeneral);
             }
 
@@ -1050,5 +1381,4 @@ public class ReportePdfService {
             throw new RuntimeException("Error generando reporte: " + e.getMessage());
         }
     }
-
 }

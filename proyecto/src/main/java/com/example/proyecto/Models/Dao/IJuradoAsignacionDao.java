@@ -89,4 +89,10 @@ public interface IJuradoAsignacionDao extends JpaRepository<JuradoAsignacion, Lo
     List<JuradoAsignacion> findByActividadIdActividadAndCategoriaActividadIdCategoriaActividad(Long idActividad, Long idCategoria);
     int countByActividadIdActividadAndCategoriaActividadIdCategoriaActividad(Long idActividad, Long idCategoria);
     List<JuradoAsignacion> findByCategoriaActividadIdCategoriaActividad(Long idCategoriaActividad);
+
+    /* fexcoin */
+    /**
+     * ✅ NUEVO: Obtiene jurados asignados a una categoría
+     */
+    List<JuradoAsignacion> findByCategoriaActividad_IdCategoriaActividad(Long categoriaId);
 }
