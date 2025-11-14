@@ -61,6 +61,7 @@
     <div class="modal fade" id="modalEval" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
+                <!-- HEADER - RESPONSIVE -->
                 <div class="modal-header">
                     <div>
                         <h5 class="modal-title">Evaluar: <span id="m-participante">—</span></h5>
@@ -71,30 +72,35 @@
                     </button>
                 </div>
 
+                <!-- BODY - SCROLLABLE Y RESPONSIVE -->
                 <div class="modal-body position-relative">
+                    <!-- STEPPER - SE ADAPTA EN TAMAÑO -->
                     <ol id="rub-stepper" class="rub-steps mb-3"></ol>
 
+                    <!-- BOTONES DE NAVEGACIÓN - RESPONSIVE -->
                     <div class="wizard-nav mb-2">
                         <button class="btn btn-outline-secondary" id="btn-prev">
-                            <i class="fa fa-chevron-left mr-1"></i> Anterior
+                            <i class="fa fa-chevron-left mr-1"></i> <span class="d-none d-sm-inline">Anterior</span>
                         </button>
                         <button class="btn btn-outline-secondary" id="btn-next">
-                            Siguiente <i class="fa fa-chevron-right ml-1"></i>
+                            <span class="d-none d-sm-inline">Siguiente</span> <i class="fa fa-chevron-right ml-1"></i>
                         </button>
                     </div>
 
+                    <!-- CAROUSEL CON OPCIONES -->
                     <div id="carouselRubricas" class="carousel slide" data-interval="false" data-wrap="false"
                         data-keyboard="false" data-touch="false">
                         <div class="carousel-inner" id="rub-slides"></div>
                     </div>
                 </div>
 
+                <!-- FOOTER - STICKY Y RESPONSIVE -->
                 <div class="modal-footer">
                     <div class="footer-left mr-auto">
-                        <span class="kpi">Total acumulado: <span id="kpi-total">0</span> pts</span>
+                        <span class="kpi">Total: <span id="kpi-total">0</span> pts</span>
                     </div>
                     <button class="btn btn-success" id="btn-finalizar" disabled>
-                        <i class="fa fa-check mr-1"></i> Finalizar evaluación
+                        <i class="fa fa-check mr-1"></i> <span class="d-none d-sm-inline">Finalizar</span>
                     </button>
                 </div>
             </div>
@@ -112,6 +118,186 @@
     <div th:replace="~{layout/script :: script}"></div>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function isMobile() {
+    return window.innerWidth <= 768;
+}
+
+function isSmallMobile() {
+    return window.innerWidth <= 576;
+}
+
+// Mejorar scroll en modal en dispositivos móviles
+function optimizeModalScroll() {
+    const modalBody = document.getElementById('modalEval')?.querySelector('.modal-body');
+    if (!modalBody) return;
+
+    // Prevenir scroll bounceback en iOS
+    modalBody.addEventListener('touchmove', function(e) {
+        const scrollTop = this.scrollTop;
+        const scrollHeight = this.scrollHeight;
+        const height = this.clientHeight;
+
+        if ((scrollTop === 0 && e.touches[0].clientY > 0) ||
+            (scrollTop === scrollHeight - height && e.touches[0].clientY < 0)) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+}
+
+// Ajustar tamaño de radio en móvil para mejor toque
+function setupResponsiveRadios() {
+    if (isSmallMobile()) {
+        document.querySelectorAll('#modalEval input[type="radio"]').forEach(radio => {
+            radio.style.transform = 'scale(1.3)';
+            radio.style.cursor = 'pointer';
+            radio.style.touchAction = 'manipulation';
+        });
+    }
+}
+
+// Mejorar rendimiento del carousel en móvil
+function optimizeCarousel() {
+    const carousel = document.getElementById('carouselRubricas');
+    if (!carousel) return;
+
+    // Desabilitar transiciones en conexiones lentas
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (connection && (connection.effectiveType === '4g' || connection.effectiveType === '3g')) {
+        if (connection.effectiveType === '3g') {
+            carousel.style.transition = 'transform 0.3s ease';
+        }
+    }
+}
+
+// Prevenir zoom accidental en inputs en iOS
+function preventIOSZoom() {
+    document.querySelectorAll('input, button').forEach(element => {
+        element.addEventListener('touchstart', function() {
+            this.style.fontSize = '16px';
+        });
+    });
+}
+
+// Ejecutar optimizaciones cuando el modal se abre
+document.getElementById('modalEval')?.addEventListener('show.bs.modal', function() {
+    setTimeout(() => {
+        optimizeModalScroll();
+        setupResponsiveRadios();
+        optimizeCarousel();
+        preventIOSZoom();
+    }, 100);
+});
+
+// Mejorar experiencia táctil en opciones
+document.addEventListener('touchstart', function(e) {
+    const optRow = e.target.closest('#modalEval .opt-row');
+    if (optRow) {
+        optRow.style.transition = 'background-color 0.15s ease';
+    }
+}, { passive: true });
+
+// Ajustar altura del modal en orientación landscape
+window.addEventListener('orientationchange', function() {
+    setTimeout(() => {
+        const modal = document.getElementById('modalEval');
+        if (modal && modal.classList.contains('show')) {
+            const modalBody = modal.querySelector('.modal-body');
+            const newHeight = window.innerHeight - 200;
+            if (isSmallMobile()) {
+                modalBody.style.maxHeight = `${newHeight}px`;
+            }
+        }
+    }, 100);
+});
+
+// Mejorar rendimiento del stepper en dispositivos pequeños
+function optimizeStepperDisplay() {
+    if (isSmallMobile()) {
+        const steps = document.querySelectorAll('#modalEval .rub-step');
+        
+        // Mostrar solo pasos visibles (virtualization)
+        const container = document.getElementById('rub-stepper');
+        if (container && container.children.length > 8) {
+            // Si hay muchos pasos, mostrar solo los relevantes
+            container.style.maxHeight = '50px';
+            container.style.overflowX = 'auto';
+            container.style.overflowY = 'hidden';
+        }
+    }
+}
+
+// Prevenir reflow en opciones
+function optimizeOptionsList() {
+    const list = document.querySelector('#modalEval .opts-list');
+    if (list) {
+        // Usar will-change para GPU acceleration
+        list.style.willChange = 'contents';
+        
+        // Debounce resize events
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                list.style.willChange = 'auto';
+            }, 150);
+        });
+    }
+}
+
+// Ejecutar optimizaciones al cargar
+document.addEventListener('DOMContentLoaded', () => {
+    if (isMobile()) {
+        optimizeStepperDisplay();
+        optimizeOptionsList();
+    }
+});
+
+// Monitorear cambios de tamaño en tiempo real
+let resizeTimer;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        if (isMobile()) {
+            const modal = document.getElementById('modalEval');
+            if (modal?.classList.contains('show')) {
+                optimizeModalScroll();
+                optimizeStepperDisplay();
+            }
+        }
+    }, 150);
+});
+
+// Mejorar haptic feedback en dispositivos móviles (si está disponible)
+function addHapticFeedback() {
+    if (navigator.vibrate) {
+        document.querySelectorAll('#modalEval .opt-row input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', () => {
+                navigator.vibrate(10); // Vibración suave de 10ms
+            });
+        });
+
+        document.getElementById('btn-finalizar')?.addEventListener('click', () => {
+            navigator.vibrate([10, 20, 10]); // Patrón de vibración
+        });
+    }
+}
+
+// Inicializar haptic cuando el modal se abre
+document.getElementById('modalEval')?.addEventListener('shown.bs.modal', () => {
+    if (isSmallMobile()) {
+        addHapticFeedback();
+    }
+});
+
+// Optimización de memoria: limpiar listeners cuando se cierra el modal
+document.getElementById('modalEval')?.addEventListener('hide.bs.modal', function() {
+    // Limpiar estilos inline
+    document.querySelectorAll('#modalEval *').forEach(el => {
+        el.style.willChange = 'auto';
+        el.style.transform = '';
+    });
+});
+
         (function () {
             let categoria = null, participantes = [], participanteSel = null, rubricas = [], valores = {};
 
