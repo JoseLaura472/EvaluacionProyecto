@@ -5,22 +5,18 @@
 <link rel="stylesheet" href="/assets/css/style-vista-evaluador-ctg.css">
 
 <body>
+    <!-- NAVBAR MEJORADO -->
     <nav class="navbar navbar-light u-navbar sticky-top">
         <div class="container-xxl d-flex align-items-center">
-
+            
             <a class="navbar-brand d-flex align-items-center u-brand m-0" href="/jurado/panel-categoria">
                 <span class="u-brand-logos d-flex align-items-center mr-2">
                     <img src="/assets/images/logo_dicyt.png" alt="Universidad" class="logo-1">
                     <span class="u-sep d-none d-sm-inline-block"></span>
                     <img src="/assets/images/logo_uap.png" alt="Feria" class="logo-2">
                 </span>
-                <span class="u-brand-title">
-                    <span class="title">Panel del Jurado</span>
-                    <span class="subtitle">Evaluación por Categorías</span>
-                </span>
             </a>
             
-            <!-- DERECHA -->
             <div class="u-right dropdown">
                 <button class="btn u-userbtn d-flex align-items-center" type="button" id="userMenuBtn"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -40,10 +36,10 @@
                     </a>
                 </div>
             </div>
-
         </div>
     </nav>
 
+    <!-- CONTENIDO PRINCIPAL -->
     <div class="container-xxl py-3" id="app">
         <div class="card p-3 mb-3">
             <div class="row g-2 align-items-end">
@@ -51,16 +47,17 @@
                     <div class="kpi">Categoría: <span id="lbl-categoria">—</span></div>
                 </div>
                 <div class="col-6 col-md-6">
-                    <div>Proyectos a evaluar: <span id="kpi-part">—</span></div>
+                    <div class="kpi">Proyectos a evaluar: <span id="kpi-part">—</span></div>
                 </div>
                 <div class="col-12 col-md-4"><br>
-                    <input id="inp-buscar" class="form-control" placeholder="Buscar participante…">
+                    <input id="inp-buscar" class="form-control" placeholder="🔍 Buscar participante…">
                 </div>
             </div>
         </div>
         <div class="row" id="grid-participantes"></div>
     </div>
 
+    <!-- MODAL DE EVALUACIÓN MEJORADO -->
     <div class="modal fade" id="modalEval" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
@@ -104,7 +101,16 @@
         </div>
     </div>
 
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+            <div class="spinner-border-custom"></div>
+            <div class="loading-text">Cargando...</div>
+        </div>
+    </div>
+
     <div th:replace="~{layout/script :: script}"></div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         (function () {
             let categoria = null, participantes = [], participanteSel = null, rubricas = [], valores = {};
@@ -119,33 +125,44 @@
                 return `
                 <div class="col-12 col-sm-6 col-lg-4 col-xxl-3">
                     <div class="card card-part h-100" data-id="${pid}">
-                    <div class="card-body">
-                        <div class="d-flex align-items-start gap-2">
-                        <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width:44px;height:44px;">
-                            <i class="fa fa-user-o"></i>
+                        <div class="card-body">
+                            <div class="d-flex align-items-start gap-4">
+                                <div class="rounded bg-light d-flex align-items-center justify-content-center" style="width:50px;height:50px;flex-shrink:0;margin-top:2px;">
+                                    <i class="fa fa-user-o"></i>
+                                </div>
+                                <div class="flex-grow-1 min-width-0">
+                                    <h6 class="mb-1" style="word-wrap:break-word;overflow-wrap:break-word;">${p.nombre}</h6>
+                                    <div class="text-muted small" style="word-wrap:break-word;overflow-wrap:break-word;">${institucion}</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1">${p.nombre}</h6>
-                            <div class="text-muted small">${institucion}</div>
+                        <div class="card-footer d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-outline-primary btn-sm btn-evaluar" data-id="${pid}" data-nombre="${p.nombre}">
+                                <i class="fa fa-clipboard-check mr-1"></i> Evaluar
+                            </button>
                         </div>
-                        </div>
-                    </div>
-                    <div class="card-footer d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-outline-primary btn-sm btn-evaluar" data-id="${pid}" data-nombre="${p.nombre}">
-                        <i class="fa fa-clipboard-check mr-1"></i> Evaluar
-                        </button>
-                    </div>
                     </div>
                 </div>`;
             }
 
+            // Debouncing para optimizar búsqueda
+            let searchTimeout;
             function renderGrid(q = '') {
-                const $g = $('#grid-participantes').empty();
-                let list = participantes || [];
-                if (q) { const s = q.toLowerCase(); list = list.filter(p => (`${p.nombre} ${p.institucion ?? ''}`).toLowerCase().includes(s)); }
-                if (!list.length) { $g.html('<div class="text-center text-muted py-5">No hay participantes para mostrar.</div>'); }
-                else list.forEach(p => $g.append(htmlCardParticipante(p)));
-                $('#kpi-part').text(list.length);
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    const $g = $('#grid-participantes').empty();
+                    let list = participantes || [];
+                    if (q) {
+                        const s = q.toLowerCase();
+                        list = list.filter(p => (`${p.nombre} ${p.institucion ?? ''}`).toLowerCase().includes(s));
+                    }
+                    if (!list.length) {
+                        $g.html('<div class="col-12"><div class="text-center text-muted py-5">No hay participantes para mostrar.</div></div>');
+                    } else {
+                        list.forEach(p => $g.append(htmlCardParticipante(p)));
+                    }
+                    $('#kpi-part').text(list.length);
+                }, 300);
             }
 
             function idxActivo() {
@@ -159,9 +176,9 @@
             const totalSeleccionado = () => Object.values(valores).reduce((a, v) => a + (Number(v?.puntaje) || 0), 0);
 
             function setProgreso() {
-
                 $('#rub-stepper .rub-step').each(function (i) {
-                    const r = rubricas[i]; const answered = !!valores[r.id]?.critId;
+                    const r = rubricas[i];
+                    const answered = !!valores[r.id]?.critId;
                     $(this).toggleClass('r-done', answered);
                 });
 
@@ -242,7 +259,8 @@
                         const i = idxActivo();
                         $('#rub-stepper .rub-step').removeClass('r-active').eq(i).addClass('r-active');
                         $('#btn-prev').prop('disabled', isFirst(i));
-                        const r = rubricas[i]; const ok = !!valores[r.id]?.critId;
+                        const r = rubricas[i];
+                        const ok = !!valores[r.id]?.critId;
                         $('#btn-next').prop('disabled', !ok || isLast(i));
                         setProgreso();
                     });
@@ -257,23 +275,64 @@
                 participanteSel = p;
                 $('#m-participante').text(p.nombre);
                 $('#m-categoria').text(categoria.nombre);
-                valores = {}; rubricas.forEach(r => valores[r.id] = { critId: null, puntaje: 0 });
+                valores = {};
+                rubricas.forEach(r => valores[r.id] = { critId: null, puntaje: 0 });
                 buildCarousel();
-                // Mostrar BS4
                 $('#modalEval').modal({ backdrop: 'static', keyboard: false, show: true });
+            }
+
+            function showLoading(show = true) {
+                if (show) {
+                    $('#loadingOverlay').addClass('active');
+                } else {
+                    $('#loadingOverlay').removeClass('active');
+                }
             }
 
             async function finalizarTodo() {
                 const faltan = rubricas.filter(r => !valores[r.id]?.critId);
                 if (faltan.length) {
-                    Swal.fire('Aviso', 'Responde todas las rúbricas antes de finalizar.', 'info');
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Evaluación incompleta',
+                        text: 'Debes responder todas las rúbricas antes de finalizar.',
+                        confirmButtonColor: '#667eea'
+                    });
                     return;
                 }
                 
+                // Confirmación con SweetAlert2
+                const result = await Swal.fire({
+                    title: '¿Finalizar evaluación?',
+                    html: `
+                        <div style="text-align: left; margin: 1rem 0;">
+                            <p><strong>Participante:</strong> ${participanteSel.nombre}</p>
+                            <p><strong>Total puntos:</strong> ${totalSeleccionado()}</p>
+                            <p><strong>Rúbricas completadas:</strong> ${rubricas.length}</p>
+                        </div>
+                        <p style="color: #dc3545; margin-top: 1rem;">
+                            <strong>⚠️ Esta acción no se puede deshacer</strong>
+                        </p>
+                    `,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#11998e',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fa fa-check mr-2"></i>Sí, finalizar',
+                    cancelButtonText: '<i class="fa fa-times mr-2"></i>Cancelar',
+                    focusCancel: true,
+                    allowOutsideClick: false
+                });
+
+                if (!result.isConfirmed) {
+                    return;
+                }
+                
+                // Mostrar loading overlay
+                showLoading(true);
                 $('#btn-finalizar').prop('disabled', true);
                 
                 try {
-                    // ✅ Construir payload con TODAS las rúbricas
                     const payload = {
                         categoriaId: Number(categoria.id),
                         participanteId: getParticipanteId(participanteSel),
@@ -287,9 +346,8 @@
                         }))
                     };
                     
-                    console.log('Enviando evaluación completa:', payload);
+                    console.log('📤 Enviando evaluación completa:', payload);
                     
-                    // ✅ UNA SOLA petición HTTP
                     const response = await $.ajax({
                         url: '/jurado/evaluar-completo',
                         method: 'POST',
@@ -297,37 +355,58 @@
                         data: JSON.stringify(payload)
                     });
                     
-                    console.log('✅ Respuesta:', response);
+                    console.log('✅ Respuesta exitosa:', response);
+                    
+                    // Ocultar loading
+                    showLoading(false);
                     
                     // Eliminar participante de la lista
                     const pid = getParticipanteId(participanteSel);
                     participantes = participantes.filter(p => getParticipanteId(p) !== pid);
                     renderGrid($('#inp-buscar').val() || '');
                     
+                    // Cerrar modal primero
+                    $('#modalEval').modal('hide');
+                    
+                    // Mostrar mensaje de éxito
                     await Swal.fire({
                         icon: 'success',
-                        title: '¡Éxito!',
-                        text: `Evaluación finalizada correctamente. ${response.rubricasGuardadas} rúbricas guardadas.`,
-                        timer: 3000
+                        title: '¡Evaluación guardada!',
+                        html: `
+                            <div style="font-size: 1.1rem; margin: 1rem 0;">
+                                <p>✅ ${response.rubricasGuardadas || rubricas.length} rúbricas guardadas correctamente</p>
+                                <p style="color: #11998e; font-weight: 600;">Total: ${totalSeleccionado()} puntos</p>
+                            </div>
+                        `,
+                        confirmButtonColor: '#11998e',
+                        timer: 3500,
+                        timerProgressBar: true
                     });
                     
-                    $('#modalEval').modal('hide');
                     participanteSel = null;
                     
                 } catch (e) {
-                    console.error('❌ Error:', e);
+                    console.error('❌ Error al guardar:', e);
                     
-                    let errorMsg = 'No se pudo finalizar la evaluación';
+                    showLoading(false);
+                    
+                    let errorMsg = 'No se pudo finalizar la evaluación. Por favor, intenta nuevamente.';
                     if (e.responseJSON?.message) {
                         errorMsg = e.responseJSON.message;
                     } else if (e.responseText) {
-                        errorMsg = e.responseText;
+                        try {
+                            const parsed = JSON.parse(e.responseText);
+                            errorMsg = parsed.message || errorMsg;
+                        } catch {
+                            errorMsg = e.responseText;
+                        }
                     }
                     
                     Swal.fire({
                         icon: 'error',
-                        title: 'Error',
-                        text: errorMsg
+                        title: 'Error al guardar',
+                        text: errorMsg,
+                        confirmButtonColor: '#dc3545'
                     });
                     
                     $('#btn-finalizar').prop('disabled', false);
@@ -335,27 +414,67 @@
             }
 
             $(document).on('click', '.btn-evaluar', function (e) {
-                e.preventDefault(); e.stopPropagation();
+                e.preventDefault();
+                e.stopPropagation();
                 const id = Number($(this).attr('data-id'));
                 const p = participantes.find(x => Number(x.idParticipante ?? x.id ?? x.participanteId) === id);
-                if (!p) { Swal.fire('Error', 'Participante no encontrado.', 'error'); return; }
+                if (!p) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Participante no encontrado.',
+                        confirmButtonColor: '#dc3545'
+                    });
+                    return;
+                }
 
                 if (!Array.isArray(rubricas) || !rubricas.length) {
+                    showLoading(true);
                     $.getJSON('/jurado/api/rubricas', { categoriaId: categoria.id })
-                        .done(list => { rubricas = list || []; $('#kpi-rub').text(rubricas.length); abrirModalPara(p); })
-                        .fail(() => Swal.fire('Error', 'No se pudieron cargar las rúbricas.', 'error'));
+                        .done(list => {
+                            rubricas = list || [];
+                            $('#kpi-rub').text(rubricas.length);
+                            showLoading(false);
+                            abrirModalPara(p);
+                        })
+                        .fail(() => {
+                            showLoading(false);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'No se pudieron cargar las rúbricas.',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        });
                     return;
                 }
                 abrirModalPara(p);
             });
 
-            $('#inp-buscar').on('input', function () { renderGrid(this.value || ''); });
-            $('#btn-prev').on('click', function () { const i = idxActivo(); if (!isFirst(i)) $('#carouselRubricas').carousel('prev'); });
+            $('#inp-buscar').on('input', function () {
+                renderGrid(this.value || '');
+            });
+
+            $('#btn-prev').on('click', function () {
+                const i = idxActivo();
+                if (!isFirst(i)) $('#carouselRubricas').carousel('prev');
+            });
+
             $('#btn-next').on('click', function () {
-                const i = idxActivo(); const r = rubricas[i];
-                if (!valores[r.id]?.critId) { Swal.fire('Aviso', 'Debes seleccionar una opción antes de continuar.', 'info'); return; }
+                const i = idxActivo();
+                const r = rubricas[i];
+                if (!valores[r.id]?.critId) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Selección requerida',
+                        text: 'Debes seleccionar una opción antes de continuar.',
+                        confirmButtonColor: '#667eea'
+                    });
+                    return;
+                }
                 if (!isLast(i)) $('#carouselRubricas').carousel('next');
             });
+
             $('#btn-finalizar').on('click', finalizarTodo);
 
             function cargarMiCategoria() {
@@ -365,17 +484,47 @@
                     return categoria;
                 });
             }
-            function cargarRubricas() { return $.getJSON('/jurado/api/rubricas', { categoriaId: categoria.id }).then(list => { rubricas = list || []; $('#kpi-rub').text(rubricas.length); }); }
+
+            function cargarRubricas() {
+                return $.getJSON('/jurado/api/rubricas', { categoriaId: categoria.id }).then(list => {
+                    rubricas = list || [];
+                    $('#kpi-rub').text(rubricas.length);
+                });
+            }
 
             function cargarParticipantes() {
                 return $.getJSON('/jurado/api/participantes', { categoriaId: categoria.id, soloPendientes: true })
-                    .done(list => { participantes = Array.isArray(list) ? list : []; renderGrid(); })
-                    .fail(() => { participantes = []; renderGrid(); Swal.fire('Error', 'No se pudo cargar la lista de participantes', 'error'); });
+                    .done(list => {
+                        participantes = Array.isArray(list) ? list : [];
+                        renderGrid();
+                    })
+                    .fail(() => {
+                        participantes = [];
+                        renderGrid();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo cargar la lista de participantes',
+                            confirmButtonColor: '#dc3545'
+                        });
+                    });
             }
 
             (async function init() {
-                try { await cargarMiCategoria(); await Promise.all([cargarRubricas(), cargarParticipantes()]); }
-                catch (e) { Swal.fire('Error', 'No se pudo inicializar el panel', 'error'); }
+                try {
+                    showLoading(true);
+                    await cargarMiCategoria();
+                    await Promise.all([cargarRubricas(), cargarParticipantes()]);
+                    showLoading(false);
+                } catch (e) {
+                    showLoading(false);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error de inicialización',
+                        text: 'No se pudo inicializar el panel. Por favor, recarga la página.',
+                        confirmButtonColor: '#dc3545'
+                    });
+                }
             })();
         })();
     </script>
