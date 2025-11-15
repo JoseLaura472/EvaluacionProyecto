@@ -155,4 +155,15 @@ public interface IEvaluacionDao extends JpaRepository<Evaluacion, Long>{
     List<Object[]> findTotalesAcumuladosPorJuradoYParticipante(
         @Param("categoriaId") Long categoriaId
     );
+
+    @Query("SELECT e FROM Evaluacion e " +
+        "WHERE e.jurado.idJurado = :juradoId " +
+        "AND e.inscripcion.participante.idParticipante = :participanteId " +
+        "AND e.inscripcion.categoriaActividad.idCategoriaActividad = :categoriaId")
+    List<Evaluacion> findByJuradoAndParticipanteAndCategoria(
+        @Param("juradoId") Long juradoId,
+        @Param("participanteId") Long participanteId,
+        @Param("categoriaId") Long categoriaId
+    );
+
 }

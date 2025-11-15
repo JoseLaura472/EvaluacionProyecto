@@ -92,4 +92,10 @@ public class EvaluacionServiceImpl implements IEvaluacionService {
     public int countByParticipanteAndCategoria(Long idParticipante, Long idCategoria) {
         return evaluacionDao.countByParticipanteIdParticipanteAndCategoriaActividadIdCategoriaActividad(idParticipante, idCategoria);
     }
+
+    @Override
+    public List<Evaluacion> findByJuradoAndParticipanteAndCategoria2(Long juradoId, Long participanteId,
+            Long categoriaId) {
+        return evaluacionDao.findByJuradoAndParticipanteAndCategoria(juradoId, participanteId, categoriaId);
+    }
 }

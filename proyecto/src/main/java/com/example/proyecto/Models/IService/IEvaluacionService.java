@@ -31,4 +31,10 @@ public interface IEvaluacionService extends IServiceGenerico<Evaluacion, Long>{
     Evaluacion findByJuradoAndParticipanteAndCategoria(Long idJurado, Long idParticipante, Long idCategoria);
     List<Evaluacion> findByParticipanteAndCategoria(Long idParticipante, Long idCategoria);
     int countByParticipanteAndCategoria(Long idParticipante, Long idCategoria);
+
+    List<Evaluacion> findByJuradoAndParticipanteAndCategoria2(
+        Long juradoId, 
+        Long participanteId, 
+        Long categoriaId
+    );
 }

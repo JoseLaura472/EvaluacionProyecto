@@ -572,53 +572,222 @@ public class ReportePdfService {
      * Genera reporte total de una categoría (todos los participantes)
      */
     public byte[] generarReportePorCategoria(Long idActividad, Long idCategoria) {
+    try {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(baos);
+        PdfDocument pdfDoc = new PdfDocument(writer);
+        pdfDoc.setDefaultPageSize(PageSize.A4.rotate()); // Horizontal
+        Document document = new Document(pdfDoc);
+        document.setMargins(30, 40, 30, 40);
 
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PdfWriter writer = new PdfWriter(baos);
-            PdfDocument pdfDoc = new PdfDocument(writer);
-            pdfDoc.setDefaultPageSize(PageSize.A4.rotate());
-
-            Document document = new Document(pdfDoc);
-            document.setMargins(30, 40, 30, 40);
-
-            // Obtener datos
-            Actividad actividad = actividadService.findById(idActividad);
-            CategoriaActividad categoria = categoriaService.findById(idCategoria);
-
-            if (actividad == null || categoria == null) {
-                throw new RuntimeException("Datos incompletos");
-            }
-
-            // Encabezado
-            agregarEncabezado(document, actividad);
-
-            document.add(new Paragraph("REPORTE GENERAL - CATEGORÍA: " + categoria.getNombre().toUpperCase())
-                    .setTextAlignment(TextAlignment.CENTER)
-                    .setFontSize(16)
-                    .setBold()
-                    .setMarginBottom(20));
-
-            // Obtener inscripciones de esta categoría
-            List<Inscripcion> inscripciones = inscripcionService
-                    .findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(
-                            idActividad, idCategoria);
-
-            // Tabla de resultados (ya maneja múltiples jurados correctamente)
-            Table table = crearTablaResultadosCategoria(inscripciones, idCategoria);
-            document.add(table);
-
-            // Pie de página
-            agregarPieDePagina(document);
-
-            document.close();
-            return baos.toByteArray();
-
-        } catch (Exception e) {
-            log.error("Error generando reporte por categoría", e);
-            throw new RuntimeException("Error generando reporte: " + e.getMessage());
+        // Obtener datos
+        Actividad actividad = actividadService.findById(idActividad);
+        CategoriaActividad categoria = categoriaService.findById(idCategoria);
+        
+        if (actividad == null || categoria == null) {
+            throw new RuntimeException("Datos incompletos");
         }
+
+        // Encabezado
+        agregarEncabezado(document, actividad);
+        
+        // Título
+        document.add(new Paragraph("REPORTE GENERAL - CATEGORÍA: " + categoria.getNombre().toUpperCase())
+            .setTextAlignment(TextAlignment.CENTER)
+            .setFontSize(16)
+            .setBold()
+            .setMarginBottom(20));
+
+        // Obtener inscripciones de esta categoría
+        List<Inscripcion> inscripciones = inscripcionService
+            .findByActividad_IdActividadAndCategoriaActividad_IdCategoriaActividadOrderByParticipante_PosicionAsc(
+                idActividad, idCategoria);
+
+        if (inscripciones.isEmpty()) {
+            document.add(new Paragraph("No hay participantes inscritos en esta categoría.")
+                .setTextAlignment(TextAlignment.CENTER)
+                .setFontSize(12)
+                .setItalic()
+                .setMarginTop(50));
+        } else {
+            // Tabla de resultados con ranking
+            Table table = crearTablaResultadosCategoriaConRanking(inscripciones, idActividad, idCategoria);
+            document.add(table);
+        }
+
+        // Pie de página
+        agregarPieDePagina(document);
+        
+        document.close();
+        return baos.toByteArray();
+        
+    } catch (Exception e) {
+        log.error("Error generando reporte por categoría", e);
+        throw new RuntimeException("Error generando reporte: " + e.getMessage());
     }
+}
+
+/**
+ * Crea tabla de resultados por categoría CON RANKING
+ * Columnas: Puesto | Participante | Jurado1 | Jurado2 | ... | Promedio
+ */
+private Table crearTablaResultadosCategoriaConRanking(
+        List<Inscripcion> inscripciones, 
+        Long idActividad, 
+        Long idCategoria) {
+    
+    // Obtener jurados asignados a esta categoría
+    List<JuradoAsignacion> asignaciones = juradoAsignacionService
+        .findByActividadAndCategoria(idActividad, idCategoria);
+    
+    int numJurados = asignaciones.size();
+    
+    // CALCULAR NÚMERO DE COLUMNAS
+    // Puesto | Participante | Jurado1 | Jurado2 | ... | Promedio
+    int numColumnas = 1 + 1 + numJurados + 1;
+    
+    float[] columnWidths = new float[numColumnas];
+    columnWidths[0] = 0.6f;  // Puesto
+    columnWidths[1] = 3f;    // Participante
+    
+    // Columnas de jurados
+    for (int i = 2; i < 2 + numJurados; i++) {
+        columnWidths[i] = 1.3f;
+    }
+    
+    columnWidths[numColumnas - 1] = 1.3f; // Promedio
+    
+    Table table = new Table(UnitValue.createPercentArray(columnWidths))
+        .useAllAvailableWidth();
+    
+    DeviceRgb colorEncabezado = new DeviceRgb(41, 128, 185);
+    
+    // === ENCABEZADOS ===
+    table.addCell(crearCeldaEncabezado("", colorEncabezado));
+    table.addCell(crearCeldaEncabezado("Participante", colorEncabezado));
+    
+    // Nombres de jurados
+    for (JuradoAsignacion asignacion : asignaciones) {
+        String nombre = asignacion.getJurado().getPersona().getNombres();
+        table.addCell(crearCeldaEncabezado(nombre, colorEncabezado)
+            .setFontSize(9));
+    }
+    
+    table.addCell(crearCeldaEncabezado("Promedio", colorEncabezado));
+    
+    // === CALCULAR PUNTAJES Y ORDENAR ===
+    
+    // Estructura para almacenar datos de cada participante
+    class ParticipanteData {
+        Participante participante;
+        Map<Long, Double> puntajesPorJurado = new HashMap<>();
+        double promedio = 0;
+        int juradosCompletados = 0;
+    }
+    
+    List<ParticipanteData> datosParticipantes = new ArrayList<>();
+    
+    for (Inscripcion inscripcion : inscripciones) {
+        Participante p = inscripcion.getParticipante();
+        ParticipanteData data = new ParticipanteData();
+        data.participante = p;
+        
+        double suma = 0;
+        int count = 0;
+        
+        // Calcular puntaje por cada jurado
+        for (JuradoAsignacion asignacion : asignaciones) {
+            Long juradoId = asignacion.getJurado().getIdJurado();
+            
+            // Obtener TODAS las evaluaciones de este jurado para este participante en esta categoría
+            List<Evaluacion> evaluaciones = evaluacionService
+                .findByJuradoAndParticipanteAndCategoria2(juradoId, p.getIdParticipante(), idCategoria);
+            
+            if (!evaluaciones.isEmpty()) {
+                // SUMAR todas las rúbricas evaluadas por este jurado
+                double totalJurado = evaluaciones.stream()
+                    .mapToDouble(Evaluacion::getTotalPonderacion)
+                    .sum();
+                
+                data.puntajesPorJurado.put(juradoId, totalJurado);
+                suma += totalJurado;
+                count++;
+            }
+        }
+        
+        // Calcular promedio
+        if (count > 0) {
+            data.promedio = suma / count;
+            data.juradosCompletados = count;
+        }
+        
+        datosParticipantes.add(data);
+    }
+    
+    // ORDENAR POR PROMEDIO (descendente)
+    datosParticipantes.sort((a, b) -> Double.compare(b.promedio, a.promedio));
+    
+    // === GENERAR FILAS CON RANKING ===
+    int puesto = 1;
+    double puntajeAnterior = -1;
+    int puestoMostrado = 1;
+    
+    for (int i = 0; i < datosParticipantes.size(); i++) {
+        ParticipanteData data = datosParticipantes.get(i);
+        
+        // Si el puntaje es igual al anterior, mantener el mismo puesto
+        if (i > 0 && Math.abs(data.promedio - puntajeAnterior) < 0.01) {
+            // Mismo puesto
+        } else {
+            puestoMostrado = puesto;
+        }
+        
+        puntajeAnterior = data.promedio;
+        
+        // Columna 1: Puesto con medalla
+        String textoPuesto = String.valueOf(puestoMostrado);
+        if (puestoMostrado == 1) textoPuesto = "🥇 1°";
+        else if (puestoMostrado == 2) textoPuesto = "🥈 2°";
+        else if (puestoMostrado == 3) textoPuesto = "🥉 3°";
+        else textoPuesto = puestoMostrado + "°";
+        
+        table.addCell(crearCeldaNormal(textoPuesto, TextAlignment.CENTER, true));
+        
+        // Columna 2: Nombre del participante
+        table.addCell(crearCeldaNormal(data.participante.getNombre()));
+        
+        // Columnas 3 a N: Puntajes de cada jurado
+        for (JuradoAsignacion asignacion : asignaciones) {
+            Long juradoId = asignacion.getJurado().getIdJurado();
+            Double puntaje = data.puntajesPorJurado.get(juradoId);
+            
+            if (puntaje != null) {
+                table.addCell(crearCeldaNormal(
+                    String.format("%.2f", puntaje), 
+                    TextAlignment.CENTER));
+            } else {
+                table.addCell(crearCeldaNormal("-", TextAlignment.CENTER)
+                    .setFontColor(ColorConstants.GRAY));
+            }
+        }
+        
+        // Última columna: Promedio
+        if (data.promedio > 0) {
+            table.addCell(crearCeldaNormal(
+                String.format("%.2f", data.promedio), 
+                TextAlignment.CENTER, 
+                true)
+                .setBackgroundColor(new DeviceRgb(241, 196, 15)));
+        } else {
+            table.addCell(crearCeldaNormal("-", TextAlignment.CENTER)
+                .setFontColor(ColorConstants.GRAY));
+        }
+        
+        puesto++;
+    }
+    
+    return table;
+}
 
     /**
      * Genera reporte TOTAL (todas las categorías sumadas)
